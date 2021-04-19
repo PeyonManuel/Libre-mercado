@@ -1,1 +1,1 @@
-web: start-server
+web: start
