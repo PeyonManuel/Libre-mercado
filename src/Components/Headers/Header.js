@@ -165,179 +165,185 @@ const Header = (props) => {
             </ul>
           </div>
         </div>
-        <ul className='row user-options half'>
-          <li>
-            {user ? (
-              <div className='dropdown'>
-                <a className='nodecoration' href='#user'>
-                  <i className='fa fa-user  fa-lg'></i> {user.name}{' '}
-                  <i className='fa fa-caret-down'></i>
-                </a>
-                <ul className='dropdown-content'>
-                  <li>
-                    <a className='nodecoration' href={'/user/' + user._id}>
-                      <i className='fa fa-user  fa-3x'></i>
-                      <span>{' Hola ' + user.name}</span>
-                    </a>
-                  </li>
-                  <li className='separator'>
-                    <a className='nodecoration ' href='#compras'>
-                      Compras
-                    </a>
-                  </li>
-                  <li>
-                    <a className='nodecoration' href='#Preguntas'>
-                      Preguntas
-                    </a>
-                  </li>
-                  <li className='separator'>
-                    <a className='nodecoration' href='#Publicaciones'>
-                      Publicaciones
-                    </a>
-                  </li>
-                  <li>
-                    <a className='nodecoration' href='#Ventas'>
-                      Ventas
-                    </a>
-                  </li>
-                  <li>
-                    <a className='nodecoration separator' href='#Misdatos'>
-                      Mis datos
-                    </a>
-                  </li>
-                  <li className='separator'>
-                    <a
-                      className='nodecoration'
-                      href='#salir'
-                      onClick={() => {
-                        dispatch({ type: 'USER_LOGIN_RESET' });
-                        localStorage.removeItem('userInfo');
-                      }}
-                    >
-                      Salir
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            ) : (
-              <a className='nodecoration' href='/register'>
-                Creá tu cuenta{' '}
-              </a>
-            )}
-          </li>
-          {!user && (
+        {window.innerWidth > 1024 && (
+          <ul className='row user-options half'>
             <li>
-              <a className='nodecoration' href='/login'>
-                Ingresá{' '}
+              {user ? (
+                <div className='dropdown'>
+                  <a className='nodecoration' href='#user'>
+                    <i className='fa fa-user  fa-lg'></i> {user.name}{' '}
+                    <i className='fa fa-caret-down'></i>
+                  </a>
+                  <ul className='dropdown-content'>
+                    <li>
+                      <a className='nodecoration' href={'/user/' + user._id}>
+                        <i className='fa fa-user  fa-3x'></i>
+                        <span>{' Hola ' + user.name}</span>
+                      </a>
+                    </li>
+                    <li className='separator'>
+                      <a className='nodecoration ' href='#compras'>
+                        Compras
+                      </a>
+                    </li>
+                    <li>
+                      <a className='nodecoration' href='#Preguntas'>
+                        Preguntas
+                      </a>
+                    </li>
+                    <li className='separator'>
+                      <a className='nodecoration' href='#Publicaciones'>
+                        Publicaciones
+                      </a>
+                    </li>
+                    <li>
+                      <a className='nodecoration' href='#Ventas'>
+                        Ventas
+                      </a>
+                    </li>
+                    <li>
+                      <a className='nodecoration separator' href='#Misdatos'>
+                        Mis datos
+                      </a>
+                    </li>
+                    <li className='separator'>
+                      <a
+                        className='nodecoration'
+                        href='#salir'
+                        onClick={() => {
+                          dispatch({ type: 'USER_LOGIN_RESET' });
+                          localStorage.removeItem('userInfo');
+                        }}
+                      >
+                        Salir
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              ) : (
+                <a className='nodecoration' href='/register'>
+                  Creá tu cuenta{' '}
+                </a>
+              )}
+            </li>
+            {!user && (
+              <li>
+                <a className='nodecoration' href='/login'>
+                  Ingresá{' '}
+                </a>
+              </li>
+            )}
+            <li>
+              <a className='nodecoration' href='/compras'>
+                Mis compras{' '}
               </a>
             </li>
-          )}
-          <li>
-            <a className='nodecoration' href='/compras'>
-              Mis compras{' '}
-            </a>
-          </li>
-          {user && (
-            <li>
-              <div className='dropdown'>
-                <a className='nodecoration' href='#favorites'>
-                  {'Favoritos '}
-                  <i className='fa fa-caret-down'></i>
-                </a>
-                <ul className='dropdown-content favorites'>
-                  <li>
-                    <h2 style={{ margin: '0' }}>Favoritos</h2>
-                  </li>
-                  {localFavorites.length >= 1 ? (
-                    localFavorites.map((fav, i) => {
-                      return (
-                        <li
-                          className='separator'
-                          key={fav._id}
-                          style={{ position: 'relative' }}
-                        >
-                          <div className='delbtn-div'>
-                            <button
-                              onClick={() => {
-                                dispatch(
-                                  updateUserFavorites({
-                                    _id: fav._id,
-                                    noDelete: false,
-                                  })
-                                );
-                                setLocalFavorites(
-                                  localFavorites.filter(
-                                    (localFav) => localFav._id !== fav._id
-                                  )
-                                );
-                              }}
-                            >
-                              Eliminar
-                            </button>
-                          </div>
-                          <div
-                            className='row buybtns-div'
-                            style={{ columnGap: '1rem' }}
+            {user && (
+              <li>
+                <div className='dropdown'>
+                  <a className='nodecoration' href='#favorites'>
+                    {'Favoritos '}
+                    <i className='fa fa-caret-down'></i>
+                  </a>
+                  <ul className='dropdown-content favorites'>
+                    <li>
+                      <h2 style={{ margin: '0' }}>Favoritos</h2>
+                    </li>
+                    {localFavorites.length >= 1 ? (
+                      localFavorites.map((fav, i) => {
+                        return (
+                          <li
+                            className='separator'
+                            key={fav._id}
+                            style={{ position: 'relative' }}
                           >
-                            <a href={'/product/' + fav._id + '/buy'}>Comprar</a>
-                            <a href={'/product/' + fav._id + '/buy'}>
-                              Agregar al carrito
-                            </a>
-                          </div>
-                          <a
-                            className='row top nodecoration'
-                            href={'/product/' + fav._id}
-                          >
-                            <img
-                              className='favimg'
-                              src={fav.images[0]}
-                              alt='product'
-                            ></img>
-                            <div className='column favinfo'>
-                              <h2 className='favname'>{fav.name}</h2>
-                              <span className='favprice'>
-                                $ {formatNumber(fav.price)}
-                              </span>
+                            <div className='delbtn-div'>
+                              <button
+                                onClick={() => {
+                                  dispatch(
+                                    updateUserFavorites({
+                                      _id: fav._id,
+                                      noDelete: false,
+                                    })
+                                  );
+                                  setLocalFavorites(
+                                    localFavorites.filter(
+                                      (localFav) => localFav._id !== fav._id
+                                    )
+                                  );
+                                }}
+                              >
+                                Eliminar
+                              </button>
                             </div>
-                          </a>
-                        </li>
-                      );
-                    })
-                  ) : (
+                            <div
+                              className='row buybtns-div'
+                              style={{ columnGap: '1rem' }}
+                            >
+                              <a href={'/product/' + fav._id + '/buy'}>
+                                Comprar
+                              </a>
+                              <a href={'/product/' + fav._id + '/buy'}>
+                                Agregar al carrito
+                              </a>
+                            </div>
+                            <a
+                              className='row top nodecoration'
+                              href={'/product/' + fav._id}
+                            >
+                              <img
+                                className='favimg'
+                                src={fav.images[0]}
+                                alt='product'
+                              ></img>
+                              <div className='column favinfo'>
+                                <h2 className='favname'>{fav.name}</h2>
+                                <span className='favprice'>
+                                  $ {formatNumber(fav.price)}
+                                </span>
+                              </div>
+                            </a>
+                          </li>
+                        );
+                      })
+                    ) : (
+                      <li>
+                        <span className='nofavs'>
+                          Agregá a tus favoritos y seguilos desde aca
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </li>
+            )}
+            <li>
+              <a className='nodecoration' href='/carrito'>
+                <i className='fa fa-shopping-cart fa-lg'></i>{' '}
+              </a>
+            </li>
+            {user && (
+              <li>
+                <div className='dropdown'>
+                  <a className='nodecoration' href='#notificaciones'>
+                    <i className='fa fa-bell fa-lg'></i>{' '}
+                  </a>
+                  <ul className='dropdown-content notifications'>
+                    <li>
+                      <h2 style={{ margin: '0' }}>Notificaciones</h2>
+                    </li>
+
                     <li>
                       <span className='nofavs'>
-                        Agregá a tus favoritos y seguilos desde aca
+                        Por ahora, no hay nada aquí
                       </span>
                     </li>
-                  )}
-                </ul>
-              </div>
-            </li>
-          )}
-          <li>
-            <a className='nodecoration' href='/carrito'>
-              <i className='fa fa-shopping-cart fa-lg'></i>{' '}
-            </a>
-          </li>
-          {user && (
-            <li>
-              <div className='dropdown'>
-                <a className='nodecoration' href='#notificaciones'>
-                  <i className='fa fa-bell fa-lg'></i>{' '}
-                </a>
-                <ul className='dropdown-content notifications'>
-                  <li>
-                    <h2 style={{ margin: '0' }}>Notificaciones</h2>
-                  </li>
-
-                  <li>
-                    <span className='nofavs'>Por ahora, no hay nada aquí</span>
-                  </li>
-                </ul>
-              </div>
-            </li>
-          )}
-        </ul>
+                  </ul>
+                </div>
+              </li>
+            )}
+          </ul>
+        )}
       </div>
       <nav className='small-screen-nav-bar' id='small-screen-nav-bar'>
         <ul className='dropdown-content'>
