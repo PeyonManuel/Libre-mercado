@@ -162,8 +162,8 @@ const ProductScreen = (props) => {
         <div className='column' style={{ margin: '3rem', gap: '1rem' }}>
           <span>
             {'| '}
-            <a href={'/categorias/' + product.category.name}>
-              {product.category.name}
+            <a href={'/categorias/' + product && product.category.name}>
+              {product && product.category.name}
             </a>
           </span>
           <div className='column screen-card'>
