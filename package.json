@@ -28,7 +28,7 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "concurrently \"react-scripts start\" \"nodemon --watch server --exec node server/server.js\"",
+    "start": "npm run build && (cd server && npm start)",
     "start-server": "npm run build && (cd server && npm start)",
     "build": "react-dotenv && react-scripts build",
     "test": "react-scripts test",
