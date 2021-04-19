@@ -151,7 +151,6 @@ const ProductScreen = (props) => {
     }
     return list;
   };
-
   return (
     <>
       {loading ? (
