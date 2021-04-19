@@ -28,7 +28,7 @@
     "web-vitals": "^0.2.4"
   },
   "engines": {
-    "node": "12.10.0"
+    "node": "14.x.x"
   },
   "scripts": {
     "start": "npm run build && (cd server && npm start)",
