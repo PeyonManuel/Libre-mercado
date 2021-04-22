@@ -360,9 +360,9 @@ const ProductScreen = (props) => {
                     </div>
                   )}
                 </div>
-                <div className='column' style={{ width: '100%', gap: '1rem' }}>
+                <div className='column width-100'>
                   <button className='primary block'>Comprar ahora</button>
-                  <button className='secondary block'>
+                  <button className='secondary block margin-top'>
                     Agregar al carrito
                   </button>
                 </div>
