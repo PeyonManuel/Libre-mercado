@@ -161,7 +161,7 @@ const ProductScreen = (props) => {
         <div
           className='column'
           style={{
-            margin: window.devicePixelRatio < 2 ? '3rem' : '1rem 0',
+            margin: '1rem',
             gap: '1rem',
           }}
         >
