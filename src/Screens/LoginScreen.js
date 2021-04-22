@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkUserName } from '../Actions/userActions';
+import LoadingCircle from '../Components/LoadingCircle';
 
 const LoginScreen = (props) => {
   const userCheckName = useSelector((state) => state.userCheckName);
-  const { error, user, success } = userCheckName;
+  const { error, user, success, loading } = userCheckName;
   const [loginInfo, setLoginInfo] = useState(
     user &&
       (user.name
@@ -35,13 +36,18 @@ const LoginScreen = (props) => {
         case 'vender':
           setLoginType('vender');
           break;
+        case 'new-address':
+          setLoginType('new-address');
+          break;
         default:
           break;
       }
     }
   }, [props]);
   useEffect(() => {
-    error && setLocalError(error);
+    if (error) {
+      setLocalError(error);
+    }
   }, [error]);
   useEffect(() => {
     if (success) {
@@ -55,10 +61,14 @@ const LoginScreen = (props) => {
         case 'vender':
           props.history.push('/login/enterpass?loginType=vender');
           break;
+        case 'new-address':
+          props.history.push('/login/enterpass?loginType=new-address');
+          break;
         default:
           props.history.push('/login/enterpass');
           break;
       }
+      dispatch({ type: 'USER_LOGIN_RESET' });
       dispatch({ type: 'USER_CHECKNAME_RESET_SUCCESS' });
     }
   }, [success, props, dispatch, loginType]);
@@ -126,12 +136,12 @@ const LoginScreen = (props) => {
         <div>
           <button
             type='submit'
-            className='primary block'
+            className={'primary block' + (loading ? ' login-padding' : '')}
             onClick={() => {
               setButtonClicked('continue');
             }}
           >
-            Continuar
+            {loading ? <LoadingCircle color='white' /> : 'Continuar'}
           </button>
           <button
             type='submit'

@@ -33,6 +33,7 @@ userRouter.post(
         res.send({
           _id: user._id,
           userName: user.userName,
+          email: user.email,
         });
       }
     }
@@ -42,6 +43,7 @@ userRouter.post(
         res.send({
           _id: user._id,
           telephone: user.telephone,
+          email: user.email,
         });
       }
     }
@@ -73,6 +75,33 @@ userRouter.post(
         });
       } else {
         res.status(401).send({ message: 'Clave incorrecta' });
+      }
+    } else {
+      res.status(404).send({ message: 'Usuario no encontrado' });
+    }
+  })
+);
+
+userRouter.post(
+  '/loginwithcode',
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.body.userId).populate(
+      'userData.favorites'
+    );
+    if (user) {
+      if (req.body.code === process.env.REACT_APP_CHANGE_PSW_CODE) {
+        res.send({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          userData: user.userData,
+          isAdmin: user.isAdmin,
+          token: generateToken(user),
+        });
+      } else {
+        res.status(401).send({
+          message: 'Ocurrio un problema con el codigo de inicio de sesion',
+        });
       }
     } else {
       res.status(404).send({ message: 'Usuario no encontrado' });
@@ -158,7 +187,12 @@ userRouter.post(
     const user = await User.findById(req.body.user._id).populate(
       'userData.favorites'
     );
-    if (user) {
+    if (
+      user &&
+      user.productDrafts.find(
+        (draft) => draft._id.toString() === req.body.draftId
+      )
+    ) {
       user.productDrafts.splice(
         user.productDrafts.indexOf(req.body.draftId),
         1
@@ -176,7 +210,7 @@ userRouter.post(
         token: req.body.user.token,
       });
     } else {
-      res.status(404).send({ message: 'Usuario no encontrado' });
+      res.status(404).send({ message: 'Usuario o draft no encontrado' });
     }
   })
 );
@@ -204,6 +238,41 @@ userRouter.post(
       });
     } else {
       res.status(404).send({ message: 'Usuario no encontrado' });
+    }
+  })
+);
+
+userRouter.post(
+  '/deleteProducts',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.body.user._id).populate(
+      'userData.favorites'
+    );
+    if (
+      user &&
+      user.products.find(
+        (product) => product.productId.toString() === req.body.productId
+      )
+    ) {
+      user.productDrafts.splice(
+        user.productDrafts.indexOf(req.body.productId),
+        1
+      );
+      await user.save();
+      const updatedUser = await User.findById(req.body.user._id).populate(
+        'userData.favorites'
+      );
+      res.send({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        userData: updatedUser.userData,
+        isAdmin: updatedUser.isAdmin,
+        token: req.body.user.token,
+      });
+    } else {
+      res.status(404).send({ message: 'Usuario o draft no encontrado' });
     }
   })
 );
@@ -333,11 +402,44 @@ userRouter.post(
   })
 );
 
+userRouter.post(
+  '/updateuser',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.body.user._id).populate(
+      'userData.favorites'
+    );
+    if (user) {
+      if (req.body.updatePassword) {
+        await user.updateOne({
+          password: bcrypt.hashSync(req.body.user.password, 8),
+        });
+      } else {
+        await user.updateOne({ ...req.body.user });
+      }
+      await user.save();
+      const updatedUser = await User.findById(req.body.user._id).populate(
+        'userData.favorites'
+      );
+      res.send({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        userData: updatedUser.userData,
+        isAdmin: updatedUser.isAdmin,
+        token: req.body.user.token,
+      });
+    } else {
+      res.status(404).send({ message: 'Usuario no encontrado' });
+    }
+  })
+);
+
 userRouter.get(
   '/:id',
   expressAsyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
-    if (user) res.send(user);
+    if (user) res.send({ ...user._doc, password: null });
     else res.status(404).send({ mesage: 'User not found' });
   })
 );

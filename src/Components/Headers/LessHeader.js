@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const LessHeader = (props) => {
@@ -6,61 +6,52 @@ const LessHeader = (props) => {
   const { user } = userLogin;
   const dispatch = useDispatch();
 
-  const burgerRef = useRef(null);
   useEffect(() => {
-    if (burgerRef.current !== null) {
-      burgerRef.current.addEventListener('click', () => {
-        burgerRef.current.classList.toggle('toggle');
-        document
-          .getElementById('small-screen-nav-bar')
-          .classList.toggle('active');
-      });
-      switch (props.location.pathname) {
-        case '/':
-          document.querySelector('#inicio') &&
-            document.querySelector('#inicio').classList.add('current');
-          break;
-        case '/notificaciones':
-          document.querySelector('#notificaciones') &&
-            document.querySelector('#notificaciones').classList.add('current');
-          break;
-        case '/compras':
-          document.querySelector('#compras') &&
-            document.querySelector('#compras').classList.add('current');
-          break;
-        case '/favoritos':
-          document.querySelector('#favoritos') &&
-            document.querySelector('#favoritos').classList.add('current');
-          break;
-        case '/ofertas':
-          document.querySelector('#ofertas') &&
-            document.querySelector('#ofertas').classList.add('current');
-          break;
-        case '/historial':
-          document.querySelector('#historial') &&
-            document.querySelector('#historial').classList.add('current');
-          break;
-        case '/vender':
-          document.querySelector('#vender') &&
-            document.querySelector('#vender').classList.add('current');
-          break;
-        case '/categorias':
-          document.querySelector('#categorias') &&
-            document.querySelector('#categorias').classList.add('current');
-          break;
-        case '/supermercado':
-          document.querySelector('#supermercado') &&
-            document.querySelector('#supermercado').classList.add('current');
-          break;
-        case '/ayuda':
-          document.querySelector('#ayuda') &&
-            document.querySelector('#ayuda').classList.add('current');
-          break;
-        default:
-          break;
-      }
+    switch (props.location.pathname) {
+      case '/':
+        document.querySelector('#inicio') &&
+          document.querySelector('#inicio').classList.add('current');
+        break;
+      case '/notificaciones':
+        document.querySelector('#notificaciones') &&
+          document.querySelector('#notificaciones').classList.add('current');
+        break;
+      case '/compras':
+        document.querySelector('#compras') &&
+          document.querySelector('#compras').classList.add('current');
+        break;
+      case '/favoritos':
+        document.querySelector('#favoritos') &&
+          document.querySelector('#favoritos').classList.add('current');
+        break;
+      case '/ofertas':
+        document.querySelector('#ofertas') &&
+          document.querySelector('#ofertas').classList.add('current');
+        break;
+      case '/historial':
+        document.querySelector('#historial') &&
+          document.querySelector('#historial').classList.add('current');
+        break;
+      case '/vender':
+        document.querySelector('#vender') &&
+          document.querySelector('#vender').classList.add('current');
+        break;
+      case '/categorias':
+        document.querySelector('#categorias') &&
+          document.querySelector('#categorias').classList.add('current');
+        break;
+      case '/supermercado':
+        document.querySelector('#supermercado') &&
+          document.querySelector('#supermercado').classList.add('current');
+        break;
+      case '/ayuda':
+        document.querySelector('#ayuda') &&
+          document.querySelector('#ayuda').classList.add('current');
+        break;
+      default:
+        break;
     }
-  }, [burgerRef, props]);
+  }, [props]);
   return (
     <header className='empty less row'>
       <a
@@ -83,7 +74,15 @@ const LessHeader = (props) => {
           style={{ marginTop: '-0.5rem' }}
         ></img>
       </a>
-      <div className='burger less-header' ref={burgerRef}>
+      <div
+        className='burger less-header'
+        onClick={() => {
+          document.querySelector('.burger').classList.toggle('toggle');
+          document
+            .getElementById('small-screen-nav-bar')
+            .classList.toggle('active');
+        }}
+      >
         <div className='line1'></div>
         <div className='line2'></div>
         <div className='line3'></div>

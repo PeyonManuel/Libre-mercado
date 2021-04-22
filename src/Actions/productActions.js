@@ -55,3 +55,26 @@ export const createNewProduct = (product) => async (dispatch, getState) => {
     });
   }
 };
+
+export const deleteProduct = (productId) => async (dispatch, getState) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'DELETE_PRODUCT_REQUEST' });
+  try {
+    const { data } = await axios.post(
+      'api/products/deleteProduct',
+      { productId },
+      { headers: { Authorization: 'Bearer ' + user.token } }
+    );
+    dispatch({ type: 'DELETE_PRODUCT_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'DELETE_PRODUCT_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};

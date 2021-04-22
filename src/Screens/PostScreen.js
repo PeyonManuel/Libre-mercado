@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   deleteAddresses,
   deleteProductDrafts,
+  userDeleteProduct,
   detailsUser,
   updateProductDrafts,
-  addProducts,
+  userAddProduct,
 } from '../Actions/userActions';
 import { formatNumber } from '../Utils/Utilities';
 import { Redirect } from 'react-router-dom';
@@ -31,11 +32,22 @@ const PostScreen = (props) => {
   const userDeleteProductDrafts = useSelector(
     (state) => state.userDeleteProductDrafts
   );
-  const { error: errorDeletingDraft, deleted } = userDeleteProductDrafts;
+  const {
+    error: errorDeletingDraft,
+    deleted: draftDeleted,
+  } = userDeleteProductDrafts;
   const newProduct = useSelector((state) => state.newProduct);
-  const { error: newProductError, product } = newProduct;
+  const {
+    error: newProductError,
+    product,
+    loading: creatingProduct,
+  } = newProduct;
   const userAddProducts = useSelector((state) => state.userAddProducts);
-  const { error: errorAddingProduct, added } = userAddProducts;
+  const {
+    error: errorAddingProduct,
+    added,
+    loading: addingProduct,
+  } = userAddProducts;
 
   const dispatch = useDispatch();
   const urlParams = new URLSearchParams(props.location.search);
@@ -74,13 +86,17 @@ const PostScreen = (props) => {
   }, []);
 
   useEffect(() => {
-    const values =
-      details &&
-      !loadingDetails &&
-      !updateLoading &&
-      details.productDrafts.find((draft) => draft._id.toString() === draftId);
-    values && setDraftValues(values);
-  }, [details, draftId, loadingDetails, updateLoading]);
+    if (details) {
+      const values = details.productDrafts.find(
+        (draft) => draft._id.toString() === draftId
+      );
+      if (values) {
+        setDraftValues(values);
+      } else {
+        props.history.push('/vender');
+      }
+    }
+  }, [details, draftId, updatingData, props]);
 
   useEffect(() => {
     if (draftValues) {
@@ -143,24 +159,30 @@ const PostScreen = (props) => {
   }, [dispatch, user]);
 
   useEffect(() => {
-    (updateLoading || loadingDetails) && setUpdatingData(true);
-  }, [updateLoading, loadingDetails]);
+    (updateLoading ||
+      loadingDetails ||
+      loading ||
+      addingProduct ||
+      creatingProduct) &&
+      setUpdatingData(true);
+  }, [updateLoading, loadingDetails, loading, addingProduct, creatingProduct]);
 
   useEffect(() => {
-    if (deleted && !product) {
+    if (!product && added) {
       dispatch(createNewProduct(draftValues));
     }
-  }, [deleted, draftValues, dispatch]);
-
+  }, [product, dispatch, added, draftValues]);
   useEffect(() => {
     if (product) {
-      dispatch(addProducts(product._id));
+      dispatch(deleteProductDrafts(draftId));
+    } else if (newProductError) {
+      dispatch(userDeleteProduct(product._id));
     }
-  }, [product, dispatch]);
+  }, [added, dispatch, product, draftId, newProductError]);
 
   useEffect(() => {
-    added && props.history.push('vender/producto-publicado');
-  }, [added]);
+    draftDeleted && props.history.push('vender/producto-publicado');
+  }, [draftDeleted, props]);
 
   const validateVideoId = (id) => {
     var img = new Image();
@@ -641,24 +663,31 @@ const PostScreen = (props) => {
   };
 
   const postBtn = (status) => {
+    const allPostErrors =
+      !errorDeletingDraft && !errorAddingProduct && !newProductError;
     return (
       <div
         className={
-          'width-100 flex-end' + (status === 'disabled' ? ' disabled' : '')
+          'width-100' +
+          (allPostErrors ? ' flex-end' : '') +
+          (status === 'disabled' ? ' disabled' : '')
         }
       >
-        {!errorDeletingDraft ? (
+        {allPostErrors ? (
           <button
             className='primary'
             onClick={() => {
-              dispatch(deleteProductDrafts(draftId));
+              dispatch(userAddProduct(draftValues));
             }}
             disabled={updatingData}
           >
             Publicar
           </button>
         ) : (
-          <MessageBox variant='danger'>{errorDeletingDraft}</MessageBox>
+          <MessageBox variant='danger'>
+            Ha ocurrido un error, por favor recargue la pagina para volver a
+            intentarlo.
+          </MessageBox>
         )}
       </div>
     );

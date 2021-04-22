@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, updateUserFavorites } from '../Actions/userActions';
+import LoadingCircle from '../Components/LoadingCircle';
 
 const EnterPassScreen = (props) => {
   const userCheckName = useSelector((state) => state.userCheckName);
   const { user } = userCheckName;
   const userLogin = useSelector((state) => state.userLogin);
-  const { error, success } = userLogin;
+  const { error, user: userSuccess, loading } = userLogin;
   const [loginInfo] = useState(
     user &&
       (user.userName
@@ -20,49 +21,45 @@ const EnterPassScreen = (props) => {
   const [password, setPassword] = useState('');
   const [localError, setLocalError] = useState('');
   const [buttonClicked, setButtonClicked] = useState('');
-  const [loginType, setLoginType] = useState('');
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (
-      props.location.search.split('?')[1] &&
-      props.location.search.split('?')[1].includes('loginType')
-    ) {
-      switch (props.location.search.split('?')[1].split('&')[0]) {
-        case 'loginType=favorito':
-          setLoginType('favorito');
-          break;
-        case 'loginType=vender':
-          setLoginType('vender');
-          break;
-        default:
-          break;
-      }
-    }
-  }, [props]);
-  useEffect(() => {
-    if (success) {
-      switch (loginType) {
-        case 'favorito':
-          dispatch(
-            updateUserFavorites({
-              _id: props.location.search.split('item_id=')[1],
-              noDelete: true,
-            })
-          );
-          break;
-        case 'vender':
-          props.history.push('/vender');
-          break;
-        default:
-          break;
+    if (userSuccess) {
+      const urlParams = new URLSearchParams(props.location.search);
+      const condition = urlParams
+        ? urlParams.get('loginType')
+          ? true
+          : false
+        : false;
+      if (condition) {
+        switch (urlParams.get('loginType')) {
+          case 'favorito':
+            dispatch(
+              updateUserFavorites({
+                _id: props.location.search.split('item_id=')[1],
+                noDelete: true,
+              })
+            );
+            break;
+          case 'vender':
+            props.history.push('/vender');
+            break;
+          case 'new-address':
+            props.history.push('/nueva-direccion');
+            break;
+          default:
+            props.history.push('/');
+            break;
+        }
       }
       dispatch({ type: 'USER_CHECKNAME_RESET' });
       localStorage.removeItem('userCheckNameInfo');
     }
-  }, [success, dispatch, props, loginType]);
+  }, [userSuccess, dispatch, props]);
   useEffect(() => {
-    error && setLocalError(error);
+    if (error) {
+      setLocalError(error);
+    }
   }, [error]);
 
   const submitHandler = (e) => {
@@ -74,7 +71,8 @@ const EnterPassScreen = (props) => {
         setLocalError('Ingresá la clave');
       }
     } else if (buttonClicked === 'dontknowpass') {
-      // do stuff
+      dispatch({ type: 'USER_VERIFYEMAILEXISTS_SUCCESS', payload: user.email });
+      props.history.push('/email-validation?authType=changepsw');
     }
   };
 
@@ -100,7 +98,6 @@ const EnterPassScreen = (props) => {
             <input
               id='password'
               type='password'
-              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => {
@@ -124,12 +121,12 @@ const EnterPassScreen = (props) => {
         <div>
           <button
             type='submit'
-            className='primary block'
+            className={'primary block' + (loading ? ' login-padding' : '')}
             onClick={() => {
               setButtonClicked('login');
             }}
           >
-            Ingresar
+            {loading ? <LoadingCircle color='white' /> : 'Ingresar'}
           </button>
           <button
             type='submit'

@@ -4,8 +4,9 @@ import SimpleFooter from './Components/Footers/SimpleFooter';
 import Header from './Components/Headers/Header';
 import EmptyHeader from './Components/Headers/EmptyHeader';
 import LessHeader from './Components/Headers/LessHeader';
-import PrivateRoute from './Components/PrivateRoute';
-import NotLogedRoute from './Components/NotLogedRoute';
+import PrivateRoute from './Components/Routes/PrivateRoute';
+import NotLogedRoute from './Components/Routes/NotLogedRoute';
+import ChangePasswordRoute from './Components/Routes/ChangePasswordRoute';
 import EnterPassScreen from './Screens/EnterPassScreen';
 import HomeScreen from './Screens/HomeScreen';
 import LoginScreen from './Screens/LoginScreen';
@@ -13,17 +14,21 @@ import ProductScreen from './Screens/ProductScreen';
 import RegisterScreen from './Screens/RegisterScreen';
 import EmailValidationScreen from './Screens/EmailValidationScreen';
 import NewProductScreen from './Screens/NewProductScreen';
-import EnterPassRoute from './Components/EnterPassRoute';
-import EmailValidationRoute from './Components/EmailValidationRoute';
+import EnterPassRoute from './Components/Routes/EnterPassRoute';
+import EmailValidationRoute from './Components/Routes/EmailValidationRoute';
+import HomeScreenRoute from './Components/Routes/HomeScreenRoute';
 import DraftsScreen from './Screens/DraftsScreen';
 import PostScreen from './Screens/PostScreen';
 import AddressScreen from './Screens/AddressScreen';
+import ChangePasswordScreen from './Screens/ChangePasswordScreen';
 
 const App = () => {
   useEffect(() => {
     document.querySelector('html').style.fontSize =
       62.5 * window.devicePixelRatio + '%';
   }, []);
+  if (window.location.pathname !== '/cambiar-contrasena')
+    localStorage.removeItem('emailCodeValidated');
   return (
     <BrowserRouter key={window.location.pathname}>
       <div className='grid-container'>
@@ -49,7 +54,11 @@ const App = () => {
           <Route path='*' component={EmptyHeader}></Route>
         </Switch>
         <main>
-          <Route path='/' component={HomeScreen} exact></Route>
+          <HomeScreenRoute
+            path='/'
+            component={HomeScreen}
+            exact
+          ></HomeScreenRoute>
           <Route path='/product/:id' component={ProductScreen}></Route>
           <NotLogedRoute
             path='/register'
@@ -89,8 +98,14 @@ const App = () => {
           <PrivateRoute
             path='/nueva-direccion'
             component={AddressScreen}
-            redirectTo={'?loginType=vender'}
+            redirectTo={'?loginType=new-address'}
+            exact
           ></PrivateRoute>
+          <ChangePasswordRoute
+            path='/cambiar-contrasena'
+            component={ChangePasswordScreen}
+            exact
+          ></ChangePasswordRoute>
         </main>
         <Route path='*' exact component={SimpleFooter}></Route>
       </div>

@@ -5,6 +5,7 @@ import {
   productDetailsReducer,
   productListReducer,
   newProductReducer,
+  deleteProductReducer,
 } from './Reducers/productReducers';
 import {
   userCheckNameReducer,
@@ -18,6 +19,8 @@ import {
   userUpdateFavoritesReducer,
   userUpdateProductsDraftsReducer,
   userVerifyEmailExistsReducer,
+  userDeleteProducsReducer,
+  userUpdateReducer,
 } from './Reducers/userReducers';
 
 const initialState = {
@@ -56,6 +59,9 @@ const reducer = combineReducers({
   userAddProducts: userAddProductsReducer,
   userUpdateAddresses: userUpdateAddressesReducer,
   userDeleteAddresses: userDeleteAddressesReducer,
+  deleteProduct: deleteProductReducer,
+  userDeleteProduct: userDeleteProducsReducer,
+  userUpdate: userUpdateReducer,
 });
 
 const store = createStore(

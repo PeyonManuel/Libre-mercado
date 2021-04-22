@@ -158,7 +158,13 @@ const ProductScreen = (props) => {
       ) : error ? (
         <MessageBox variant='danger'>{error}</MessageBox>
       ) : (
-        <div className='column' style={{ margin: '3rem', gap: '1rem' }}>
+        <div
+          className='column'
+          style={{
+            margin: window.devicePixelRatio < 2 ? '3rem' : '1rem 0',
+            gap: '1rem',
+          }}
+        >
           <span>
             {'| '}
             <a href={'/categorias/' + product && product.category.name}>
@@ -166,38 +172,40 @@ const ProductScreen = (props) => {
             </a>
           </span>
           <div className='column screen-card'>
-            <div className='row top screen-segment first'>
-              <div className='row top product-col-1'>
-                <div className='miniature-images column'>
-                  {product &&
-                    product.images &&
-                    product.images.map((img, i) => (
-                      <img
-                        key={i}
-                        className={
-                          'img miniature-selector' +
-                          (selectedImg === i ? ' selected' : '')
-                        }
-                        src={img}
-                        alt='Miniature preview'
-                        onMouseOver={() => setSelectedImg(i)}
-                      ></img>
-                    ))}
+            <div className='top screen-segment first'>
+              {window.devicePixelRatio < 2 && (
+                <div className='row top product-col-1'>
+                  <div className='miniature-images column'>
+                    {product &&
+                      product.images &&
+                      product.images.map((img, i) => (
+                        <img
+                          key={i}
+                          className={
+                            'img miniature-selector' +
+                            (selectedImg === i ? ' selected' : '')
+                          }
+                          src={img}
+                          alt='Miniature preview'
+                          onMouseOver={() => setSelectedImg(i)}
+                        ></img>
+                      ))}
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <img
+                      className='product-image'
+                      src={
+                        product && product.images && product.images[selectedImg]
+                      }
+                      alt='Selected product'
+                    ></img>
+                  </div>
+                  <div
+                    className='column'
+                    style={{ maxWidth: '35rem', gap: '0.5rem' }}
+                  ></div>
                 </div>
-                <div style={{ position: 'relative' }}>
-                  <img
-                    className='product-image'
-                    src={
-                      product && product.images && product.images[selectedImg]
-                    }
-                    alt='Selected product'
-                  ></img>
-                </div>
-                <div
-                  className='column'
-                  style={{ maxWidth: '35rem', gap: '0.5rem' }}
-                ></div>
-              </div>
+              )}
               <div
                 className='column top product-col-2 screen-mini-card'
                 style={{ gap: '1rem' }}
@@ -249,6 +257,23 @@ const ProductScreen = (props) => {
                     }
                   ></Rating>
                 </div>
+                {window.devicePixelRatio > 1 && (
+                  <div className='carousel-container'>
+                    <div className='carousel'>
+                      <div className='track'>
+                        {product.images.map((img) => (
+                          <div className='carousel-card'>
+                            <img
+                              src={img}
+                              alt='product'
+                              className='center-cropped'
+                            ></img>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className='column'>
                   {product && product.isOnSale && (
                     <del className='saleprice'>
@@ -347,8 +372,8 @@ const ProductScreen = (props) => {
             <div className='screen-segment second'>
               <div>
                 <h1 style={{ fontSize: '2.4rem' }}>Descripción</h1>
-                <pre className='product-description'>
-                  {product && product.description && product.description}
+                <pre className='product-description width-100'>
+                  {/* {product && product.description && product.description} */}
                 </pre>
               </div>
             </div>

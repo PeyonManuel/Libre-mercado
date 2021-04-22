@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUserFavorites } from '../../Actions/userActions';
 import { formatNumber } from '../../Utils/Utilities';
@@ -14,17 +14,13 @@ const Header = (props) => {
       ? user.userData.favorites
       : []
   );
-  const burgerRef = useRef(null);
+  const [screenWidth, setScreenWidth] = useState(window.outerWidth);
   useEffect(() => {
-    if (burgerRef.current !== null) {
-      burgerRef.current.addEventListener('click', () => {
-        burgerRef.current.classList.toggle('toggle');
-        document
-          .getElementById('small-screen-nav-bar')
-          .classList.toggle('active');
-      });
-    }
-  }, [burgerRef]);
+    var onresize = function (e) {
+      setScreenWidth(e.target.outerWidth);
+    };
+    window.addEventListener('resize', onresize);
+  }, []);
   useEffect(() => {
     switch (props.location.pathname) {
       case '/':
@@ -112,60 +108,74 @@ const Header = (props) => {
               <i className='fa fa-search'></i>
             </div>
 
-            <div className='row cart'>
-              <div className='burger' ref={burgerRef}>
-                <div className='line1'></div>
-                <div className='line2'></div>
-                <div className='line3'></div>
+            {screenWidth < 1024 && (
+              <div className='row cart'>
+                <div
+                  className='burger'
+                  onClick={(e) => {
+                    document
+                      .querySelector('.burger')
+                      .classList.toggle('toggle');
+                    document
+                      .getElementById('small-screen-nav-bar')
+                      .classList.toggle('active');
+                  }}
+                >
+                  <div className='line1'></div>
+                  <div className='line2'></div>
+                  <div className='line3'></div>
+                </div>
+                <i className='fa fa-shopping-cart fa-lg'></i>
               </div>
-              <i className='fa fa-shopping-cart fa-lg'></i>
+            )}
+          </div>
+          {screenWidth > 1024 && (
+            <div
+              className='row first-half half left'
+              style={{ paddingTop: '1.5rem' }}
+            >
+              <div style={{ width: '14rem' }}></div>
+              <ul className='row market-options top'>
+                <li>
+                  <a className='nodecoration' href='#categorias'>
+                    Categorias <i className='fa fa-caret-down'></i>
+                  </a>
+                </li>
+                <li>
+                  <a className='nodecoration' href='/ofertas'>
+                    Ofertas
+                  </a>
+                </li>
+                <li>
+                  <a className='nodecoration' href='/historial'>
+                    Historial
+                  </a>
+                </li>
+                <li>
+                  <a className='nodecoration' href='/supermercado'>
+                    Supermercado
+                  </a>
+                </li>
+                <li className='tiendas-oficiales'>
+                  <a className='nodecoration' href='/tiendasoficiales'>
+                    Tiendas oficiales
+                  </a>
+                </li>
+                <li>
+                  <a className='nodecoration' href='/vender'>
+                    Vender
+                  </a>
+                </li>
+                <li>
+                  <a className='nodecoration' href='/ayuda'>
+                    Ayuda
+                  </a>
+                </li>
+              </ul>
             </div>
-          </div>
-          <div
-            className='row first-half half left'
-            style={{ paddingTop: '1.5rem' }}
-          >
-            <div style={{ width: '14rem' }}></div>
-            <ul className='row market-options top'>
-              <li>
-                <a className='nodecoration' href='#categorias'>
-                  Categorias <i className='fa fa-caret-down'></i>
-                </a>
-              </li>
-              <li>
-                <a className='nodecoration' href='/ofertas'>
-                  Ofertas
-                </a>
-              </li>
-              <li>
-                <a className='nodecoration' href='/historial'>
-                  Historial
-                </a>
-              </li>
-              <li>
-                <a className='nodecoration' href='/supermercado'>
-                  Supermercado
-                </a>
-              </li>
-              <li className='tiendas-oficiales'>
-                <a className='nodecoration' href='/tiendasoficiales'>
-                  Tiendas oficiales
-                </a>
-              </li>
-              <li>
-                <a className='nodecoration' href='/vender'>
-                  Vender
-                </a>
-              </li>
-              <li>
-                <a className='nodecoration' href='/ayuda'>
-                  Ayuda
-                </a>
-              </li>
-            </ul>
-          </div>
+          )}
         </div>
-        {window.innerWidth > 1024 && (
+        {screenWidth > 1024 && (
           <ul className='row user-options half'>
             <li>
               {user ? (

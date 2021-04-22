@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateAddresses } from '../Actions/userActions';
+import LoadingCircle from '../Components/LoadingCircle';
 
 const AddressScreen = (props) => {
+  document.body.style.backgroundColor = '#f7f7f7';
   const userUpdateAddresses = useSelector((state) => state.userUpdateAddresses);
   const { loading, error } = userUpdateAddresses;
   const currentAddress = localStorage.getItem('currentAddress')
@@ -60,7 +62,9 @@ const AddressScreen = (props) => {
 
   useEffect(() => {
     if (isSubmited === true && !loading && !error) {
-      props.history.push('publicar?draft=' + draftId);
+      draftId
+        ? props.history.push('publicar?draft=' + draftId)
+        : props.history.push('/');
     }
   }, [isSubmited, loading, error, draftId, props]);
 
@@ -152,7 +156,7 @@ const AddressScreen = (props) => {
             </div>
           </div>
           <div className='wrapper'>
-            <div className='underline-label-input'>
+            <div className='underline-label-input big-form'>
               <input
                 type='text'
                 onChange={(e) => {
@@ -166,7 +170,7 @@ const AddressScreen = (props) => {
             </div>
           </div>
           <div className='wrapper'>
-            <div className='underline-label-input'>
+            <div className='underline-label-input big-form'>
               <input
                 id='numero'
                 type={noNumberCheck ? 'text' : 'number'}
@@ -243,7 +247,7 @@ const AddressScreen = (props) => {
             </div>
           </div>
           <div className='wrapper'>
-            <div className='underline-label-input'>
+            <div className='underline-label-input big-form'>
               <input
                 type='text'
                 onChange={(e) => {
@@ -274,7 +278,7 @@ const AddressScreen = (props) => {
             </div>
           </div>
           <div className='wrapper'>
-            <div className='underline-label-input'>
+            <div className='underline-label-input big-form'>
               <input
                 type='text'
                 onChange={(e) => {
@@ -288,7 +292,7 @@ const AddressScreen = (props) => {
             </div>
           </div>
           <div className='wrapper'>
-            <div className='underline-label-input'>
+            <div className='underline-label-input big-form'>
               <input
                 type='text'
                 onChange={(e) => {
@@ -302,34 +306,17 @@ const AddressScreen = (props) => {
             </div>
           </div>
         </div>
-        <button
-          type='submit'
-          className={'primary big-form' + (isSubmited ? ' no-padding' : '')}
-          id='submitbtn'
-          disabled={true}
-        >
-          {isSubmited ? (
-            <div id='wrapper'>
-              <div className='profile-main-loader'>
-                <div className='loader'>
-                  <svg className='circular-loader' viewBox='25 25 50 50'>
-                    <circle
-                      className='loader-path'
-                      cx='50'
-                      cy='50'
-                      r='20'
-                      fill='none'
-                      stroke='#70c542'
-                      strokeWidth='2'
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          ) : (
-            'Guardar'
-          )}
-        </button>
+        <div style={{ padding: '0 2rem 2rem' }}>
+          {' '}
+          <button
+            type='submit'
+            className={'primary big-form' + (isSubmited ? ' no-padding' : '')}
+            id='submitbtn'
+            disabled={true}
+          >
+            {isSubmited ? <LoadingCircle color='white' /> : 'Guardar'}
+          </button>
+        </div>
       </form>
     </div>
   );

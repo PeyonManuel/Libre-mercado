@@ -33,10 +33,10 @@ const Product = ({ product, user }) => {
     }
   }, [user, _id, error]);
   return (
-    <div className='card' style={{ margin: '0' }}>
+    <div className='card' style={{ margin: '0' }} key={_id}>
       <div className='favorite-btn'>
         <a
-          href={'?loginType=favorito&item_id=' + _id}
+          href={'/login?loginType=favorito&item_id=' + _id}
           onClick={(e) => {
             if (user) {
               e.preventDefault();

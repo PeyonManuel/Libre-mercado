@@ -34,9 +34,29 @@ export const checkUserName = (loginInfo) => async (dispatch) => {
 };
 
 export const loginUser = (user) => async (dispatch) => {
-  dispatch({ type: 'USER_lOGIN_REQUEST' });
+  dispatch({ type: 'USER_LOGIN_REQUEST' });
   try {
     const { data } = await Axios.post('/api/users/login', user);
+    localStorage.setItem('userInfo', JSON.stringify(data));
+    dispatch({ type: 'USER_LOGIN_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_LOGIN_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const loginUserWithCode = (userId, code) => async (dispatch) => {
+  dispatch({ type: 'USER_LOGIN_REQUEST' });
+  try {
+    const { data } = await Axios.post('/api/users/loginwithcode', {
+      userId,
+      code,
+    });
     localStorage.setItem('userInfo', JSON.stringify(data));
     dispatch({ type: 'USER_LOGIN_SUCCESS', payload: data });
   } catch (error) {
@@ -171,7 +191,7 @@ export const deleteProductDrafts = (draftId) => async (dispatch, getState) => {
   }
 };
 
-export const addProducts = (productId) => async (dispatch, getState) => {
+export const userAddProduct = (productId) => async (dispatch, getState) => {
   const {
     userLogin: { user },
   } = getState();
@@ -185,10 +205,36 @@ export const addProducts = (productId) => async (dispatch, getState) => {
       },
       { headers: { Authorization: 'Bearer ' + user.token } }
     );
-    dispatch({ type: 'USER_ADD_PRODUCTS_SUCCESS' });
+    dispatch({ type: 'USER_ADD_PRODUCTS_SUCCESS', payload: data });
   } catch (error) {
     dispatch({
       type: 'USER_ADD_PRODUCTS_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const userDeleteProduct = (productId) => async (dispatch, getState) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'USER_DELETE_PRODUCTS_REQUEST' });
+  try {
+    const { data } = await Axios.post(
+      '/api/users/delete  Products',
+      {
+        productId,
+        user,
+      },
+      { headers: { Authorization: 'Bearer ' + user.token } }
+    );
+    dispatch({ type: 'USER_DELETE_PRODUCTS_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_DELETE_PRODUCTS_FAIL',
       payload:
         error.response && error.response.data.message
           ? error.response.data.message
@@ -245,6 +291,31 @@ export const deleteAddresses = (addressId) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: 'USER_DELETE_ADDRESSES_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const updateUser = (user, updatePassword) => async (dispatch) => {
+  dispatch({ type: 'USER_UPDATE_REQUEST' });
+  try {
+    const { data } = await Axios.post(
+      '/api/users/updateuser',
+      {
+        user,
+        updatePassword,
+      },
+      { headers: { Authorization: 'Bearer ' + user.token } }
+    );
+    dispatch({ type: 'USER_UPDATE_SUCCESS', payload: data });
+    localStorage.setItem('userInfo', JSON.stringify(data));
+    dispatch({ type: 'USER_LOGIN_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_UPDATE_FAIL',
       payload:
         error.response && error.response.data.message
           ? error.response.data.message

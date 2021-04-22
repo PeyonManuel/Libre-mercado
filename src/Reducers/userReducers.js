@@ -33,7 +33,7 @@ export const userLoginReducer = (state = {}, action) => {
     case 'USER_LOGIN_REQUEST':
       return { loading: true };
     case 'USER_LOGIN_SUCCESS':
-      return { loading: false, user: action.payload, success: true };
+      return { loading: false, user: action.payload };
     case 'USER_LOGIN_FAIL':
       return { loading: false, error: action.payload };
     case 'USER_LOGIN_RESET':
@@ -101,6 +101,19 @@ export const userUpdateProductsDraftsReducer = (state = {}, action) => {
   }
 };
 
+export const userUpdateReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_UPDATE_REQUEST':
+      return { loading: true };
+    case 'USER_UPDATE_SUCCESS':
+      return { loading: false, user: action.payload };
+    case 'USER_UPDATE_FAIL':
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
 export const userDeleteProductDraftsReducer = (state = {}, action) => {
   switch (action.type) {
     case 'USER_DELETE_PRODUCT_DRAFTS_REQUEST':
@@ -114,12 +127,25 @@ export const userDeleteProductDraftsReducer = (state = {}, action) => {
   }
 };
 
+export const userDeleteProducsReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_DELETE_PRODUCTS_REQUEST':
+      return { loading: true };
+    case 'USER_DELETE_PRODUCTS_SUCCESS':
+      return { loading: false, user: action.payload, deleted: true };
+    case 'USER_DELETE_PRODUCTS_FAIL':
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
 export const userAddProductsReducer = (state = {}, action) => {
   switch (action.type) {
     case 'USER_ADD_PRODUCTS_REQUEST':
       return { loading: true };
     case 'USER_ADD_PRODUCTS_SUCCESS':
-      return { loading: false, added: true };
+      return { loading: false, added: true, user: action.payload };
     case 'USER_ADD_PRODUCTS_FAIL':
       return { loading: false, error: action.payload };
     default:

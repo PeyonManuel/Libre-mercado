@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { userVerifyEmailExists } from '../Actions/userActions';
+import LoadingCircle from '../Components/LoadingCircle';
 
 const RegisterScreen = (props) => {
   document.body.style.backgroundColor = '#f7f7f7';
@@ -28,6 +29,7 @@ const RegisterScreen = (props) => {
   const [emailExistsScreen, setEmailExistsScreen] = useState(false);
   const [isSubmited, setIsSubmited] = useState(false);
   const [loginType, setLoginType] = useState('');
+  const [btnPressed, setBtnPressed] = useState(false);
 
   const wrapperRef = useRef(null);
 
@@ -49,6 +51,9 @@ const RegisterScreen = (props) => {
           break;
         case 'vender':
           setLoginType('vender');
+          break;
+        case 'new-address':
+          setLoginType('new-address');
           break;
         default:
           break;
@@ -74,15 +79,22 @@ const RegisterScreen = (props) => {
       switch (loginType) {
         case 'favorito':
           props.history.push(
-            '/email-validation?loginType=favorito&item_id=' +
+            '/email-validation?authType=register&loginType=favorito&item_id=' +
               props.location.search.split('item_id=')[1]
           );
           break;
         case 'vender':
-          props.history.push('/email-validation?loginType=vender');
+          props.history.push(
+            '/email-validation?authType=register&loginType=vender'
+          );
+          break;
+        case 'new-address':
+          props.history.push(
+            '/email-validation?authType=register&loginType=new-address'
+          );
           break;
         default:
-          props.history.push('/email-validation');
+          props.history.push('/email-validation?authType=register');
           break;
       }
       dispatch({ type: 'USER_VERIFYEMAILEXISTS_RESET_SUCCESS' });
@@ -156,21 +168,29 @@ const RegisterScreen = (props) => {
   }, [password]);
   const submitHandler = async (e) => {
     e.preventDefault();
+    setBtnPressed(true);
     const verifyEmail = async (email) => {
-      const data = await axios.get(
-        'https://emailvalidation.abstractapi.com/v1/?api_key=' +
-          '991cebae87a64dd2a83faa0e62123f3b' +
-          '&email=' +
-          email
-      );
-      if (
-        data &&
-        data.data &&
-        data.data.deliverability &&
-        data.data.deliverability === 'DELIVERABLE'
-      )
-        return true;
-      else return false;
+      try {
+        const data = await axios.get(
+          'https://emailvalidation.abstractapi.com/v1/?api_key=' +
+            '991cebae87a64dd2a83faa0e62123f3b' +
+            '&email=' +
+            email
+        );
+        if (
+          data &&
+          data.data &&
+          data.data.deliverability &&
+          data.data.deliverability === 'DELIVERABLE'
+        )
+          return true;
+        else {
+          setBtnPressed(false);
+          return false;
+        }
+      } catch (error) {
+        setBtnPressed(false);
+      }
     };
     setIsSubmited(true);
     if (!(await verifyEmail(email.trim()))) {
@@ -180,6 +200,8 @@ const RegisterScreen = (props) => {
         !(nameError || surnameError || dniError || emailError || passwordError)
       ) {
         dispatch(userVerifyEmailExists(email));
+      } else {
+        setBtnPressed(false);
       }
     }
   };
@@ -202,7 +224,7 @@ const RegisterScreen = (props) => {
               <button
                 className='primary block'
                 style={{ marginBottom: '1rem' }}
-                onClick={() => props.history.push('/email-validation')}
+                onClick={() => props.history.push('/login')}
               >
                 Ingresá a tu cuenta
               </button>
@@ -410,14 +432,16 @@ const RegisterScreen = (props) => {
               </label>
             </div>
           </div>
-          <button
-            type='submit'
-            className='primary big-form'
-            id='submitbtn'
-            disabled={true}
-          >
-            Continuar
-          </button>
+          <div style={{ padding: '2rem' }}>
+            <button
+              type='submit'
+              className={'primary big-form' + (btnPressed ? ' no-padding' : '')}
+              id='submitbtn'
+              disabled={true}
+            >
+              {btnPressed ? <LoadingCircle color='white' /> : 'Continuar'}
+            </button>
+          </div>
         </form>
       </div>
     </>

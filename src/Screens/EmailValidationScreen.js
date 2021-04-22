@@ -11,66 +11,79 @@ import bcrypt from 'bcryptjs';
 
 const EmailValidationScreen = (props) => {
   const dispatch = useDispatch();
-  const userVerifyEmail = useSelector((state) => state.userVerifyEmail);
-  const { checkedEmail } = userVerifyEmail;
+  const checkedEmail = localStorage.getItem('verifiedEmail')
+    ? JSON.parse(localStorage.getItem('verifiedEmail'))
+    : null;
   const userLogin = useSelector((state) => state.userLogin);
-  const { success } = userLogin;
+  const { user } = userLogin;
   const [input, setInput] = useState(['', '', '', '', '', '']);
   const [hashCode, setHashCode] = useState(
     localStorage.getItem('hashCode')
       ? JSON.parse(localStorage.getItem('hashCode'))
       : null
   );
+  const [authType, setAuthType] = useState('');
+  const [success, setSuccess] = useState(false);
   const [codeError, setCodeError] = useState(false);
-  const [loginType, setLoginType] = useState('');
 
   useEffect(() => {
     const urlParams = new URLSearchParams(props.location.search);
-    const condition = urlParams
-      ? urlParams.get('loginType')
-        ? true
-        : false
-      : false;
-    if (condition) {
-      switch (urlParams.get('loginType')) {
-        case 'favorito':
-          setLoginType('favorito');
-          break;
-        case 'vender':
-          setLoginType('vender');
-          break;
-        default:
-          break;
-      }
-    }
+    setAuthType(urlParams.get('authType'));
   }, [props]);
-
   useEffect(() => {
+    const loginTypeSwitch = () => {
+      const urlParams = new URLSearchParams(props.location.search);
+      const loginCondition = urlParams
+        ? urlParams.get('loginType')
+          ? true
+          : false
+        : false;
+      if (loginCondition) {
+        switch (urlParams.get('loginType')) {
+          case 'favorito':
+            dispatch(
+              updateUserFavorites({
+                _id: props.location.search.split('item_id=')[1],
+                noDelete: true,
+              })
+            );
+            break;
+          case 'vender':
+            props.history.push('/vender');
+            break;
+          case 'new-address':
+            props.history.push('/nueva-direccion');
+            break;
+          default:
+            props.history.push('./');
+            break;
+        }
+      }
+    };
     if (success) {
-      switch (loginType) {
-        case 'favorito':
-          dispatch(
-            updateUserFavorites({
-              _id: props.location.search.split('item_id=')[1],
-              noDelete: true,
-            })
-          );
+      switch (authType) {
+        case 'register':
+          loginTypeSwitch();
           break;
-        case 'vender':
-          props.history.push('/vender');
+        case 'changepsw':
+          localStorage.removeItem('verifiedEmail');
+          localStorage.setItem(
+            'emailCodeValidated',
+            JSON.stringify({ validated: true })
+          );
+          props.history.push('/cambiar-contrasena');
           break;
         default:
-          props.history.push('./');
+          props.history.push('/');
           break;
       }
       localStorage.removeItem('RegisterCacheValues');
     }
-  }, [success, dispatch, props, loginType]);
+  }, [success, dispatch, props, authType]);
 
   useEffect(() => {
     if (!hashCode && checkedEmail) {
-      const length = checkedEmail && (checkedEmail.exists ? 6 : 4);
-      const randomNumber = generateRandomNumber(length);
+      const randomNumber = generateRandomNumber(6);
       const cacheHashCode = bcrypt.hashSync(randomNumber);
       setHashCode(cacheHashCode);
       localStorage.setItem('hashCode', JSON.stringify(cacheHashCode));
@@ -88,8 +101,12 @@ const EmailValidationScreen = (props) => {
     }
   }, [checkedEmail, hashCode]);
 
+  useEffect(() => {
+    user && setSuccess(true);
+  }, [user]);
+
   const createOtpInputs = (error) => {
-    const ammount = checkedEmail.exists ? 6 : 4;
+    const ammount = 6;
     const div = [];
     for (let i = 0; i < ammount; i++) {
       div.push(
@@ -98,11 +115,7 @@ const EmailValidationScreen = (props) => {
           id={'input' + i}
           className={
             'otp-input' +
-            (i === ammount - 1
-              ? ' no-space'
-              : ammount === 6 && i === 2
-              ? ' big-space'
-              : '') +
+            (i === ammount - 1 ? ' no-space' : i === 2 ? ' big-space' : '') +
             (error ? ' error' : '')
           }
           type='number'
@@ -173,25 +186,29 @@ const EmailValidationScreen = (props) => {
   const submitHandler = (e) => {
     e.preventDefault();
     if (bcrypt.compareSync(input.join(''), hashCode)) {
-      if (checkedEmail.exists) {
-        dispatch(
-          loginUser({
-            _id: checkedEmail._id,
-            baseCode: '523bhf72y37n782cDFU1FN7NX',
-          })
-        );
-      } else {
-        const user = localStorage.getItem('RegisterCacheValues')
-          ? JSON.parse(localStorage.getItem('RegisterCacheValues'))
-          : null;
-        if (user) {
-          dispatch(registerUser(user));
-        } else {
-          alert(
-            'Ha ocurrido un error con los datos de registro, volviendo a la pagina de registro'
+      if (authType === 'register') {
+        if (checkedEmail.exists) {
+          dispatch(
+            loginUser({
+              _id: checkedEmail._id,
+              baseCode: '523bhf72y37n782cDFU1FN7NX',
+            })
           );
-          props.history.push('/register');
+        } else {
+          const user = localStorage.getItem('RegisterCacheValues')
+            ? JSON.parse(localStorage.getItem('RegisterCacheValues'))
+            : null;
+          if (user) {
+            dispatch(registerUser(user));
+          } else {
+            alert(
+              'Ha ocurrido un error con los datos de registro, volviendo a la pagina de registro'
+            );
+            props.history.push('/register');
+          }
         }
+      } else if (authType === 'changepsw') {
+        setSuccess(true);
       }
       localStorage.removeItem('hashCode');
     } else {
@@ -247,15 +264,7 @@ const EmailValidationScreen = (props) => {
               ))}
           </div>
           {checkedEmail && (
-            <div
-              className='otp-inputs'
-              onClick={() => {
-                const ammount = checkedEmail.exists ? 6 : 4;
-                for (let i = 0; i < ammount; i++) {}
-              }}
-            >
-              {createOtpInputs(codeError)}
-            </div>
+            <div className='otp-inputs'>{createOtpInputs(codeError)}</div>
           )}
           <button type='submit' className='primary block'>
             {checkedEmail.exists ? 'Verificar el código' : 'Continuar'}

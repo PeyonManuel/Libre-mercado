@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { listProducts } from '../Actions/productActions';
+import LoadingCircle from '../Components/LoadingCircle';
 import MessageBox from '../Components/MessageBox';
 import Product from '../Components/Product';
 
@@ -45,49 +46,56 @@ const HomeScreen = (props) => {
   }, [ammountToMove]);
   return (
     <>
-      {loading ? (
-        <></>
-      ) : error ? (
+      {error ? (
         <MessageBox variant='danger'>{error}</MessageBox>
       ) : (
         <div
+          className='flex-center'
           style={{
             position: 'relative',
             width: '120rem',
           }}
         >
-          {ammountToMove > 0 && (
-            <button
-              className='card-back-button'
-              onClick={() => moveList('backwards')}
-            ></button>
+          {loading ? (
+            <LoadingCircle color='blue' />
+          ) : (
+            <>
+              {ammountToMove > 0 && (
+                <button
+                  className='card-back-button'
+                  onClick={() => moveList('backwards')}
+                ></button>
+              )}
+              <div className='product-list-container'>
+                <h1>Productos</h1>
+                <div
+                  className='row top product-cards'
+                  id='product-cards'
+                  style={{
+                    transform:
+                      'translate3d(' + -ammountToMove + 'px, 0px, 0px)',
+                  }}
+                >
+                  {products.map((product) => (
+                    <>
+                      <Product
+                        key={product._id}
+                        product={product}
+                        user={user && user}
+                        history={props.history}
+                      />
+                    </>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                id='card-next-button'
+                className='card-next-button'
+                onClick={() => moveList('forward')}
+              ></button>
+            </>
           )}
-          <div className='product-list-container'>
-            <h1>Productos</h1>
-            <div
-              className='row top product-cards'
-              id='product-cards'
-              style={{
-                transform: 'translate3d(' + -ammountToMove + 'px, 0px, 0px)',
-              }}
-            >
-              {products.map((product) => (
-                <>
-                  <Product
-                    key={product._id}
-                    product={product}
-                    user={user && user}
-                    history={props.history}
-                  />
-                </>
-              ))}
-            </div>
-          </div>
-          <button
-            id='card-next-button'
-            className='card-next-button'
-            onClick={() => moveList('forward')}
-          ></button>
         </div>
       )}
       {categoryLoading ? (

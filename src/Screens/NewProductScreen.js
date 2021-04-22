@@ -14,9 +14,9 @@ const NewProductScreen = (props) => {
   const { user } = userLogin;
   const userDetails = useSelector((state) => state.userDetails);
   const {
-    loading: loadingDetails,
     error: detailsError,
     user: details,
+    loading: loadingDetails,
   } = userDetails;
   const userUpdateProductDrafts = useSelector(
     (state) => state.userUpdateProductDrafts
@@ -26,7 +26,7 @@ const NewProductScreen = (props) => {
     error: updateError,
   } = userUpdateProductDrafts;
   const draftId = urlParams.get('draft');
-  const [cacheValues, setCacheValues] = useState('');
+  const [cacheValues, setCacheValues] = useState(null);
   const [searchSell, setSearchSell] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isStateNew, setIsStateNew] = useState(null);
@@ -40,7 +40,6 @@ const NewProductScreen = (props) => {
   const [quantityError, setQuantityError] = useState('');
   const [showHelpSign, setShowHelpSign] = useState(false);
   const [showChangeCategorySign, setShowChangeCategorySign] = useState(false);
-  const [updatingImages, setUpdatingImages] = useState(false);
   const wrapperRef = useRef(null);
   const wrapperRefHelpSign = useRef(null);
   const wrapperRefCategorySign = useRef(null);
@@ -98,34 +97,24 @@ const NewProductScreen = (props) => {
       window.removeEventListener('dragover', preventDragAndDrop);
     };
   }, []);
-
   useEffect(() => {
     dispatch(detailsUser(user._id));
   }, [user, dispatch]);
 
   useEffect(() => {
-    if (cacheValues === '') {
-      setCacheValues(
-        draftId
-          ? details &&
-            details.productDrafts.find(
-              (productDraft) => productDraft._id === draftId
-            )
-            ? details.productDrafts.find(
-                (productDraft) => productDraft._id === draftId
-              )
-            : ''
-          : ''
-      );
-    }
-  }, [details, draftId, cacheValues]);
-
-  useEffect(() => {
     if (draftId === null) {
       setCacheValues('');
-      setPercentage(0);
+    } else if (details) {
+      const productDraft = details.productDrafts.find(
+        (productDraft) => productDraft._id === draftId
+      );
+      if (productDraft) {
+        setCacheValues(productDraft);
+      } else if (!updateLoading) {
+        props.history.push('/vender');
+      }
     }
-  }, [draftId]);
+  }, [draftId, props, cacheValues, details, updateLoading]);
 
   useEffect(() => {
     setSearchSell(cacheValues ? cacheValues.name : '');
@@ -133,8 +122,8 @@ const NewProductScreen = (props) => {
     setIsStateNew(cacheValues ? cacheValues.isStateNew : null);
     setImages(cacheValues ? cacheValues.images : []);
     setPercentage(
-      cacheValues !== ''
-        ? cacheValues.name !== ''
+      cacheValues
+        ? cacheValues.name
           ? cacheValues.category !== null
             ? cacheValues.isStateNew !== null
               ? cacheValues.images && cacheValues.images.length > 0
@@ -143,7 +132,7 @@ const NewProductScreen = (props) => {
               : 33
             : 16.5
           : 0
-        : 0
+        : -1
     );
     setQuantity(cacheValues ? cacheValues.stock : '');
   }, [cacheValues]);
@@ -197,7 +186,7 @@ const NewProductScreen = (props) => {
       }
     };
     newDraftId();
-  }, [details]);
+  }, [details, draftId, props, percentage]);
 
   useEffect(() => {
     showHelpSign &&
@@ -223,31 +212,6 @@ const NewProductScreen = (props) => {
       categories.length < 1 &&
       dispatch(listCategories());
   }, [dispatch, percentage, categories]);
-
-  useEffect(() => {
-    if (cacheValues !== '') {
-      if (updateLoading && !updateError) {
-        if (
-          cacheValues.isStateNew === true ||
-          cacheValues.isStateNew === false
-        ) {
-          if (
-            cacheValues.images &&
-            cacheValues.images.length > 0 &&
-            parseInt(quantity) > 0 &&
-            !updatingImages
-          ) {
-            setPercentage(100);
-          } else {
-            setPercentage(67);
-            setIsStateNew(cacheValues.isStateNew);
-          }
-        } else {
-          setPercentage(33);
-        }
-      }
-    }
-  }, [updateLoading, updateError, cacheValues, quantity, updatingImages]);
 
   const CheckDimension = (file) => {
     var reader = new FileReader();
@@ -409,7 +373,6 @@ const NewProductScreen = (props) => {
                     href='#cambiar-categoria'
                     onClick={() => {
                       setSelectedCategory(null);
-                      setPercentage(16.5);
                     }}
                   >
                     Elegir otra
@@ -488,10 +451,6 @@ const NewProductScreen = (props) => {
             onClick={() => {
               if (isStateNew !== true) {
                 setIsStateNew(true);
-                setCacheValues({
-                  ...cacheValues,
-                  isStateNew: true,
-                });
                 dispatch(
                   updateProductDrafts({
                     ...cacheValues,
@@ -516,10 +475,6 @@ const NewProductScreen = (props) => {
             onClick={() => {
               if (isStateNew !== false) {
                 setIsStateNew(false);
-                setCacheValues({
-                  ...cacheValues,
-                  isStateNew: false,
-                });
                 dispatch(
                   updateProductDrafts({
                     ...cacheValues,
@@ -753,9 +708,10 @@ const NewProductScreen = (props) => {
                       <button
                         className='image-slider-arrow-btn'
                         onClick={() => {
-                          setPercentage(67);
-                          setUpdatingImages(true);
-                          setImages(move(images, i, i - 1, false));
+                          if (images.length > 1 && i !== 0) {
+                            setImages(move(images, i, i - 1, false));
+                            setPercentage(67);
+                          }
                         }}
                       >
                         <i className='fas fa-caret-left'></i>
@@ -763,12 +719,11 @@ const NewProductScreen = (props) => {
                       <button
                         className='image-slider-del-btn'
                         onClick={() => {
-                          setPercentage(67);
-                          setUpdatingImages(true);
                           setImages((images) => [
                             ...images.slice(0, i),
                             ...images.slice(i + 1),
                           ]);
+                          setPercentage(67);
                         }}
                       >
                         <img
@@ -779,9 +734,10 @@ const NewProductScreen = (props) => {
                       <button
                         className='image-slider-arrow-btn'
                         onClick={() => {
-                          setPercentage(67);
-                          setUpdatingImages(true);
-                          setImages(move(images, i, i + 1, false));
+                          if (images.length > 1 && images.length - 1 !== i) {
+                            setImages(move(images, i, i + 1, false));
+                            setPercentage(67);
+                          }
                         }}
                       >
                         <i className='fas fa-caret-right'></i>
@@ -804,8 +760,6 @@ const NewProductScreen = (props) => {
                 if (e.target.value.length === 0 || e.target.value === '0') {
                   setQuantityError('La cantidad mínima es 1.');
                 } else {
-                  setPercentage(67);
-                  setUpdatingImages(true);
                   setQuantityError('');
                 }
               }}
@@ -820,6 +774,7 @@ const NewProductScreen = (props) => {
                   )
                 )
                   e.preventDefault();
+                setPercentage(67);
               }}
             ></input>
             <div
@@ -846,11 +801,6 @@ const NewProductScreen = (props) => {
             onClick={() => {
               if (images.length > 0) {
                 if (quantity !== '' && parseInt(quantity) > 0) {
-                  setCacheValues({
-                    ...cacheValues,
-                    images,
-                    stock: parseInt(quantity),
-                  });
                   dispatch(
                     updateProductDrafts({
                       ...cacheValues,
@@ -859,7 +809,6 @@ const NewProductScreen = (props) => {
                       _id: draftId ? draftId : null,
                     })
                   );
-                  setUpdatingImages(false);
                 } else {
                   setQuantityError('La cantidad mínima es 1.');
                 }
@@ -980,13 +929,6 @@ const NewProductScreen = (props) => {
                 setIsStateNew(null);
                 setImages([]);
                 setQuantity(0);
-                setCacheValues({
-                  name: searchSell,
-                  category: selectedCategory,
-                  isStateNew: null,
-                  quantity: 0,
-                  images: [],
-                });
                 dispatch(
                   updateProductDrafts({
                     name: searchSell,
@@ -994,13 +936,13 @@ const NewProductScreen = (props) => {
                     _id: draftId ? draftId : null,
                   })
                 );
-                setUpdatingImages(false);
                 document
                   .querySelector('#change-category-sign')
                   .classList.add('hidden');
                 setTimeout(() => {
                   setShowChangeCategorySign(false);
                 }, 500);
+                setPercentage(33);
               }}
             >
               Aceptar
@@ -1010,10 +952,6 @@ const NewProductScreen = (props) => {
               className='secondary'
               onClick={() => {
                 setSelectedCategory(cacheValues.category);
-                setCacheValues({
-                  ...cacheValues,
-                  name: searchSell,
-                });
                 dispatch(
                   updateProductDrafts({
                     ...cacheValues,
@@ -1065,7 +1003,8 @@ const NewProductScreen = (props) => {
           <MessageBox variant='danger'>{detailsError || error}</MessageBox>
         </div>
       ) : (
-        percentage >= 0 && (
+        percentage >= 0 &&
+        cacheValues !== null && (
           <>
             <div className='extra-header new-product'></div>
             <div className='new-product-steps'>
@@ -1138,19 +1077,19 @@ const NewProductScreen = (props) => {
                   <div className='screen-mini-card medium'>
                     <MessageBox variant='danger'>{updateError}</MessageBox>
                   </div>
-                ) : updateLoading || draftId === null ? (
+                ) : updateLoading || loadingDetails || draftId === null ? (
                   secondStep('disabled')
                 ) : (
                   secondStep()
                 )
               ) : (
                 percentage > 33 &&
-                (updateLoading || draftId === null
+                (updateLoading || loadingDetails || draftId === null
                   ? secondStep('disabled')
                   : secondStep())
               )}
               {percentage >= 67 &&
-                (updateLoading || draftId === null ? (
+                (updateLoading || loadingDetails || draftId === null ? (
                   thirdStep('disabled')
                 ) : updateError ? (
                   <div className='screen-mini-card medium'>
@@ -1163,7 +1102,7 @@ const NewProductScreen = (props) => {
                 <div className='row flex-end width-100'>
                   <button
                     className='primary'
-                    disabled={updateLoading || updateError ? true : false}
+                    disabled={updateLoading || loadingDetails || updateError}
                     onClick={() => {
                       document.querySelector('#siguiente-link').click();
                     }}
