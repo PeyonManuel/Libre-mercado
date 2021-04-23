@@ -32,6 +32,74 @@ const ProductScreen = (props) => {
       ? true
       : false
   );
+
+  useEffect(() => {
+    let initialPosition = null;
+    let moving = false;
+    let transform = 0;
+    let diff = 0;
+    const carouselLimit = product && (product.images.length - 1) * -340;
+    const getStartPosition = (e) => {
+      if (e.target.className === 'center-cropped big') {
+        initialPosition = e.pageX;
+        moving = true;
+        const transformMatrix =
+          document.querySelector('.track') &&
+          window
+            .getComputedStyle(document.querySelector('.track'))
+            .getPropertyValue('transform');
+        if (transformMatrix !== 'none') {
+          transform = transformMatrix
+            ? parseInt(transformMatrix.split(',')[4].trim())
+            : 0;
+        }
+      }
+    };
+    const getCurrentPoition = (e) => {
+      if (moving && product) {
+        const currentPosition = e.pageX;
+        diff = transform + (currentPosition - initialPosition);
+        document.querySelector('.track').style.transform =
+          'translateX(' + diff + 'px)';
+      }
+    };
+    const getMouseUp = () => {
+      moving = false;
+      if (diff < carouselLimit) {
+        document.querySelector('.track').style.transform =
+          'translateX(' + carouselLimit + 'px)';
+      } else if (diff > 0) {
+        document.querySelector('.track').style.transform =
+          'translateX(' + 0 + 'px)';
+      } else if (diff % 340 !== 0) {
+        document.querySelector('.track').style.transform =
+          'translateX(' + Math.round(diff / 340) * 340 + 'px)';
+      }
+    };
+    if (window.PointerEvent) {
+      window.addEventListener('pointerdown', getStartPosition);
+      window.addEventListener('pointermove', getCurrentPoition);
+      window.addEventListener('pointerup', getMouseUp);
+    } else {
+      window.addEventListener('touchdown', getStartPosition);
+      window.addEventListener('touchmove', getCurrentPoition);
+      window.addEventListener('touchup', getMouseUp);
+    }
+
+    return () => {
+      if (window.PointerEvent) {
+        window.removeEventListener('pointerdown', getStartPosition);
+        window.removeEventListener('pointermove', getCurrentPoition);
+        window.removeEventListener('pointerup', getMouseUp);
+      } else {
+        window.removeEventListener('touchdown', getStartPosition);
+        window.removeEventListener('touchmove', getCurrentPoition);
+        window.removeEventListener('touchup', getMouseUp);
+      }
+    };
+    // eslint-disable-next-line
+  });
+
   useEffect(() => {
     dispatch(detailsProduct(productId));
   }, [dispatch, productId]);
@@ -161,7 +229,7 @@ const ProductScreen = (props) => {
         <div
           className='column'
           style={{
-            margin: '1rem',
+            margin: window.devicePixelRatio < 2 ? '3rem' : '1rem 0',
             gap: '1rem',
           }}
         >
@@ -257,23 +325,25 @@ const ProductScreen = (props) => {
                     }
                   ></Rating>
                 </div>
-                {window.devicePixelRatio > 1 && (
-                  <div className='carousel-container'>
-                    <div className='carousel'>
-                      <div className='track'>
-                        {product.images.map((img) => (
-                          <div className='carousel-card'>
-                            <img
-                              src={img}
-                              alt='product'
-                              className='center-cropped'
-                            ></img>
-                          </div>
-                        ))}
-                      </div>
+                <div className='carousel-container width-100'>
+                  <div className='carousel'>
+                    <div
+                      className='track row'
+                      style={{ width: product.images.length * 34 + 'rem' }}
+                    >
+                      {product.images.map((img) => (
+                        <div className='carousel-card'>
+                          <img
+                            src={img}
+                            alt='product'
+                            className='center-cropped big'
+                            draggable='false'
+                          ></img>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                )}
+                </div>
                 <div className='column'>
                   {product && product.isOnSale && (
                     <del className='saleprice'>

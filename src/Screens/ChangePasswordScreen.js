@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Redirect } from 'react-router';
 import {
   detailsUser,
   loginUserWithCode,
@@ -46,7 +45,7 @@ const ChangePasswordScreen = (props) => {
 
   useEffect(() => {
     userUpdated && props.history.push('/');
-  }, [userUpdated]);
+  }, [userUpdated, props]);
 
   useEffect(() => {
     if (password.length < 6) {
@@ -69,7 +68,7 @@ const ChangePasswordScreen = (props) => {
           true
         )
       );
-  }, [loggedUser]);
+  }, [loggedUser, dispatch, password, userUpdated]);
 
   const submitHandler = (e) => {
     e.preventDefault();

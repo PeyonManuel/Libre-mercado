@@ -20,6 +20,9 @@ const Header = (props) => {
       setScreenWidth(e.target.outerWidth);
     };
     window.addEventListener('resize', onresize);
+    return () => {
+      window.removeEventListener('resize', onresize);
+    };
   }, []);
   useEffect(() => {
     switch (props.location.pathname) {

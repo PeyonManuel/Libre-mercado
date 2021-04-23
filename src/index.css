@@ -111,6 +111,11 @@ footer {
   width: calc(100vw - 1.7rem);
   margin-top: 0.1rem;
 }
+@media (min-resolution: 250dpi) {
+  footer {
+    width: 100vw;
+  }
+}
 /* common */
 textarea {
   border: 1px solid rgba(0, 0, 0, 0.25);
@@ -815,6 +820,10 @@ img.small {
 img.medium {
   max-width: 22rem;
   width: 100%;
+}
+img.big {
+  height: 30rem;
+  width: 32rem;
 }
 img.large {
   width: 100%;
@@ -1687,7 +1696,7 @@ div:hover > .card-next-button,
 }
 @media (min-resolution: 250dpi) {
   .product-col-2 {
-    width: 100%;
+    width: 36rem;
     box-sizing: border-box;
   }
 }
@@ -2377,14 +2386,16 @@ div:hover > .card-next-button,
 
 .carousel {
   width: 100%;
-  height: 20rem;
+  height: 30rem;
   position: relative;
   overflow: hidden;
 }
 
 .carousel .track {
   position: absolute;
-  left: 2rem;
+  touch-action: none;
+  transition: 0.2s ease-out;
+  width: auto;
 }
 
 .carousel .track .carousel-card {
