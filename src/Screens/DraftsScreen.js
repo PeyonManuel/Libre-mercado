@@ -65,9 +65,9 @@ const DraftsScreen = () => {
                 }
                 alt='Imagen del producto'
               />
-              <div className='column list-text-container'>
+              <div className='column'>
                 <span>{productDrafts[i].name}</span>
-                <span className='subtle-text'>
+                <span className='subtle-text margin-top'>
                   <img
                     className='very-small little-margin-right'
                     src='https://svgshare.com/i/UJR.svg'
@@ -76,7 +76,7 @@ const DraftsScreen = () => {
                   {'Publicación iniciada el ' +
                     parseInt(productDrafts[i].date.split('-')[2]) +
                     ' de ' +
-                    months[parseInt(productDrafts[i].date.split('-')[1])]}
+                    months[parseInt(productDrafts[i].date.split('-')[1]) - 1]}
                 </span>
               </div>
             </a>

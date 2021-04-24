@@ -122,15 +122,17 @@ const NewProductScreen = (props) => {
     setIsStateNew(cacheValues ? cacheValues.isStateNew : null);
     setImages(cacheValues ? cacheValues.images : []);
     setPercentage(
-      cacheValues
-        ? cacheValues.name
-          ? cacheValues.category !== null
-            ? cacheValues.isStateNew !== null
-              ? cacheValues.images && cacheValues.images.length > 0
-                ? 100
-                : 67
-              : 33
-            : 16.5
+      cacheValues !== null
+        ? cacheValues !== ''
+          ? cacheValues.name
+            ? cacheValues.category !== null
+              ? cacheValues.isStateNew !== null
+                ? cacheValues.images && cacheValues.images.length > 0
+                  ? 100
+                  : 67
+                : 33
+              : 16.5
+            : 0
           : 0
         : -1
     );
@@ -995,7 +997,7 @@ const NewProductScreen = (props) => {
         }'><img class='center-cropped invalid-img'src='${errorImg}' alt='error'/><p class='bold'>${errorDetail}</p></div></li>`
       );
   };
-
+  console.log(percentage, cacheValues);
   return (
     <>
       {detailsError || error ? (

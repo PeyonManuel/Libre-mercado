@@ -645,8 +645,7 @@ const PostScreen = (props) => {
                     dispatch(
                       updateProductDrafts({
                         ...draftValues,
-                        video:
-                          'https://www.youtube.com/watch?v=' + validVideoId,
+                        video: 'https://www.youtube.com/embed/' + validVideoId,
                       })
                     );
                     setEditingVideo(false);

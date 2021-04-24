@@ -10,6 +10,7 @@ html {
 @media (min-resolution: 250dpi) {
   html {
     font-size: 62.5% !important;
+    overflow-x: hidden;
   }
 }
 body {
@@ -22,12 +23,18 @@ body {
   flex-direction: column;
   min-height: 100vh;
   height: auto;
+  width: 100%;
   margin: 0;
   font-size: 1.6rem;
   font-family: 'Montserrat', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #ebebeb;
+}
+@media (min-resolution: 250dpi) {
+  body {
+    overflow-x: hidden;
+  }
 }
 #root {
   min-height: 100vh;
@@ -55,6 +62,7 @@ header {
   width: calc(100vw - 1.7rem);
   box-sizing: border-box;
   position: absolute;
+  z-index: 9999;
 }
 header.empty {
   height: 6rem;
@@ -300,9 +308,6 @@ ul.qty-list > li > span > label.nostock::after {
 ul.qty-list > li > span > input.nostock:hover,
 ul.qty-list > li > span > input.nostock:focus {
   border-bottom: 2px #f04449 solid;
-}
-.list-text-container {
-  gap: 1rem;
 }
 input,
 select,
@@ -802,9 +807,6 @@ a.brand {
   width: 100%;
   height: 100%;
 }
-img {
-  border-radius: 0.5rem;
-}
 img.very-small {
   height: 1.6rem;
   width: 1.5rem;
@@ -823,7 +825,7 @@ img.medium {
 }
 img.big {
   height: 30rem;
-  width: 32rem;
+  width: 26rem;
 }
 img.large {
   width: 100%;
@@ -872,6 +874,9 @@ img.logo.small-logo {
   object-fit: contain;
   margin-left: 3rem;
 }
+.logo-container {
+  width: 14rem;
+}
 
 @media (max-width: 1024px) {
   img.logo.big-logo {
@@ -879,6 +884,9 @@ img.logo.small-logo {
   }
   img.logo.small-logo {
     display: block;
+  }
+  .logo-container {
+    width: 5rem;
   }
 }
 /* card */
@@ -1035,12 +1043,21 @@ img.logo.small-logo {
   cursor: pointer;
   outline: 0;
   position: absolute;
-  top: 17rem;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 2;
-  right: -1rem;
 }
 .card-back-button {
-  left: -3rem;
+  left: -2rem;
+}
+.card-next-button {
+  right: -2rem;
+}
+.card-back-button.exhibitor {
+  left: 0.5rem;
+}
+.card-next-button.exhibitor {
+  right: 0.5rem;
 }
 div:hover > .card-back-button,
 div:hover > .card-next-button,
@@ -1396,6 +1413,12 @@ div:hover > .card-next-button,
   padding: 2rem;
   box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
 }
+@media (min-resolution: 250dpi) {
+  .screen-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
 .screen-mini-card.disabled {
   pointer-events: none;
   opacity: 50%;
@@ -1696,7 +1719,7 @@ div:hover > .card-next-button,
 }
 @media (min-resolution: 250dpi) {
   .product-col-2 {
-    width: 36rem;
+    width: auto;
     box-sizing: border-box;
   }
 }
@@ -2401,4 +2424,38 @@ div:hover > .card-next-button,
 .carousel .track .carousel-card {
   background: #fff;
   margin-right: 2rem;
+}
+
+/* home exhibitor */
+
+.exhibitor-container {
+  overflow: hidden;
+  width: calc(100vw - 1.7rem);
+  position: relative;
+}
+@media (min-resolution: 250dpi) {
+  .exhibitor-container {
+    width: 100vw;
+  }
+}
+.home-item {
+  height: 34rem;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+@media (min-resolution: 250dpi) {
+  .home-item {
+    height: 16rem;
+  }
+}
+.home-item > img {
+  position: absolute;
+  left: -1000%;
+  right: -1000%;
+  top: -1000%;
+  bottom: -1000%;
+  margin: auto;
+  height: 100%;
+  min-width: 100%;
 }

@@ -89,7 +89,7 @@ const Header = (props) => {
       >
         <div className='halfs'>
           <div className='row half left'>
-            <div>
+            <div className='logo-container'>
               <a className='nodecoration' href='/'>
                 <img
                   className='logo big-logo'
