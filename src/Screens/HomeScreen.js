@@ -62,7 +62,7 @@ const HomeScreen = (props) => {
               <LoadingCircle color='blue' />
             ) : (
               <>
-                {ammountToMove > 0 && (
+                {window.devicePixelRatio < 2 && ammountToMove > 0 && (
                   <button
                     className='card-back-button'
                     onClick={() => moveList('backwards')}
@@ -91,11 +91,13 @@ const HomeScreen = (props) => {
                   </div>
                 </div>
 
-                <button
-                  id='card-next-button'
-                  className='card-next-button'
-                  onClick={() => moveList('forward')}
-                ></button>
+                {window.devicePixelRatio < 2 && (
+                  <button
+                    id='card-next-button'
+                    className='card-next-button'
+                    onClick={() => moveList('forward')}
+                  ></button>
+                )}
               </>
             )}
           </div>

@@ -227,6 +227,11 @@ ul.qty-list {
   box-shadow: 1px 1px 7px -3px rgba(0, 0, 0, 0.75);
   visibility: hidden;
 }
+@media (min-resolution: 250dpi) {
+  ul.qty-list {
+    width: 100%;
+  }
+}
 ul.qty-list > li {
   text-align: center;
   background-color: white;
@@ -2443,6 +2448,10 @@ div:hover > .card-next-button,
   width: 100vw;
   overflow: hidden;
   position: relative;
+}
+
+.home-screen-exhibitor {
+  touch-action: none;
 }
 @media (min-resolution: 250dpi) {
   .home-item {

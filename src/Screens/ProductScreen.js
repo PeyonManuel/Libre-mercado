@@ -34,12 +34,19 @@ const ProductScreen = (props) => {
       ? true
       : false
   );
+  const [carouselWidth, setCarouselWidth] = useState('');
 
   const carouselContainerRef = useRef();
 
   useEffect(() => {
-    console.log(carouselContainerRef);
-  }, [carouselContainerRef]);
+    carouselContainerRef &&
+      product &&
+      setCarouselWidth(
+        (product.images.length * carouselContainerRef.current.scrollWidth) /
+          10 +
+          'rem'
+      );
+  }, [product, carouselContainerRef]);
 
   useEffect(() => {
     if (carouselContainerRef.current) {
@@ -234,6 +241,7 @@ const ProductScreen = (props) => {
     }
     return list;
   };
+  console.log(product && product.images);
   return (
     <>
       {loading ? (
@@ -381,31 +389,25 @@ const ProductScreen = (props) => {
                       className='carousel-container width-100 margin-top'
                       ref={carouselContainerRef}
                     >
-                      {carouselContainerRef.current && (
-                        <div className='carousel'>
-                          <div
-                            className='track row'
-                            style={{
-                              width:
-                                (product.images.length *
-                                  carouselContainerRef.current.scrollWidth) /
-                                  10 +
-                                'rem',
-                            }}
-                          >
-                            {product.images.map((img) => (
-                              <div className='carousel-card'>
-                                <img
-                                  src={img}
-                                  alt='product'
-                                  className='center-cropped big'
-                                  draggable='false'
-                                ></img>
-                              </div>
-                            ))}
-                          </div>
+                      <div className='carousel'>
+                        <div
+                          className='track row'
+                          style={{
+                            width: carouselWidth,
+                          }}
+                        >
+                          {product.images.map((img) => (
+                            <div className='carousel-card'>
+                              <img
+                                src={img}
+                                alt='product'
+                                className='center-cropped big'
+                                draggable='false'
+                              ></img>
+                            </div>
+                          ))}
                         </div>
-                      )}
+                      </div>
                     </div>
                   )}
                   <div className='column'>
