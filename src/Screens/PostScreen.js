@@ -58,7 +58,7 @@ const PostScreen = (props) => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [price, setPrice] = useState(0);
   const [priceError, setPriceError] = useState('');
-  const [justShipping, setJustShipping] = useState(null);
+  const [noShipping, setNoShipping] = useState(null);
   const [description, setDescription] = useState('');
   const [video, setVideo] = useState('');
   const [videoError, setVideoError] = useState('');
@@ -108,8 +108,8 @@ const PostScreen = (props) => {
         setPrice(draftValues.price);
         setPercentage(50);
       }
-      if (draftValues.justShipping !== null) {
-        setJustShipping(draftValues.justShipping);
+      if (draftValues.noShipping !== null) {
+        setNoShipping(draftValues.noShipping);
         setPercentage(75);
       }
       if (draftValues.description) {
@@ -181,7 +181,7 @@ const PostScreen = (props) => {
   }, [added, dispatch, product, draftId, newProductError]);
 
   useEffect(() => {
-    draftDeleted && props.history.push('vender/producto-publicado');
+    draftDeleted && props.history.push('/producto-publicado');
   }, [draftDeleted, props]);
 
   const validateVideoId = (id) => {
@@ -409,18 +409,18 @@ const PostScreen = (props) => {
           <li
             className={
               'list-relative multiple-selection-btn' +
-              (justShipping === false ? ' selected' : '')
+              (noShipping === false ? ' selected' : '')
             }
           >
             <button
               className='list-item padding'
               onClick={() => {
-                if (justShipping !== false) {
-                  setJustShipping(false);
+                if (noShipping !== false) {
+                  setNoShipping(false);
                   dispatch(
                     updateProductDrafts({
                       ...draftValues,
-                      justShipping: false,
+                      noShipping: false,
                     })
                   );
                 }
@@ -432,18 +432,18 @@ const PostScreen = (props) => {
           <li
             className={
               'list-relative multiple-selection-btn' +
-              (justShipping === true ? ' selected' : '')
+              (noShipping === true ? ' selected' : '')
             }
           >
             <button
               className='list-item padding'
               onClick={() => {
-                if (justShipping !== true) {
-                  setJustShipping(true);
+                if (noShipping !== true) {
+                  setNoShipping(true);
                   dispatch(
                     updateProductDrafts({
                       ...draftValues,
-                      justShipping: true,
+                      noShipping: true,
                     })
                   );
                 }
@@ -691,9 +691,9 @@ const PostScreen = (props) => {
       </div>
     );
   };
-
   return (
     <>
+      <div className='extra-header new-product'></div>
       {!draftId || (details && draftValues === undefined) ? (
         <Redirect to='vender/producto'></Redirect>
       ) : (
@@ -706,7 +706,6 @@ const PostScreen = (props) => {
           <MessageBox>{errorDetails}</MessageBox>
         ) : (
           <>
-            <div className='extra-header new-product'></div>
             <div className='new-product-steps'>
               <span>
                 <span className='step-number'>2</span>

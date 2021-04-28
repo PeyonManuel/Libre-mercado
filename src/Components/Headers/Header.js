@@ -4,6 +4,13 @@ import { updateUserFavorites } from '../../Actions/userActions';
 import { formatNumber } from '../../Utils/Utilities';
 
 const Header = (props) => {
+  const urlParams = new URLSearchParams(props.location.search);
+  const categoryParam = urlParams.get('categoria');
+  const searchParam = urlParams.get('busqueda');
+  const stateParam = urlParams.get('estado');
+  const shippingParam = urlParams.get('con-envio');
+  const minimumParam = urlParams.get('minimo');
+  const maximumParam = urlParams.get('maximo');
   const userLogin = useSelector((state) => state.userLogin);
   const { user } = userLogin;
   const userUpdateFavs = useSelector((state) => state.userUpdateFavs);
@@ -15,6 +22,7 @@ const Header = (props) => {
       : []
   );
   const [screenWidth, setScreenWidth] = useState(window.outerWidth);
+  const [search, setSearch] = useState(searchParam ? searchParam : '');
   useEffect(() => {
     var onresize = function (e) {
       setScreenWidth(e.target.outerWidth);
@@ -107,8 +115,37 @@ const Header = (props) => {
               <input
                 type='text'
                 placeholder='Buscar productos, marcas y mas...'
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.keyCode === 13 && search.length > 2) {
+                    window.location.href =
+                      '/productos?busqueda=' +
+                      search +
+                      (categoryParam ? '&categoria=' + categoryParam : '') +
+                      (stateParam ? '&estado=' + !stateParam : '') +
+                      (shippingParam ? '&con-envio=' + shippingParam : '') +
+                      (minimumParam ? '&minimo=' + minimumParam : '') +
+                      (maximumParam ? '&maximo=' + maximumParam : '');
+                  }
+                }}
               ></input>
-              <i className='fa fa-search'></i>
+              <a
+                href={
+                  search.length > 2
+                    ? '/productos?busqueda=' +
+                      search +
+                      (categoryParam ? '&categoria=' + categoryParam : '') +
+                      (stateParam ? '&estado=' + !stateParam : '') +
+                      (shippingParam ? '&con-envio=' + shippingParam : '') +
+                      (minimumParam ? '&minimo=' + minimumParam : '') +
+                      (maximumParam ? '&maximo=' + maximumParam : '')
+                    : '#short-search'
+                }
+                className='nodecoration'
+              >
+                <i className='fa fa-search'></i>
+              </a>
             </div>
 
             {screenWidth < 1024 && (
@@ -139,29 +176,65 @@ const Header = (props) => {
             >
               <div style={{ width: '14rem' }}></div>
               <ul className='row market-options top'>
-                <li>
-                  <a className='nodecoration' href='#categorias'>
-                    Categorias <i className='fa fa-caret-down'></i>
-                  </a>
-                </li>
-                <li>
-                  <a className='nodecoration' href='/ofertas'>
-                    Ofertas
-                  </a>
+                <li
+                  onMouseOver={() => {
+                    const messageScreen = document.createElement('div');
+                    messageScreen.id = 'categories-black-screen';
+                    messageScreen.className = 'message-screen';
+                    document.querySelector('#main').append(messageScreen);
+                  }}
+                  onMouseOut={() => {
+                    document.querySelector('#categories-black-screen').remove();
+                  }}
+                >
+                  <div className='dropdown categories'>
+                    <a className='nodecoration' href='#categorias'>
+                      Categorias <i className='fa fa-caret-down'></i>
+                    </a>
+                    <ul className='dropdown-content categories'>
+                      <li className='margin-top'>
+                        <a className='nodecoration ' href='#compras'>
+                          Compras
+                        </a>
+                      </li>
+                      <li>
+                        <a className='nodecoration' href='#Preguntas'>
+                          Preguntas
+                        </a>
+                      </li>
+                      <li>
+                        <a className='nodecoration' href='#Publicaciones'>
+                          Publicaciones
+                        </a>
+                      </li>
+                      <li>
+                        <a className='nodecoration' href='#Ventas'>
+                          Ventas
+                        </a>
+                      </li>
+                      <li>
+                        <a className='nodecoration separator' href='#Misdatos'>
+                          Mis datos
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className='nodecoration'
+                          href='#salir'
+                          onClick={() => {
+                            dispatch({ type: 'USER_LOGIN_RESET' });
+                            localStorage.removeItem('userInfo');
+                          }}
+                        >
+                          Salir
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
                 </li>
                 <li>
                   <a className='nodecoration' href='/historial'>
                     Historial
-                  </a>
-                </li>
-                <li>
-                  <a className='nodecoration' href='/supermercado'>
-                    Supermercado
-                  </a>
-                </li>
-                <li className='tiendas-oficiales'>
-                  <a className='nodecoration' href='/tiendasoficiales'>
-                    Tiendas oficiales
                   </a>
                 </li>
                 <li>
@@ -263,8 +336,8 @@ const Header = (props) => {
                       <h2 style={{ margin: '0' }}>Favoritos</h2>
                     </li>
                     {localFavorites.length >= 1 ? (
-                      localFavorites.map((fav, i) => {
-                        return (
+                      localFavorites.map((fav, i) =>
+                        i < 3 ? (
                           <li
                             className='separator'
                             key={fav._id}
@@ -317,8 +390,14 @@ const Header = (props) => {
                               </div>
                             </a>
                           </li>
-                        );
-                      })
+                        ) : (
+                          i === 3 && (
+                            <li>
+                              <a href='/favoritos'>Ver todos tus favoritos</a>
+                            </li>
+                          )
+                        )
+                      )
                     ) : (
                       <li>
                         <span className='nofavs'>
@@ -441,16 +520,6 @@ const Header = (props) => {
               </a>
             </li>
           )}
-          <li>
-            <a
-              id='ofertas'
-              className='nodecoration small-nav-bar'
-              href='/ofertas'
-            >
-              <i className='fas fa-percentage fa-lg'></i>
-              Ofertas
-            </a>
-          </li>
           {user && (
             <li>
               <a

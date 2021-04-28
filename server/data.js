@@ -15,13 +15,12 @@ const data = {
         'https://http2.mlstatic.com/D_NQ_NP_819815-MLA44342311116_122020-O.webp',
         'https://http2.mlstatic.com/D_NQ_NP_960547-MLA44342299585_122020-O.webp',
       ],
-      category: '60316f0d8d305e258c9d3065',
+      category: '607db70973b32618a8d3b508',
       numReviews: 300,
       rating: 4,
       price: 37999,
-      isOnSale: true,
-      salePrice: 34999,
       stock: 847,
+      noShipping: false,
       description:
         'TIENDA OFICIAL MALL 360\n\
       \n\
@@ -69,7 +68,7 @@ const data = {
       No te llamaremos, ni escribiremos por ningún medio para solicitarte los mismos. Si observás una conducta sospechosa por favor consultanos por mensaje privado.\n\
       \n\
       ** Para conocer todos nuestros productos ingresá a: https://tienda.mercadolibre.com.ar/Mall-360 **',
-      seller: '60103c8820bafd2134c34020',
+      seller: '607b1b4a7e5ab125f8615e5f',
     },
     {
       name: 'Bomba filtrante Portátil',
@@ -84,13 +83,13 @@ const data = {
       videos: [
         'https://www.youtube.com/embed/o1CIOrhxw0s?enablejsapi=1&controls=1&rel=0&showinfo=0&fs=0&autoplay=1&mute=1',
       ],
-      category: '60316f0d8d305e258c9d306a',
+      category: '607db70973b32618a8d3b508',
       numReviews: 300,
       rating: 4.5,
       price: 12728,
-      isOnSale: true,
-      salePrice: 10278,
       stock: 3343,
+      noShipping: false,
+
       description:
         'CODIGO: 17738/4\n\
 \n\
@@ -156,7 +155,7 @@ const data = {
       ¿Puedo retirar el artículo personalmente?\n\
       Si, Usted puede elegir la opción retiro en nuestra tienda.\n\
       ________________________________________________________',
-      seller: '60103c8820bafd2134c34020',
+      seller: '607b1b4a7e5ab125f8615e5f',
     },
     {
       name: 'Juego Herramientas Kroner Maletín Aluminio 114 Pzas Premium',
@@ -170,13 +169,13 @@ const data = {
         'https://http2.mlstatic.com/D_NQ_NP_827602-MLA44370133490_122020-O.webp',
         'https://http2.mlstatic.com/D_NQ_NP_984949-MLA44370152054_122020-O.webp',
       ],
-      category: '60316f0d8d305e258c9d3072',
+      category: '607db70973b32618a8d3b508',
       numReviews: 300,
       rating: 4.5,
       price: 10999,
-      isOnSale: true,
-      salePrice: 9799,
       stock: 19,
+      noShipping: false,
+
       description:
         '» SET DE 114 HERRAMIENTAS EN PRACTICO MALETIN DE ALIMUNIO KRONER H61\n\
 \n\
@@ -242,7 +241,7 @@ const data = {
       CONSULTÁ PROMOCIONES VIGENTES A TRAVÉS DE MERCADO PAGO EN EL SIGUIENTE LINK: www.mercadopago.com.ar/promociones\n\
       \n\
       --------------------------------------------------------------------------------------------------',
-      seller: '60103c8820bafd2134c34020',
+      seller: '607b1b4a7e5ab125f8615e5f',
     },
     {
       name: 'Sillon Gamer Playstation Xbox Gaming Pc Oficina Gri Cuotas',
@@ -255,13 +254,12 @@ const data = {
       videos: [
         'https://www.youtube.com/embed/m5HxMWLugq0?enablejsapi=1&controls=1&rel=0&showinfo=0&fs=0&autoplay=1&mute=1',
       ],
-      category: '60316f0d8d305e258c9d306a',
+      category: '607db70973b32618a8d3b508',
       numReviews: 730,
       rating: 4.5,
       price: 47659,
-      isOnSale: true,
-      salePrice: 33361,
       stock: 224,
+      noShipping: true,
       description:
         '¡¡¡LEER ATENCIÓN !!! ESTAMOS DESPACHANDO NUESTROS PEDIDOS CON NORMALIDAD EN LA CUARENTENA MEDIANTE MERCADO ENVÍOS, PUEDES REALIZAR LA COMPRA, CUALQUIER CONSULTA NOS PUEDES ESCRIBIR POR LAS PREGUNTAS..\n\
 \n\
@@ -289,7 +287,7 @@ const data = {
       *MERCADO ENVÍOS ¡GRATIS!: Abonando el precio publicado obtiene su producto con envío gratis ¡a todo el país!\n\
       \n\
       *RETIRA: por depósito en Boedo , CABA ¡Entrega inmediata! Lunes a viernes de 9 a 18 hs, sábados de 9 a 13 hs. Favor de confirmar día y horario en que retirará su compra a través del chat de Mercado Libre.',
-      seller: '60103c8820bafd2134c34020',
+      seller: '607b1b4a7e5ab125f8615e5f',
     },
     {
       name: 'Smart Tv LG AI ThinQ 43UM7360PSA LED 4K 43',
@@ -301,13 +299,12 @@ const data = {
         'https://http2.mlstatic.com/D_NQ_NP_846349-MLA43137751697_082020-O.webp',
         'https://http2.mlstatic.com/D_NQ_NP_816613-MLA40912865641_022020-O.webp',
       ],
-      category: '60316f0d8d305e258c9d3068',
+      category: '607db70973b32618a8d3b508',
       numReviews: 432,
       rating: 5,
       price: 63999,
-      isOnSale: true,
-      salePrice: 49999,
       stock: 45,
+      noShipping: true,
       description:
         'LG es innovación y eso se ve en cada uno de sus productos tecnológicos, pensados especialmente para que tu familia y vos disfruten mucho más de la vida. Tener un televisor LG es aprovechar la más alta calidad del mercado.\n\
       Con el Smart TV 43UM7360 vas a acceder a las aplicaciones en las que se encuentran tus contenidos favoritos. Además, podés navegar por Internet, interactuar en redes sociales y divertirte con videojuegos.\n\
@@ -320,7 +317,7 @@ const data = {
       \n\
       Más allá de ver televisión\n\
       Su función Screen Share permite duplicar la pantalla de tu smartphone, tablet o PC para que aparezca en la TV. De esta forma vas a poder visualizar todo tipo de contenido: material audiovisual, documentos de trabajo, correos electrónicos y más.',
-      seller: '60103c8820bafd2134c34020',
+      seller: '607b1b4a7e5ab125f8615e5f',
     },
   ],
 

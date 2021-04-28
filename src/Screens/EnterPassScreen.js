@@ -121,7 +121,7 @@ const EnterPassScreen = (props) => {
         <div>
           <button
             type='submit'
-            className={'primary block' + (loading ? ' login-padding' : '')}
+            className={'primary block' + (loading ? ' loading-padding' : '')}
             onClick={() => {
               setButtonClicked('login');
             }}

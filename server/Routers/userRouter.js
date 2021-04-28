@@ -172,6 +172,7 @@ userRouter.post(
         email: updatedUser.email,
         userData: updatedUser.userData,
         isAdmin: updatedUser.isAdmin,
+        productDrafts: updatedUser.productDrafts,
         token: req.body.user.token,
       });
     } else {

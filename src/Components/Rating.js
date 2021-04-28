@@ -1,11 +1,11 @@
 import React from 'react';
 
-const Rating = ({ rating, numReviews }) => {
+const Rating = ({ rating, numReviews, small }) => {
   return (
     <div className='rating'>
       {numReviews > 0 && (
         <>
-          <span>
+          <span key={0}>
             <i
               className={
                 rating >= 1
@@ -16,7 +16,7 @@ const Rating = ({ rating, numReviews }) => {
               }
             ></i>
           </span>
-          <span>
+          <span key={1}>
             <i
               className={
                 rating >= 2
@@ -27,7 +27,7 @@ const Rating = ({ rating, numReviews }) => {
               }
             ></i>
           </span>
-          <span>
+          <span key={2}>
             <i
               className={
                 rating >= 3
@@ -38,7 +38,7 @@ const Rating = ({ rating, numReviews }) => {
               }
             ></i>
           </span>
-          <span>
+          <span key={3}>
             <i
               className={
                 rating >= 4
@@ -49,7 +49,7 @@ const Rating = ({ rating, numReviews }) => {
               }
             ></i>
           </span>
-          <span>
+          <span key={4}>
             <i
               className={
                 rating >= 5
@@ -59,10 +59,12 @@ const Rating = ({ rating, numReviews }) => {
                   : 'fa fa-star-0'
               }
             ></i>
-          </span>{' '}
+          </span>
         </>
       )}
-      <span>{numReviews + ' opiniones'}</span>
+      <span key={0} className={small ? 'subtle-text' : ''}>
+        {numReviews + (!small && ' opiniones')}
+      </span>
     </div>
   );
 };

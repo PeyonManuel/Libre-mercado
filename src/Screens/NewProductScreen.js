@@ -24,14 +24,15 @@ const NewProductScreen = (props) => {
   const {
     loading: updateLoading,
     error: updateError,
+    user: userUpdated,
   } = userUpdateProductDrafts;
   const draftId = urlParams.get('draft');
-  const [cacheValues, setCacheValues] = useState(null);
+  const [cacheValues, setCacheValues] = useState('');
   const [searchSell, setSearchSell] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isStateNew, setIsStateNew] = useState(null);
   const [images, setImages] = useState([]);
-  const [percentage, setPercentage] = useState(-1);
+  const [percentage, setPercentage] = useState(0);
   const [quantity, setQuantity] = useState(
     cacheValues ? cacheValues.stock : ''
   );
@@ -102,19 +103,24 @@ const NewProductScreen = (props) => {
   }, [user, dispatch]);
 
   useEffect(() => {
-    if (draftId === null) {
-      setCacheValues('');
-    } else if (details) {
-      const productDraft = details.productDrafts.find(
-        (productDraft) => productDraft._id === draftId
+    if (
+      draftId === null &&
+      percentage === 33 &&
+      userUpdated &&
+      userUpdated.productDrafts &&
+      !updateLoading
+    ) {
+      props.history.push(
+        '/vender/producto?draft=' +
+          userUpdated.productDrafts[userUpdated.productDrafts.length - 1]._id
       );
-      if (productDraft) {
-        setCacheValues(productDraft);
-      } else if (!updateLoading) {
-        props.history.push('/vender');
-      }
+    } else if (details) {
+      details.productDrafts.find((draft) => draft._id === draftId) &&
+        setCacheValues(
+          details.productDrafts.find((draft) => draft._id === draftId)
+        );
     }
-  }, [draftId, props, cacheValues, details, updateLoading]);
+  }, [updateLoading, draftId, percentage, userUpdated, details, props]);
 
   useEffect(() => {
     setSearchSell(cacheValues ? cacheValues.name : '');
@@ -122,19 +128,17 @@ const NewProductScreen = (props) => {
     setIsStateNew(cacheValues ? cacheValues.isStateNew : null);
     setImages(cacheValues ? cacheValues.images : []);
     setPercentage(
-      cacheValues !== null
-        ? cacheValues !== ''
-          ? cacheValues.name
-            ? cacheValues.category !== null
-              ? cacheValues.isStateNew !== null
-                ? cacheValues.images && cacheValues.images.length > 0
-                  ? 100
-                  : 67
-                : 33
-              : 16.5
-            : 0
+      cacheValues
+        ? cacheValues.name
+          ? cacheValues.category
+            ? cacheValues.isStateNew !== null
+              ? cacheValues.images && cacheValues.images.length > 0
+                ? 100
+                : 67
+              : 33
+            : 16.5
           : 0
-        : -1
+        : 0
     );
     setQuantity(cacheValues ? cacheValues.stock : '');
   }, [cacheValues]);
@@ -172,23 +176,6 @@ const NewProductScreen = (props) => {
         break;
     }
   }, [percentage, updateLoading, updateError]);
-
-  useEffect(() => {
-    const newDraftId = () => {
-      if (
-        percentage >= 33 &&
-        draftId === null &&
-        details &&
-        details.productDrafts[details.productDrafts.length - 1]
-      ) {
-        props.history.push(
-          'producto?draft=' +
-            details.productDrafts[details.productDrafts.length - 1]._id
-        );
-      }
-    };
-    newDraftId();
-  }, [details, draftId, props, percentage]);
 
   useEffect(() => {
     showHelpSign &&
@@ -405,7 +392,7 @@ const NewProductScreen = (props) => {
         className='primary'
         onClick={() => {
           if (
-            cacheValues === '' ||
+            !cacheValues ||
             cacheValues.category === null ||
             cacheValues.category === selectedCategory
           ) {
@@ -413,12 +400,15 @@ const NewProductScreen = (props) => {
               name: searchSell,
               category: selectedCategory,
               images: [],
+              isStateNew: null,
             });
             dispatch(
               updateProductDrafts({
                 name: searchSell,
                 category: selectedCategory,
                 _id: draftId ? draftId : null,
+                isStateNew: null,
+                images: [],
               })
             );
           } else {
@@ -944,7 +934,6 @@ const NewProductScreen = (props) => {
                 setTimeout(() => {
                   setShowChangeCategorySign(false);
                 }, 500);
-                setPercentage(33);
               }}
             >
               Aceptar
@@ -997,7 +986,6 @@ const NewProductScreen = (props) => {
         }'><img class='center-cropped invalid-img'src='${errorImg}' alt='error'/><p class='bold'>${errorDetail}</p></div></li>`
       );
   };
-  console.log(percentage, cacheValues);
   return (
     <>
       {detailsError || error ? (
@@ -1005,126 +993,122 @@ const NewProductScreen = (props) => {
           <MessageBox variant='danger'>{detailsError || error}</MessageBox>
         </div>
       ) : (
-        percentage >= 0 &&
-        cacheValues !== null && (
-          <>
-            <div className='extra-header new-product'></div>
-            <div className='new-product-steps'>
-              <span>
-                <span className='step-number'>1</span>
-                Datos del producto
-              </span>
-              <div
-                className='progress-bar'
-                style={{ width: percentage + '%' }}
-              ></div>
+        <>
+          <div className='extra-header new-product'></div>
+          <div className='new-product-steps'>
+            <span>
+              <span className='step-number'>1</span>
+              Datos del producto
+            </span>
+            <div
+              className='progress-bar'
+              style={{ width: percentage + '%' }}
+            ></div>
+          </div>
+
+          <div className='column flex-start'>
+            <div
+              className='row width-100'
+              style={{ zIndex: '2', marginBottom: '6rem' }}
+            >
+              <div>
+                <span className='subtle-text'>Paso 1 de 2</span>
+                <h1 style={{ fontSize: '2.5rem' }}>
+                  Empecemos identificando tu producto
+                </h1>
+              </div>
+              <img
+                src='https://http2.mlstatic.com/secure/sell/images/shoe-v2.svg'
+                alt='arte de zapato'
+              ></img>
             </div>
 
-            <div className='column flex-start'>
-              <div
-                className='row width-100'
-                style={{ zIndex: '2', marginBottom: '6rem' }}
-              >
-                <div>
-                  <span className='subtle-text'>Paso 1 de 2</span>
-                  <h1 style={{ fontSize: '2.5rem' }}>
-                    Empecemos identificando tu producto
+            <div
+              id='first-step'
+              className={
+                'screen-mini-card medium' +
+                (percentage > 16.5 && updateLoading ? ' disabled' : '')
+              }
+            >
+              {percentage >= 16.5 && firstStepHeader()}
+              <div className='screen-mini-card-body padding column'>
+                {percentage < 16.5 ? (
+                  <h1>
+                    Indicá producto, marca, modelo y características principales
                   </h1>
-                </div>
-                <img
-                  src='https://http2.mlstatic.com/secure/sell/images/shoe-v2.svg'
-                  alt='arte de zapato'
-                ></img>
-              </div>
-
-              <div
-                id='first-step'
-                className={
-                  'screen-mini-card medium' +
-                  (percentage > 16.5 && updateLoading ? ' disabled' : '')
-                }
-              >
-                {percentage >= 16.5 && firstStepHeader()}
-                <div className='screen-mini-card-body padding column'>
-                  {percentage < 16.5 ? (
-                    <h1>
-                      Indicá producto, marca, modelo y características
-                      principales
-                    </h1>
-                  ) : selectedCategory === null ? (
-                    <h1>¿Qué opción lo describe?</h1>
-                  ) : percentage < 33 ? (
-                    <h2>Confirma la categoría</h2>
-                  ) : (
-                    <h2>La categoría que elegiste</h2>
-                  )}
-                  {percentage < 16.5 && firstStepSearch()}
-                  {loading ? (
-                    <></>
-                  ) : error ? (
-                    <div className='screen-mini-card medium'>
-                      <MessageBox variant='danger'>{error}</MessageBox>
-                    </div>
-                  ) : (
-                    firstStepSelectCategory()
-                  )}
-                </div>
-                {selectedCategory !== null &&
-                  !loading &&
-                  percentage === 16.5 &&
-                  firstStepFooter()}
-              </div>
-              {percentage === 33 ? (
-                updateError ? (
-                  <div className='screen-mini-card medium'>
-                    <MessageBox variant='danger'>{updateError}</MessageBox>
-                  </div>
-                ) : updateLoading || loadingDetails || draftId === null ? (
-                  secondStep('disabled')
+                ) : selectedCategory === null ? (
+                  <h1>¿Qué opción lo describe?</h1>
+                ) : percentage < 33 ? (
+                  <h2>Confirma la categoría</h2>
                 ) : (
-                  secondStep()
-                )
-              ) : (
-                percentage > 33 &&
-                (updateLoading || loadingDetails || draftId === null
-                  ? secondStep('disabled')
-                  : secondStep())
-              )}
-              {percentage >= 67 &&
-                (updateLoading || loadingDetails || draftId === null ? (
-                  thirdStep('disabled')
-                ) : updateError ? (
+                  <h2>La categoría que elegiste</h2>
+                )}
+                {percentage < 16.5 && firstStepSearch()}
+                {loading ? (
+                  <></>
+                ) : error ? (
                   <div className='screen-mini-card medium'>
-                    <MessageBox variant='danger'>{updateError}</MessageBox>
+                    <MessageBox variant='danger'>{error}</MessageBox>
                   </div>
                 ) : (
-                  thirdStep()
-                ))}
-              {percentage === 100 && (
-                <div className='row flex-end width-100'>
-                  <button
-                    className='primary'
-                    disabled={updateLoading || loadingDetails || updateError}
-                    onClick={() => {
-                      document.querySelector('#siguiente-link').click();
-                    }}
-                  >
-                    Siguiente
-                  </button>
-                  <a
-                    id='siguiente-link'
-                    href={'/publicar?draft=' + draftId}
-                    hidden
-                  >
-                    Siguiente
-                  </a>
-                </div>
-              )}
+                  firstStepSelectCategory()
+                )}
+              </div>
+              {selectedCategory !== null &&
+                !loading &&
+                percentage === 16.5 &&
+                firstStepFooter()}
             </div>
-            {showHelpSign && helpSign()}
-            {showChangeCategorySign && changeCategorySign()}
-          </>
-        )
+            {percentage === 33 ? (
+              updateError ? (
+                <div className='screen-mini-card medium'>
+                  <MessageBox variant='danger'>{updateError}</MessageBox>
+                </div>
+              ) : updateLoading || loadingDetails || draftId === null ? (
+                secondStep('disabled')
+              ) : (
+                secondStep()
+              )
+            ) : (
+              percentage > 33 &&
+              (updateLoading || loadingDetails || draftId === null
+                ? secondStep('disabled')
+                : secondStep())
+            )}
+            {percentage >= 67 &&
+              (updateLoading || loadingDetails || draftId === null ? (
+                thirdStep('disabled')
+              ) : updateError ? (
+                <div className='screen-mini-card medium'>
+                  <MessageBox variant='danger'>{updateError}</MessageBox>
+                </div>
+              ) : (
+                thirdStep()
+              ))}
+            {percentage === 100 && (
+              <div className='row flex-end width-100'>
+                <button
+                  className='primary'
+                  disabled={updateLoading || loadingDetails || updateError}
+                  onClick={() => {
+                    document.querySelector('#siguiente-link').click();
+                  }}
+                >
+                  Siguiente
+                </button>
+                <a
+                  id='siguiente-link'
+                  href={'/publicar?draft=' + draftId}
+                  hidden
+                >
+                  Siguiente
+                </a>
+              </div>
+            )}
+          </div>
+          {showHelpSign && helpSign()}
+          {showChangeCategorySign && changeCategorySign()}
+        </>
       )}
     </>
   );

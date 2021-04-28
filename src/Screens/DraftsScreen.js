@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deleteProductDrafts, detailsUser } from '../Actions/userActions';
 import MessageBox from '../Components/MessageBox';
 import { Redirect } from 'react-router-dom';
+import LoadingCircle from '../Components/LoadingCircle';
 
 const DraftsScreen = () => {
   const userLogin = useSelector((state) => state.userLogin);
@@ -38,9 +39,10 @@ const DraftsScreen = () => {
   }, [user, dispatch]);
 
   useEffect(() => {
-    details && details.productDrafts && setProductDrafts(details.productDrafts);
+    details &&
+      details.productDrafts.length > 0 &&
+      setProductDrafts(details.productDrafts);
   }, [details]);
-
   const displayDrafts = () => {
     let drafts = [];
     const length = details && productDrafts.length - 1;
@@ -99,16 +101,19 @@ const DraftsScreen = () => {
   };
   return (
     <>
+      <div className='extra-header post'></div>
+
       {error || detailsError ? (
         <div className='screen-mini-card medium'>
           <MessageBox variant='danger'>{error || detailsError}</MessageBox>
         </div>
+      ) : !details ? (
+        <LoadingCircle color='blue' />
       ) : details && details.productDrafts.length < 1 ? (
         <Redirect to='/vender/producto' />
       ) : (
         productDrafts.length > 0 && (
           <>
-            <div className='extra-header post'></div>
             <div className='column flex-start'>
               <h1>
                 Hola {user && user.name},<br /> ¡qué bueno volver a verte!

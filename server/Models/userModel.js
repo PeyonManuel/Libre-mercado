@@ -13,7 +13,7 @@ const userSchema = mongoose.Schema(
       required: true,
       unique: true,
     },
-    telephone: { type: String, required: false, unique: true },
+    telephone: { type: String, required: false, unique: false },
     password: { type: String, required: true },
     addresses: [
       {
@@ -44,7 +44,7 @@ const userSchema = mongoose.Schema(
         stock: { type: Number, default: 0 },
         address: { type: mongoose.Schema.Types.ObjectId, default: null },
         price: { type: Number },
-        justShipping: { type: Boolean, default: null },
+        noShipping: { type: Boolean, default: null },
         description: { type: String },
         video: { type: String },
         date: { type: Date, default: Date.now },

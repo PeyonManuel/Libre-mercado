@@ -6,6 +6,7 @@ import {
   productListReducer,
   newProductReducer,
   deleteProductReducer,
+  customProductListReducer,
 } from './Reducers/productReducers';
 import {
   userCheckNameReducer,
@@ -62,6 +63,7 @@ const reducer = combineReducers({
   deleteProduct: deleteProductReducer,
   userDeleteProduct: userDeleteProducsReducer,
   userUpdate: userUpdateReducer,
+  customProductList: customProductListReducer,
 });
 
 const store = createStore(

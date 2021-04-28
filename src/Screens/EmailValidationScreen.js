@@ -8,14 +8,21 @@ import {
 } from '../Actions/userActions';
 import { generateRandomNumber } from '../Utils/Utilities';
 import bcrypt from 'bcryptjs';
+import MessageBox from '../Components/MessageBox';
+import LoadingCircle from '../Components/LoadingCircle';
 
 const EmailValidationScreen = (props) => {
   const dispatch = useDispatch();
-  const checkedEmail = localStorage.getItem('verifiedEmail')
-    ? JSON.parse(localStorage.getItem('verifiedEmail'))
+  const checkedEmail = localStorage.getItem('verifyEmail')
+    ? JSON.parse(localStorage.getItem('verifyEmail'))
+    : localStorage.getItem('doesEmailExist')
+    ? localStorage.getItem('doesEmailExist')
     : null;
   const userLogin = useSelector((state) => state.userLogin);
-  const { user } = userLogin;
+  const { user, error, loading: loadingLogin } = userLogin;
+  const userRegister = useSelector((state) => state.userRegister);
+  const { error: errorRegistering, loading: loadingRegister } = userRegister;
+  const [localError, setLocalError] = useState(false);
   const [input, setInput] = useState(['', '', '', '', '', '']);
   const [hashCode, setHashCode] = useState(
     localStorage.getItem('hashCode')
@@ -27,37 +34,38 @@ const EmailValidationScreen = (props) => {
   const [codeError, setCodeError] = useState(false);
 
   useEffect(() => {
+    (error || errorRegistering) && setLocalError(true);
+  }, [error, errorRegistering]);
+
+  useEffect(() => {
+    checkedEmail === null && setLocalError(true);
+  }, [checkedEmail]);
+
+  useEffect(() => {
     const urlParams = new URLSearchParams(props.location.search);
     setAuthType(urlParams.get('authType'));
   }, [props]);
   useEffect(() => {
     const loginTypeSwitch = () => {
       const urlParams = new URLSearchParams(props.location.search);
-      const loginCondition = urlParams
-        ? urlParams.get('loginType')
-          ? true
-          : false
-        : false;
-      if (loginCondition) {
-        switch (urlParams.get('loginType')) {
-          case 'favorito':
-            dispatch(
-              updateUserFavorites({
-                _id: props.location.search.split('item_id=')[1],
-                noDelete: true,
-              })
-            );
-            break;
-          case 'vender':
-            props.history.push('/vender');
-            break;
-          case 'new-address':
-            props.history.push('/nueva-direccion');
-            break;
-          default:
-            props.history.push('./');
-            break;
-        }
+      switch (urlParams.get('loginType')) {
+        case 'favorito':
+          dispatch(
+            updateUserFavorites({
+              _id: props.location.search.split('item_id=')[1],
+              noDelete: true,
+            })
+          );
+          break;
+        case 'vender':
+          props.history.push('/vender');
+          break;
+        case 'new-address':
+          props.history.push('/nueva-direccion');
+          break;
+        default:
+          props.history.push('./');
+          break;
       }
     };
     if (success) {
@@ -66,7 +74,7 @@ const EmailValidationScreen = (props) => {
           loginTypeSwitch();
           break;
         case 'changepsw':
-          localStorage.removeItem('verifiedEmail');
+          localStorage.removeItem('doesEmailExist');
           localStorage.setItem(
             'emailCodeValidated',
             JSON.stringify({ validated: true })
@@ -218,59 +226,80 @@ const EmailValidationScreen = (props) => {
 
   return (
     <>
-      <div className='extra-header'></div>
-      <div className='empty-header-block'>
-        <form
-          onSubmit={submitHandler}
-          className='screen-card login-screen'
-          style={{ height: '38rem' }}
-        >
-          <div>
-            <h1>Ingresá el código que te enviamos por e-mail</h1>
-            {checkedEmail &&
-              (checkedEmail.exist ? (
-                <>
-                  <p style={{ fontSize: '1.4rem' }}>
-                    Te enviamos un código a tu e-mail para que puedas ingresar a
-                    tu cuenta.
-                  </p>
+      {localError ? (
+        <MessageBox variant='danger'>Ha ocurrido un error</MessageBox>
+      ) : (
+        <>
+          <div className='extra-header'></div>
+          <div className='empty-header-block'>
+            <form
+              onSubmit={submitHandler}
+              className='screen-card login-screen'
+              style={{ height: '38rem' }}
+            >
+              <div>
+                <h1>Ingresá el código que te enviamos por e-mail</h1>
+                {checkedEmail &&
+                  (checkedEmail.exist ? (
+                    <>
+                      <p style={{ fontSize: '1.4rem' }}>
+                        Te enviamos un código a tu e-mail para que puedas
+                        ingresar a tu cuenta.
+                      </p>
 
-                  <div className='email-badge row top'>
-                    <i className='fa fa-user'></i>
-                    <p className='email-badge__user-name'>
-                      {checkedEmail.email}
-                    </p>
-                    <input type='hidden' name='email'>
-                      {checkedEmail.email}
-                    </input>
-                    <a
-                      href='/login'
-                      onClick={() =>
-                        localStorage.removeItem('userCheckNameInfo')
+                      <div className='email-badge row top'>
+                        <i className='fa fa-user'></i>
+                        <p className='email-badge__user-name'>
+                          {checkedEmail.email}
+                        </p>
+                        <input type='hidden' name='email'>
+                          {checkedEmail.email}
+                        </input>
+                        <a
+                          href='/login'
+                          onClick={() =>
+                            localStorage.removeItem('userCheckNameInfo')
+                          }
+                        >
+                          <i
+                            className='fa fa-times'
+                            style={{ color: 'black' }}
+                          ></i>
+                        </a>
+                      </div>
+                    </>
+                  ) : (
+                    <p style={{ fontSize: '1.4rem' }}>
+                      {'Lo enviamos a '}
+                      <b>{checkedEmail.email}</b>
+                      {
+                        ' para confirmar que te pertenece. Si no lo encontrás revisá tu carpeta de correo no deseado.'
                       }
-                    >
-                      <i className='fa fa-times' style={{ color: 'black' }}></i>
-                    </a>
-                  </div>
-                </>
-              ) : (
-                <p style={{ fontSize: '1.4rem' }}>
-                  {'Lo enviamos a '}
-                  <b>{checkedEmail.email}</b>
-                  {
-                    ' para confirmar que te pertenece. Si no lo encontrás revisá tu carpeta de correo no deseado.'
-                  }
-                </p>
-              ))}
+                    </p>
+                  ))}
+              </div>
+              {checkedEmail && (
+                <div className='otp-inputs'>{createOtpInputs(codeError)}</div>
+              )}
+              <button
+                type='submit'
+                className={
+                  'primary block' +
+                  (loadingLogin || loadingRegister ? ' loading-padding' : '')
+                }
+              >
+                {loadingLogin || loadingRegister ? (
+                  <LoadingCircle color='white' />
+                ) : checkedEmail.exists ? (
+                  'Verificar el código'
+                ) : (
+                  'Continuar'
+                )}
+              </button>
+            </form>
           </div>
-          {checkedEmail && (
-            <div className='otp-inputs'>{createOtpInputs(codeError)}</div>
-          )}
-          <button type='submit' className='primary block'>
-            {checkedEmail.exists ? 'Verificar el código' : 'Continuar'}
-          </button>
-        </form>
-      </div>
+        </>
+      )}
     </>
   );
 };

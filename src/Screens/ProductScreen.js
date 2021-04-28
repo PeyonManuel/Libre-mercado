@@ -39,7 +39,7 @@ const ProductScreen = (props) => {
   const carouselContainerRef = useRef();
 
   useEffect(() => {
-    carouselContainerRef &&
+    carouselContainerRef.current &&
       product &&
       setCarouselWidth(
         (product.images.length * carouselContainerRef.current.scrollWidth) /
@@ -222,6 +222,7 @@ const ProductScreen = (props) => {
               ></input>
               <button
                 type='button'
+                className='arrow-btn'
                 onClick={() => {
                   if (moreQty && moreQty <= product.stock) {
                     setSelectedQty(moreQty);
@@ -241,7 +242,6 @@ const ProductScreen = (props) => {
     }
     return list;
   };
-  console.log(product && product.images);
   return (
     <>
       {loading ? (
@@ -411,26 +411,10 @@ const ProductScreen = (props) => {
                     </div>
                   )}
                   <div className='column'>
-                    {product.isOnSale && (
-                      <del className='saleprice'>
-                        $ {product.salePrice && product.salePrice}
-                      </del>
-                    )}
                     <div className='row'>
                       <span className='price big row'>
                         $ {product.price && formatNumber(product.price)}{' '}
                       </span>
-                      {product.isOnSale && (
-                        <span className='discount big'>
-                          {product &&
-                            product.salePrice &&
-                            product.price &&
-                            Math.floor(
-                              (1 - product.salePrice / product.price) * 100
-                            )}
-                          % OFF
-                        </span>
-                      )}
                     </div>
                   </div>
                   <div>
@@ -455,9 +439,12 @@ const ProductScreen = (props) => {
                     ) : (
                       <div>
                         <h2>Stock disponible</h2>
-                        <span className='btn-dropdown-qty' ref={wrapperRef}>
+                        <span
+                          className='styled-dropdown width-100'
+                          ref={wrapperRef}
+                        >
                           <button
-                            className='qty'
+                            className='styled-dropdown-btn'
                             onClick={() => {
                               setQtyBtnClicked(!qtyBtnClicked);
                             }}
@@ -470,7 +457,7 @@ const ProductScreen = (props) => {
                             <span>
                               <i
                                 className={
-                                  'fa fa-caret-down qty-caret' +
+                                  'fa fa-caret-down style-list-caret' +
                                   (qtyBtnClicked ? ' selected' : '')
                                 }
                               ></i>
@@ -484,7 +471,7 @@ const ProductScreen = (props) => {
                           </button>
                           <ul
                             className={
-                              'qty-list' + (qtyBtnClicked ? ' active' : '')
+                              'styled-list' + (qtyBtnClicked ? ' active' : '')
                             }
                           >
                             {product &&

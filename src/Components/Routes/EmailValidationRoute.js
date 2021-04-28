@@ -11,21 +11,28 @@ const EmailValidationRoute = ({ component: Component, ...rest }) => {
       render={(props) => {
         const user = localStorage.getItem('RegisterCacheValues');
         const userCheckName = localStorage.getItem('userCheckNameInfo');
-        var emailVerified = true;
+        const urlParams = new URLSearchParams(props.location.search);
+        const authType = urlParams.get('authType');
+        if (authType === 'register') {
+          return user || userCheckName ? (
+            <Component {...props}></Component>
+          ) : (
+            <Redirect to='/' />
+          );
+        }
         if (checkedEmail) {
           localStorage.setItem(
-            'verifiedEmail',
+            'doesEmailExist',
             JSON.stringify({ exits: true, email: checkedEmail })
           );
-          emailVerified = true;
-        } else if (!localStorage.getItem('verifiedEmail')) {
-          emailVerified = false;
+          return user || userCheckName ? (
+            <Component {...props}></Component>
+          ) : (
+            <Redirect to='/' />
+          );
+        } else if (!localStorage.getItem('doesEmailExist')) {
+          return <Redirect to='/' />;
         }
-        return (user || userCheckName) && emailVerified ? (
-          <Component {...props}></Component>
-        ) : (
-          <Redirect to='/' />
-        );
       }}
     ></Route>
   );

@@ -21,6 +21,8 @@ import DraftsScreen from './Screens/DraftsScreen';
 import PostScreen from './Screens/PostScreen';
 import AddressScreen from './Screens/AddressScreen';
 import ChangePasswordScreen from './Screens/ChangePasswordScreen';
+import SearchScreen from './Screens/SearchScreen';
+import ProductPublishedScreen from './Screens/ProductPublishedScreen';
 
 const App = () => {
   useEffect(() => {
@@ -37,6 +39,7 @@ const App = () => {
           <Route path='/product/:id' component={Header}></Route>
           <Route path='/user/:id' component={Header}></Route>
           <Route path='/notificaciones' component={Header}></Route>
+          <Route path='/productos' component={Header}></Route>
           <PrivateRoute
             path='/vender'
             exact
@@ -51,9 +54,13 @@ const App = () => {
             path='/nueva-direccion'
             component={LessHeader}
           ></PrivateRoute>
+          <PrivateRoute
+            path='/producto-publicado/:id'
+            component={LessHeader}
+          ></PrivateRoute>
           <Route path='*' component={EmptyHeader}></Route>
         </Switch>
-        <main>
+        <main id='main'>
           <HomeScreenRoute
             path='/'
             component={HomeScreen}
@@ -106,6 +113,11 @@ const App = () => {
             component={ChangePasswordScreen}
             exact
           ></ChangePasswordRoute>
+          <Route path='/productos' component={SearchScreen}></Route>
+          <PrivateRoute
+            path='/producto-publicado/:id'
+            component={ProductPublishedScreen}
+          ></PrivateRoute>
         </main>
         <Route path='*' exact component={SimpleFooter}></Route>
       </div>

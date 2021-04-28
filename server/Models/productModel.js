@@ -13,11 +13,10 @@ const productSchema = mongoose.Schema(
     numReviews: { type: Number, required: true, default: 0 },
     rating: { type: Number, required: true, default: 0 },
     price: { type: Number, required: true },
-    isOnSale: { type: Boolean, default: false },
-    salePrice: { type: Number, default: 0 },
     stock: { type: Number, required: true },
     description: { type: String, required: false },
     video: { type: String, required: false },
+    noShipping: { type: Boolean, required: true },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

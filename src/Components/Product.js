@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { updateUserFavorites } from '../Actions/userActions';
 import { formatNumber } from '../Utils/Utilities';
+import Rating from './Rating';
 
-const Product = ({ product, user }) => {
-  const { _id, name, images, price, salePrice, isOnSale } = product;
+const Product = ({ product, user, noHover, smallRating }) => {
+  const { _id, name, images, price, rating, numReviews } = product;
   const userUpdateFavs = useSelector((state) => state.userUpdateFavs);
   const { error } = userUpdateFavs;
   const dispatch = useDispatch();
@@ -33,7 +34,7 @@ const Product = ({ product, user }) => {
     }
   }, [user, _id, error]);
   return (
-    <div className='card' style={{ margin: '0' }} key={_id}>
+    <div className={'card' + (noHover ? ' opened' : '')} key={_id}>
       <div className='favorite-btn'>
         <a
           href={'/login?loginType=favorito&item_id=' + _id}
@@ -59,29 +60,19 @@ const Product = ({ product, user }) => {
       <Link className='nodecoration card-link' key={_id} to={'/product/' + _id}>
         <img className='card-img center-cropped' src={images[0]} alt={name} />
         <div className='card-body'>
-          {isOnSale ? (
-            <div className='sale-price-module row top'>
-              <div className='sale-price'>$ {formatNumber(salePrice)}</div>
-              <div className='discount small-screen'>
-                {Math.floor((1 - salePrice / price) * 100)}% OFF
-              </div>
-            </div>
-          ) : (
-            <div className='small-original-price-module'>
-              <div className='sale-price'>$ {formatNumber(price)}</div>
-            </div>
-          )}
           <div className='row top card-price'>
             <div className='price'>$ {formatNumber(price)}</div>
-            {isOnSale && (
-              <div className='discount' style={{ right: '2.5rem' }}>
-                {Math.floor((1 - salePrice / price) * 100)}% OFF
-              </div>
-            )}
           </div>
           <div className='name-module'>
             <p className='product-name'>{name}</p>
           </div>
+          {noHover && numReviews > 0 && (
+            <Rating
+              rating={rating && rating}
+              numReviews={numReviews && numReviews}
+              small={smallRating}
+            ></Rating>
+          )}
         </div>
       </Link>
     </div>
