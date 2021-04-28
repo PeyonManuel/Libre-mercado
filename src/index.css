@@ -62,7 +62,7 @@ header {
   width: calc(100vw - 1.7rem);
   box-sizing: border-box;
   position: absolute;
-  z-index: 9999;
+  z-index: 99;
 }
 header.empty {
   height: 6rem;
@@ -559,6 +559,7 @@ header .halfs {
   height: 18rem;
   background-color: #fff159;
   width: 100%;
+  z-index: 100;
 }
 .extra-header.post {
   background-color: #ffea78;
@@ -1160,13 +1161,13 @@ div:hover > .card-next-button,
   transform: rotate(45deg);
 }
 @media (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2),
-  (min-resolution: 300dpi) {
+  (min-resolution: 250dpi) {
   .card:hover > .favorite-btn {
     display: none;
   }
   .product-list {
     background-color: white;
-    height: 46.5rem;
+    height: 70.5rem;
   }
   .product-list > h1 {
     padding: 2rem 1rem;
@@ -1180,10 +1181,10 @@ div:hover > .card-next-button,
   }
   .card {
     width: 90vw;
-    height: 8rem;
+    height: 11rem;
     border-bottom: 1px #e6e6e6 solid;
     border-radius: 0;
-    padding: 1rem;
+    padding: 0 1rem;
   }
   .card:hover {
     height: 8rem;
@@ -1191,6 +1192,9 @@ div:hover > .card-next-button,
   }
   .card-body {
     width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column-reverse;
   }
   .card-link {
     display: flex;
@@ -1199,15 +1203,10 @@ div:hover > .card-next-button,
     width: 4rem;
     height: 100%;
   }
-  .card-price {
-    display: none;
-  }
   .name-module {
     width: 65%;
     display: block;
-    position: absolute;
-    top: 0;
-    height: 5rem;
+    height: 5.5rem;
     word-break: break-word;
   }
   .product-name {
@@ -1215,6 +1214,8 @@ div:hover > .card-next-button,
     font-size: 1.4rem;
     color: rgb(29, 29, 29);
     font-weight: bold;
+    margin: 0;
+    height: 100%;
   }
   .product-name:after {
     display: none;
@@ -1456,6 +1457,7 @@ div:hover > .card-next-button,
   border-radius: 2px;
   padding: 2rem;
   box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+  z-index: 101;
 }
 @media (min-resolution: 250dpi) {
   .screen-card,
@@ -2591,6 +2593,7 @@ div:hover > .card-next-button,
 .categorie-cards-container {
   height: 34rem;
   overflow: hidden;
+  touch-action: none;
   position: relative;
 }
 

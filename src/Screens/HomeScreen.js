@@ -15,15 +15,21 @@ const HomeScreen = (props) => {
   const { user } = userLogin;
   const [ammountToMoveProductList, setammountToMoveProductList] = useState(0);
   const [productListContainerWidth, setProductListContainerWidth] = useState(
-    Math.floor(window.innerWidth / 240) * 240
+    window.devicePixelRatio < 2
+      ? Math.floor(window.innerWidth / 240) * 240
+      : '100%'
   );
-
+  console.log(window.devicePixelRatio);
   useEffect(() => {
     dispatch(listProducts());
   }, [dispatch]);
   useEffect(() => {
     const updateProductListContainerWidth = () => {
-      setProductListContainerWidth(Math.floor(window.innerWidth / 240) * 240);
+      if (window.devicePixelRatio < 2) {
+        setProductListContainerWidth(Math.floor(window.innerWidth / 240) * 240);
+      } else {
+        setProductListContainerWidth('100%');
+      }
     };
     window.addEventListener('resize', updateProductListContainerWidth);
     return () =>
@@ -59,7 +65,10 @@ const HomeScreen = (props) => {
   return (
     <div
       className='column flex-center'
-      style={{ overflow: 'hidden', width: 'calc(100vw - 1.7rem)' }}
+      style={{
+        overflow: 'hidden',
+        width: window.devicePixelRatio < 2 ? 'calc(100vw - 1.7rem)' : '100%',
+      }}
     >
       <HomeScreenExhibitor />
       {error ? (

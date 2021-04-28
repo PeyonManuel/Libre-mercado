@@ -14,6 +14,9 @@ const CategorieCards = () => {
   } = categoryList;
   const [categorieCardsIndex, setCategorieCardsIndex] = useState(0);
   const [categoriesContainerWidth, setCategoriesContainerWidth] = useState();
+  const [disableScroll, setDisableScroll] = useState(false);
+
+  const categorieCardsContainerRef = useRef();
 
   const categorieCardsRef = useRef();
   useEffect(() => {
@@ -59,6 +62,83 @@ const CategorieCards = () => {
         'translateX(' + -categoriesContainerWidth * categorieCardsIndex + 'px)';
     }
   }, [categorieCardsIndex, categoriesContainerWidth]);
+  useEffect(() => {
+    if (categorieCardsContainerRef.current && window.devicePixelRatio > 2) {
+      let initialPosition = null;
+      let moving = false;
+      let transform = 0;
+      let diff = 0;
+      const getStartPosition = (e) => {
+        if (e.target.className === 'categorie-card flex-center column') {
+          console.log(disableScroll);
+
+          initialPosition = e.pageX;
+          moving = true;
+          const transformMatrix =
+            categorieCardsRef.current &&
+            window
+              .getComputedStyle(categorieCardsRef.current)
+              .getPropertyValue('transform');
+          if (transformMatrix !== 'none') {
+            transform = transformMatrix
+              ? parseInt(transformMatrix.split(',')[4].trim())
+              : 0;
+          }
+        }
+      };
+      const getCurrentPoition = (e) => {
+        if (moving && !disableScroll) {
+          const currentPosition = e.pageX;
+          diff = transform + (currentPosition - initialPosition);
+          categorieCardsRef.current.style.transform =
+            'translateX(' + diff + 'px)';
+          if (
+            currentPosition - initialPosition >= window.innerWidth - 10 ||
+            currentPosition - initialPosition <= -window.innerWidth + 10
+          ) {
+            getMouseUp();
+          }
+        }
+      };
+      const getMouseUp = () => {
+        moving = false;
+        if (diff % window.innerWidth !== 0) {
+          const newTransformValue =
+            Math.round(
+              (diff < transform
+                ? diff - 0.3 * window.innerWidth
+                : diff + 0.3 * window.innerWidth) / window.innerWidth
+            ) * window.innerWidth;
+          setCategorieCardsIndex(
+            categorieCardsIndex + (diff < transform ? +1 : -1)
+          );
+          setDisableScroll(true);
+        }
+      };
+      if (window.PointerEvent) {
+        window.addEventListener('pointerdown', getStartPosition);
+        window.addEventListener('pointermove', getCurrentPoition);
+        window.addEventListener('pointerup', getMouseUp);
+      } else {
+        window.addEventListener('touchdown', getStartPosition);
+        window.addEventListener('touchmove', getCurrentPoition);
+        window.addEventListener('touchup', getMouseUp);
+      }
+
+      return () => {
+        if (window.PointerEvent) {
+          window.removeEventListener('pointerdown', getStartPosition);
+          window.removeEventListener('pointermove', getCurrentPoition);
+          window.removeEventListener('pointerup', getMouseUp);
+        } else {
+          window.removeEventListener('touchdown', getStartPosition);
+          window.removeEventListener('touchmove', getCurrentPoition);
+          window.removeEventListener('touchup', getMouseUp);
+        }
+      };
+    }
+    // eslint-disable-next-line
+  });
   return (
     <div
       style={{
@@ -83,12 +163,28 @@ const CategorieCards = () => {
             )}
             <div
               className='categorie-cards-container'
+              ref={categorieCardsContainerRef}
               style={{ width: categoriesContainerWidth }}
             >
               <div
                 className='categorie-cards-track'
                 style={{ width: Math.ceil(categories.length / 2) * 170 }}
                 ref={categorieCardsRef}
+                onTransitionEnd={() => {
+                  setDisableScroll(false);
+                  if (categorieCardsIndex < 0) {
+                    setCategorieCardsIndex(categorieCardsIndex + 1);
+                    setDisableScroll(true);
+                  }
+                  if (
+                    categorieCardsRef.current &&
+                    parseInt(categorieCardsRef.current.style.width) <
+                      (categorieCardsIndex + 1) * categoriesContainerWidth
+                  ) {
+                    setCategorieCardsIndex(categorieCardsIndex - 1);
+                    setDisableScroll(true);
+                  }
+                }}
               >
                 {categories.map((cat) => {
                   return (
