@@ -4,6 +4,8 @@ import { Redirect, Route } from 'react-router-dom';
 
 const EmailValidationRoute = ({ component: Component, ...rest }) => {
   const userVerifyEmail = useSelector((state) => state.userVerifyEmail);
+  const userLogin = useSelector((state) => state.userLogin);
+  const { user: loggedUser } = userLogin;
   const { checkedEmail } = userVerifyEmail;
   return (
     <Route
@@ -13,8 +15,8 @@ const EmailValidationRoute = ({ component: Component, ...rest }) => {
         const userCheckName = localStorage.getItem('userCheckNameInfo');
         const urlParams = new URLSearchParams(props.location.search);
         const authType = urlParams.get('authType');
-        if (authType === 'register') {
-          return user || userCheckName ? (
+        if (authType === 'register' || authType === 'changepsw') {
+          return user || userCheckName || loggedUser ? (
             <Component {...props}></Component>
           ) : (
             <Redirect to='/' />

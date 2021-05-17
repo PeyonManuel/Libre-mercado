@@ -56,15 +56,26 @@ const EmailValidationScreen = (props) => {
               noDelete: true,
             })
           );
+          window.location.href = './';
           break;
         case 'vender':
-          props.history.push('/vender');
+          window.location.href = '/vender';
           break;
         case 'new-address':
-          props.history.push('/nueva-direccion');
+          window.location.href = '/nueva-direccion';
+          break;
+        case 'product-question':
+          const productQuestion = localStorage.getItem('product-question')
+            ? JSON.parse(localStorage.getItem('product-question'))
+            : null;
+          if (productQuestion) {
+            window.location.href = '/product/' + productQuestion._id;
+          } else {
+            window.location.href = '/';
+          }
           break;
         default:
-          props.history.push('./');
+          window.location.href = './';
           break;
       }
     };
@@ -79,13 +90,12 @@ const EmailValidationScreen = (props) => {
             'emailCodeValidated',
             JSON.stringify({ validated: true })
           );
-          props.history.push('/cambiar-contrasena');
+          window.location.href = '/cambiar-contrasena';
           break;
         default:
-          props.history.push('/');
+          window.location.href = '/';
           break;
       }
-      localStorage.removeItem('RegisterCacheValues');
     }
   }, [success, dispatch, props, authType]);
 
@@ -110,8 +120,8 @@ const EmailValidationScreen = (props) => {
   }, [checkedEmail, hashCode]);
 
   useEffect(() => {
-    user && setSuccess(true);
-  }, [user]);
+    user && authType && authType !== 'changepsw' && setSuccess(true);
+  }, [user, authType]);
 
   const createOtpInputs = (error) => {
     const ammount = 6;
@@ -225,20 +235,16 @@ const EmailValidationScreen = (props) => {
   };
 
   return (
-    <>
+    <div className='width-100 flex-center'>
       {localError ? (
         <MessageBox variant='danger'>Ha ocurrido un error</MessageBox>
       ) : (
-        <>
+        <div className='width-100 flex-center'>
           <div className='extra-header'></div>
-          <div className='empty-header-block'>
-            <form
-              onSubmit={submitHandler}
-              className='screen-card login-screen'
-              style={{ height: '38rem' }}
-            >
+          <div className='screen flex-center email-validation-screen'>
+            <form onSubmit={submitHandler} className='screen-card login-screen'>
               <div>
-                <h1>Ingresá el código que te enviamos por e-mail</h1>
+                <h2>Ingresá el código que te enviamos por e-mail</h2>
                 {checkedEmail &&
                   (checkedEmail.exist ? (
                     <>
@@ -298,9 +304,9 @@ const EmailValidationScreen = (props) => {
               </button>
             </form>
           </div>
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 };
 

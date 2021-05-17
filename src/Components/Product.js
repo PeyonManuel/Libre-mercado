@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { updateUserFavorites } from '../Actions/userActions';
+import { updateHistory, updateUserFavorites } from '../Actions/userActions';
 import { formatNumber } from '../Utils/Utilities';
 import Rating from './Rating';
 
-const Product = ({ product, user, noHover, smallRating }) => {
-  const { _id, name, images, price, rating, numReviews } = product;
+const Product = ({
+  product,
+  user,
+  noHover,
+  smallRating,
+  removeBtn,
+  setItemDeleting,
+}) => {
+  const { _id, name, cover, price, reviews } = product;
+  let productTotalRating = 0;
+  let numReviews = 0;
+  reviews.forEach((review) => {
+    productTotalRating += review.rating;
+    numReviews++;
+  });
+  const rating = productTotalRating / numReviews;
   const userUpdateFavs = useSelector((state) => state.userUpdateFavs);
   const { error } = userUpdateFavs;
   const dispatch = useDispatch();
@@ -14,7 +28,7 @@ const Product = ({ product, user, noHover, smallRating }) => {
     user &&
       user.userData &&
       user.userData.favorites &&
-      user.userData.favorites.find((fav) => fav._id === _id)
+      user.userData.favorites.find((fav) => fav === _id)
       ? true
       : false
   );
@@ -23,7 +37,7 @@ const Product = ({ product, user, noHover, smallRating }) => {
       user &&
       user.userData &&
       user.userData.favorites &&
-      user.userData.favorites.filter((fav) => fav._id === _id).length === 1
+      user.userData.favorites.filter((fav) => fav === _id).length === 1
     ) {
       setChangeHeart(true);
     } else {
@@ -58,7 +72,7 @@ const Product = ({ product, user, noHover, smallRating }) => {
         </a>
       </div>
       <Link className='nodecoration card-link' key={_id} to={'/product/' + _id}>
-        <img className='card-img center-cropped' src={images[0]} alt={name} />
+        <img className='card-img center-cropped' src={cover} alt={name} />
         <div className='card-body'>
           <div className='row top card-price'>
             <div className='price'>$ {formatNumber(price)}</div>
@@ -75,6 +89,17 @@ const Product = ({ product, user, noHover, smallRating }) => {
           )}
         </div>
       </Link>
+      {removeBtn && (
+        <button
+          className='anchor-lookalike'
+          onClick={() => {
+            dispatch(updateHistory(_id, 'remove'));
+            setItemDeleting(_id);
+          }}
+        >
+          Eliminar
+        </button>
+      )}
     </div>
   );
 };

@@ -18,32 +18,8 @@ const LoginScreen = (props) => {
   );
   const [localError, setLocalError] = useState('');
   const [buttonClicked, setButtonClicked] = useState('');
-  const [loginType, setLoginType] = useState('');
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(props.location.search);
-    const condition = urlParams
-      ? urlParams.get('loginType')
-        ? true
-        : false
-      : false;
-    if (condition) {
-      switch (urlParams.get('loginType')) {
-        case 'favorito':
-          setLoginType('favorito');
-          break;
-        case 'vender':
-          setLoginType('vender');
-          break;
-        case 'new-address':
-          setLoginType('new-address');
-          break;
-        default:
-          break;
-      }
-    }
-  }, [props]);
   useEffect(() => {
     if (error) {
       setLocalError(error);
@@ -51,27 +27,23 @@ const LoginScreen = (props) => {
   }, [error]);
   useEffect(() => {
     if (success) {
-      switch (loginType) {
-        case 'favorito':
-          props.history.push(
+      const urlParams = new URLSearchParams(props.location.search);
+      const loginType = urlParams.get('loginType');
+      if (loginType) {
+        if (loginType === 'favorito') {
+          window.location.href =
             '/login/enterpass?loginType=favorito&item_id=' +
-              props.location.search.split('item_id=')[1]
-          );
-          break;
-        case 'vender':
-          props.history.push('/login/enterpass?loginType=vender');
-          break;
-        case 'new-address':
-          props.history.push('/login/enterpass?loginType=new-address');
-          break;
-        default:
-          props.history.push('/login/enterpass');
-          break;
+            props.location.search.split('item_id=')[1];
+        } else {
+          window.location.href = '/login/enterpass?loginType=' + loginType;
+        }
+      } else {
+        window.location.href = '/login/enterpass';
       }
       dispatch({ type: 'USER_LOGIN_RESET' });
       dispatch({ type: 'USER_CHECKNAME_RESET_SUCCESS' });
     }
-  }, [success, props, dispatch, loginType]);
+  }, [success, props, dispatch]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -82,29 +54,30 @@ const LoginScreen = (props) => {
         setLocalError('Completá este dato');
       }
     } else if (buttonClicked === 'register') {
-      switch (loginType) {
-        case 'favorito':
-          props.history.push(
+      const urlParams = new URLSearchParams(props.location.search);
+      const loginType = urlParams.get('loginType');
+      if (loginType) {
+        if (loginType === 'favorito') {
+          window.location.href =
             '/register?loginType=favorito&item_id=' +
-              props.location.search.split('item_id=')[1]
-          );
-          break;
-        case 'vender':
-          props.history.push('/register?loginType=vender');
-          break;
-        default:
-          props.history.push('/register');
-          break;
+            props.location.search.split('item_id=')[1];
+        } else {
+          window.location.href = '/register?loginType=' + loginType;
+        }
+      } else {
+        window.location.href = '/register';
       }
+      dispatch({ type: 'USER_LOGIN_RESET' });
+      dispatch({ type: 'USER_CHECKNAME_RESET_SUCCESS' });
     }
   };
 
   return (
-    <>
+    <div className='width-100 flex-center'>
       <div className='extra-header'></div>
       <form onSubmit={submitHandler} className='screen-card login-screen'>
         <h1>¡Hola! Ingresá tu teléfono, e-mail o usuario</h1>
-        <div className='wrapper'>
+        <div className='wrapper login'>
           <div className='underline-label-input'>
             <input
               id='login'
@@ -152,7 +125,7 @@ const LoginScreen = (props) => {
           </button>
         </div>
       </form>
-    </>
+    </div>
   );
 };
 

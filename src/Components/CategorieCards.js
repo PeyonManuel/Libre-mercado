@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { listCategories } from '../Actions/categoryActions';
+import { useSelector } from 'react-redux';
+import { desktopScreenCondition } from '../Utils/Utilities';
 import LoadingCircle from './LoadingCircle';
 import MessageBox from './MessageBox';
 
 const CategorieCards = () => {
-  const dispatch = useDispatch();
   const categoryList = useSelector((state) => state.categoryList);
   const {
     loading: categoryLoading,
@@ -15,28 +14,35 @@ const CategorieCards = () => {
   const [categorieCardsIndex, setCategorieCardsIndex] = useState(0);
   const [categoriesContainerWidth, setCategoriesContainerWidth] = useState();
   const [disableScroll, setDisableScroll] = useState(false);
+  const [firstClick, setFirstClick] = useState(false);
+  const [categoryCardWidth] = useState(window.screen.width > 340 ? 170 : 135);
 
   const categorieCardsContainerRef = useRef();
-
+  console.log(window.screen.width);
   const categorieCardsRef = useRef();
-  useEffect(() => {
-    dispatch(listCategories());
-  }, [dispatch]);
 
   useEffect(() => {
     const updateCategoriesContainerWidth = () => {
-      const preliminaryWidth = Math.floor(window.innerWidth / 170);
+      const preliminaryWidth = Math.floor(
+        window.innerWidth /
+          ((desktopScreenCondition ? window.devicePixelRatio : 1) *
+            categoryCardWidth)
+      );
       setCategoriesContainerWidth(
         preliminaryWidth % 2 !== 0
-          ? (preliminaryWidth - 1) * 170
-          : preliminaryWidth * 170
+          ? (preliminaryWidth - 1) *
+              (desktopScreenCondition ? window.devicePixelRatio : 1) *
+              categoryCardWidth
+          : preliminaryWidth *
+              (desktopScreenCondition ? window.devicePixelRatio : 1) *
+              categoryCardWidth
       );
     };
     updateCategoriesContainerWidth();
     window.addEventListener('resize', updateCategoriesContainerWidth);
     return () =>
       window.removeEventListener('resize', updateCategoriesContainerWidth);
-  }, []);
+  }, [categoryCardWidth]);
   useEffect(() => {
     if (categorieCardsRef.current) {
       let currentTransform = 0;
@@ -63,15 +69,13 @@ const CategorieCards = () => {
     }
   }, [categorieCardsIndex, categoriesContainerWidth]);
   useEffect(() => {
-    if (categorieCardsContainerRef.current && window.devicePixelRatio > 2) {
+    if (categorieCardsContainerRef.current && !desktopScreenCondition) {
       let initialPosition = null;
       let moving = false;
       let transform = 0;
       let diff = 0;
       const getStartPosition = (e) => {
         if (e.target.className === 'categorie-card flex-center column') {
-          console.log(disableScroll);
-
           initialPosition = e.pageX;
           moving = true;
           const transformMatrix =
@@ -103,12 +107,6 @@ const CategorieCards = () => {
       const getMouseUp = () => {
         moving = false;
         if (diff % window.innerWidth !== 0) {
-          const newTransformValue =
-            Math.round(
-              (diff < transform
-                ? diff - 0.3 * window.innerWidth
-                : diff + 0.3 * window.innerWidth) / window.innerWidth
-            ) * window.innerWidth;
           setCategorieCardsIndex(
             categorieCardsIndex + (diff < transform ? +1 : -1)
           );
@@ -140,11 +138,7 @@ const CategorieCards = () => {
     // eslint-disable-next-line
   });
   return (
-    <div
-      style={{
-        minHeight: '45rem',
-      }}
-    >
+    <div className='categorie-cards-screen'>
       {categoryLoading ? (
         <LoadingCircle color='blue' />
       ) : categoryError ? (
@@ -153,7 +147,7 @@ const CategorieCards = () => {
         <>
           <h2>Categorías populares</h2>
           <div style={{ position: 'relative' }}>
-            {window.devicePixelRatio < 2 && categorieCardsIndex > 0 && (
+            {desktopScreenCondition && categorieCardsIndex > 0 && (
               <button
                 className='card-back-button'
                 onClick={() => {
@@ -168,7 +162,12 @@ const CategorieCards = () => {
             >
               <div
                 className='categorie-cards-track'
-                style={{ width: Math.ceil(categories.length / 2) * 170 }}
+                style={{
+                  width: desktopScreenCondition
+                    ? Math.ceil(categories.length / 2) *
+                      Math.floor(window.devicePixelRatio * categoryCardWidth)
+                    : Math.ceil(categories.length / 2) * categoryCardWidth,
+                }}
                 ref={categorieCardsRef}
                 onTransitionEnd={() => {
                   setDisableScroll(false);
@@ -177,9 +176,14 @@ const CategorieCards = () => {
                     setDisableScroll(true);
                   }
                   if (
-                    categorieCardsRef.current &&
-                    parseInt(categorieCardsRef.current.style.width) <
-                      (categorieCardsIndex + 1) * categoriesContainerWidth
+                    categoriesContainerWidth *
+                      Math.ceil(
+                        categorieCardsRef.current &&
+                          parseInt(categorieCardsRef.current.style.width) /
+                            categoriesContainerWidth
+                      ) <
+                      (categorieCardsIndex + 1) * categoriesContainerWidth &&
+                    !desktopScreenCondition
                   ) {
                     setCategorieCardsIndex(categorieCardsIndex - 1);
                     setDisableScroll(true);
@@ -200,17 +204,21 @@ const CategorieCards = () => {
                 })}
               </div>
             </div>
-            {window.devicePixelRatio < 2 &&
+            {((desktopScreenCondition &&
               categorieCardsRef.current &&
               parseInt(categorieCardsRef.current.style.width) >
-                (categorieCardsIndex + 1) * categoriesContainerWidth && (
-                <button
-                  className='card-next-button'
-                  onClick={() => {
-                    setCategorieCardsIndex(categorieCardsIndex + 1);
-                  }}
-                ></button>
-              )}
+                (categorieCardsIndex + 1) * categoriesContainerWidth) ||
+              !firstClick) && (
+              <button
+                className='card-next-button'
+                onClick={() => {
+                  if (!firstClick) {
+                    setFirstClick(true);
+                  }
+                  setCategorieCardsIndex(categorieCardsIndex + 1);
+                }}
+              ></button>
+            )}
           </div>
         </>
       )}

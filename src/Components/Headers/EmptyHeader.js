@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const EmptyHeader = () => {
+  useEffect(() => {
+    document.querySelector('.grid-container').classList.add('less-header');
+  }, []);
   return (
     <header className='empty'>
       <div className='logo-container'>

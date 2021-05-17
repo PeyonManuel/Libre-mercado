@@ -1,9 +1,9 @@
 import React from 'react';
 
-const LoadingCircle = ({ color }) => {
+const LoadingCircle = ({ color, padding }) => {
   return (
     <div id='wrapper'>
-      <div className='profile-main-loader'>
+      <div className={'profile-main-loader' + (padding ? ' padding' : '')}>
         <div className={'loader ' + color}>
           <svg className='circular-loader' viewBox='25 25 50 50'>
             <circle

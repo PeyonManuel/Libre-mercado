@@ -43,6 +43,21 @@ export const userLoginReducer = (state = {}, action) => {
   }
 };
 
+export const userAuthenticateReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_AUTHENTICATE_REQUEST':
+      return { loading: true };
+    case 'USER_AUTHENTICATE_SUCCESS':
+      return { loading: false, success: action.payload.success };
+    case 'USER_AUTHENTICATE_FAIL':
+      return { loading: false, error: action.payload };
+    case 'USER_AUTHENTICATE_RESET':
+      return {};
+    default:
+      return state;
+  }
+};
+
 export const userUpdateFavoritesReducer = (state = {}, action) => {
   switch (action.type) {
     case 'UPDATE_USER_FAVORITES_REQUEST':
@@ -51,6 +66,8 @@ export const userUpdateFavoritesReducer = (state = {}, action) => {
       return { loading: false, user: action.payload };
     case 'UPDATE_USER_FAVORITES_FAIL':
       return { loading: false, error: action.payload };
+    case 'UPDATE_USER_FAVORITES_RESET':
+      return {};
     default:
       return state;
   }
@@ -106,7 +123,7 @@ export const userUpdateReducer = (state = {}, action) => {
     case 'USER_UPDATE_REQUEST':
       return { loading: true };
     case 'USER_UPDATE_SUCCESS':
-      return { loading: false, user: action.payload };
+      return { loading: false, user: action.payload, success: true };
     case 'USER_UPDATE_FAIL':
       return { loading: false, error: action.payload };
     default:
@@ -147,33 +164,128 @@ export const userAddProductsReducer = (state = {}, action) => {
     case 'USER_ADD_PRODUCTS_SUCCESS':
       return { loading: false, added: true, user: action.payload };
     case 'USER_ADD_PRODUCTS_FAIL':
+      return { loading: false, added: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userGetPublishedProductsReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_PUBLISHED_PRODUCTS_REQUEST':
+      return { loading: true };
+    case 'USER_PUBLISHED_PRODUCTS_SUCCESS':
+      return { loading: false, products: action.payload };
+    case 'USER_PUBLISHED_PRODUCTS_FAIL':
       return { loading: false, error: action.payload };
     default:
       return state;
   }
 };
 
-export const userUpdateAddressesReducer = (state = {}, action) => {
+export const userUpdateHistoryReducer = (state = {}, action) => {
   switch (action.type) {
-    case 'USER_UPDATE_ADDRESSES_REQUEST':
+    case 'USER_HISTORY_UPDATE_REQUEST':
       return { loading: true };
-    case 'USER_UPDATE_ADDRESSES_SUCCESS':
+    case 'USER_HISTORY_UPDATE_SUCCESS':
       return { loading: false, user: action.payload };
-    case 'USER_UPDATE_ADDRESSES_FAIL':
+    case 'USER_HISTORY_UPDATE_FAIL':
       return { loading: false, error: action.payload };
     default:
       return state;
   }
 };
 
-export const userDeleteAddressesReducer = (state = {}, action) => {
+export const userGetHistoryDetailsReducer = (state = {}, action) => {
   switch (action.type) {
-    case 'USER_DELETE_ADDRESSES_REQUEST':
+    case 'USER_HISTORY_REQUEST':
       return { loading: true };
-    case 'USER_DELETE_ADDRESSES_SUCCESS':
-      return { loading: false, user: action.payload };
-    case 'USER_DELETE_ADDRESSES_FAIL':
+    case 'USER_HISTORY_SUCCESS':
+      return { loading: false, history: action.payload };
+    case 'USER_HISTORY_FAIL':
       return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userRemoveHistoryReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_HISTORY_REMOVE_REQUEST':
+      return { loading: true };
+    case 'USER_HISTORY_REMOVE_SUCCESS':
+      return { loading: false, history: action.payload };
+    case 'USER_HISTORY_REMOVE_FAIL':
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userPushNotificationReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_PUSH_NOTIFICATION_REQUEST':
+      return { loading: true };
+    case 'USER_PUSH_NOTIFICATION_SUCCESS':
+      return { loading: false, user: action.payload };
+    case 'USER_PUSH_NOTIFICATION_FAIL':
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userDeleteNotificationReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_DELETE_NOTIFICATION_REQUEST':
+      return { loading: true };
+    case 'USER_DELETE_NOTIFICATION_SUCCESS':
+      return { loading: false, success: true };
+    case 'USER_DELETE_NOTIFICATION_FAIL':
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userUpdateCartReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_CART_UPDATE_REQUEST':
+      return { loading: true };
+    case 'USER_CART_UPDATE_SUCCESS':
+      return { loading: false, success: true, item: action.payload };
+    case 'USER_CART_UPDATE_FAIL':
+      return { loading: false, error: action.payload };
+    case 'USER_CART_UPDATE_RESET':
+      return {};
+    default:
+      return state;
+  }
+};
+
+export const usergetCartDetailsReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_CART_REQUEST':
+      return { loading: true };
+    case 'USER_CART_SUCCESS':
+      return { loading: false, cart: action.payload };
+    case 'USER_CART_FAIL':
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userCartRemoveMultipleReducer = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_CART_REMOVE_MULTIPLE_REQUEST':
+      return { loading: true };
+    case 'USER_CART_REMOVE_MULTIPLE_SUCCESS':
+      return { loading: false, success: true };
+    case 'USER_CART_REMOVE_MULTIPLE_FAIL':
+      return { loading: false, error: action.payload };
+    case 'USER_CART_REMOVE_MULTIPLE_RESET':
+      return {};
     default:
       return state;
   }

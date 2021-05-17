@@ -37,11 +37,28 @@ export const loginUser = (user) => async (dispatch) => {
   dispatch({ type: 'USER_LOGIN_REQUEST' });
   try {
     const { data } = await Axios.post('/api/users/login', user);
+    console.log(data);
     localStorage.setItem('userInfo', JSON.stringify(data));
     dispatch({ type: 'USER_LOGIN_SUCCESS', payload: data });
   } catch (error) {
     dispatch({
       type: 'USER_LOGIN_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const authenticateUser = (user) => async (dispatch) => {
+  dispatch({ type: 'USER_AUTHENTICATE_REQUEST' });
+  try {
+    const { data } = await Axios.post('/api/users/authenticate', user);
+    dispatch({ type: 'USER_AUTHENTICATE_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_AUTHENTICATE_FAIL',
       payload:
         error.response && error.response.data.message
           ? error.response.data.message
@@ -191,7 +208,7 @@ export const deleteProductDrafts = (draftId) => async (dispatch, getState) => {
   }
 };
 
-export const userAddProduct = (productId) => async (dispatch, getState) => {
+export const userAddProduct = (product) => async (dispatch, getState) => {
   const {
     userLogin: { user },
   } = getState();
@@ -200,7 +217,7 @@ export const userAddProduct = (productId) => async (dispatch, getState) => {
     const { data } = await Axios.post(
       '/api/users/addProducts',
       {
-        productId,
+        product,
         user,
       },
       { headers: { Authorization: 'Bearer ' + user.token } }
@@ -243,69 +260,19 @@ export const userDeleteProduct = (productId) => async (dispatch, getState) => {
   }
 };
 
-export const updateAddresses = (address) => async (dispatch, getState) => {
+export const updateUser = (userToUpdate, updatePassword) => async (
+  dispatch,
+  getState
+) => {
   const {
     userLogin: { user },
   } = getState();
-  dispatch({ type: 'USER_UPDATE_ADDRESSES_REQUEST' });
-  try {
-    const { data } = await Axios.post(
-      '/api/users/updateAddresses',
-      {
-        address,
-        user,
-      },
-      { headers: { Authorization: 'Bearer ' + user.token } }
-    );
-    dispatch({ type: 'USER_UPDATE_ADDRESSES_SUCCESS', payload: data });
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    dispatch({ type: 'USER_LOGIN_SUCCESS', payload: data });
-  } catch (error) {
-    dispatch({
-      type: 'USER_UPDATE_ADDRESSES_FAIL',
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
-    });
-  }
-};
-
-export const deleteAddresses = (addressId) => async (dispatch, getState) => {
-  const {
-    userLogin: { user },
-  } = getState();
-  dispatch({ type: 'USER_DELETE_ADDRESSES_REQUEST' });
-  try {
-    const { data } = await Axios.post(
-      '/api/users/deleteAddresses',
-      {
-        addressId,
-        user,
-      },
-      { headers: { Authorization: 'Bearer ' + user.token } }
-    );
-    dispatch({ type: 'USER_DELETE_ADDRESSES_SUCCESS', payload: data });
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    dispatch({ type: 'USER_LOGIN_SUCCESS', payload: data });
-  } catch (error) {
-    dispatch({
-      type: 'USER_DELETE_ADDRESSES_FAIL',
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
-    });
-  }
-};
-
-export const updateUser = (user, updatePassword) => async (dispatch) => {
   dispatch({ type: 'USER_UPDATE_REQUEST' });
   try {
     const { data } = await Axios.post(
       '/api/users/updateuser',
       {
-        user,
+        user: { _id: user._id, ...userToUpdate },
         updatePassword,
       },
       { headers: { Authorization: 'Bearer ' + user.token } }
@@ -316,6 +283,211 @@ export const updateUser = (user, updatePassword) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: 'USER_UPDATE_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const updateHistory = (productId, typeOfUpdate) => async (
+  dispatch,
+  getState
+) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'USER_HISTORY_UPDATE_REQUEST' });
+  try {
+    const { data } = await Axios.post(
+      '/api/users/updatehistory',
+      {
+        productId,
+        typeOfUpdate,
+      },
+      { headers: { Authorization: 'Bearer ' + user.token } }
+    );
+    dispatch({ type: 'USER_HISTORY_UPDATE_SUCCESS', payload: data });
+    localStorage.setItem('userInfo', JSON.stringify(data));
+    dispatch({ type: 'USER_LOGIN_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_HISTORY_UPDATE_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const historyRemove = () => async (dispatch, getState) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'USER_HISTORY_REMOVE_REQUEST' });
+  try {
+    const { data } = await Axios.post('/api/users/removehistory', user, {
+      headers: { Authorization: 'Bearer ' + user.token },
+    });
+    dispatch({ type: 'USER_HISTORY_REMOVE_SUCCESS', payload: data });
+    dispatch({ type: 'USER_HISTORY_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_HISTORY_REMOVE_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const getHistoryDetails = () => async (dispatch, getState) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'USER_HISTORY_REQUEST' });
+  try {
+    const { data } = await Axios.get('/api/users/gethistorydetails', {
+      headers: { Authorization: 'Bearer ' + user.token },
+    });
+    dispatch({ type: 'USER_HISTORY_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_HISTORY_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const pushNotificationUser = (userId, notification) => async (
+  dispatch
+) => {
+  dispatch({ type: 'USER_PUSH_NOTIFICATION_REQUEST' });
+  try {
+    const { data } = await Axios.post('/api/users/pushnotification', {
+      userId,
+      notification,
+      code: process.env.REACT_APP_NOTIFICATION_CODE,
+    });
+    dispatch({ type: 'USER_PUSH_NOTIFICATION_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_PUSH_NOTIFICATION_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const deleteNotificationUser = (notificationId) => async (
+  dispatch,
+  getState
+) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'USER_DELETE_NOTIFICATION_REQUEST' });
+  try {
+    const { data } = await Axios.post(
+      '/api/users/deletenotification',
+      {
+        notificationId,
+      },
+      {
+        headers: { Authorization: 'Bearer ' + user.token },
+      }
+    );
+    dispatch({ type: 'USER_DELETE_NOTIFICATION_SUCCESS', payload: data });
+    localStorage.setItem('userInfo', JSON.stringify(data));
+  } catch (error) {
+    dispatch({
+      type: 'USER_DELETE_NOTIFICATION_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const updateCart = (item, typeOfUpdate) => async (
+  dispatch,
+  getState
+) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'USER_CART_UPDATE_REQUEST' });
+  try {
+    const { data } = await Axios.post(
+      '/api/users/updatecart',
+      {
+        item,
+        typeOfUpdate,
+      },
+      { headers: { Authorization: 'Bearer ' + user.token } }
+    );
+    dispatch({ type: 'USER_CART_UPDATE_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_CART_UPDATE_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const getCartDetails = () => async (dispatch, getState) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'USER_CART_REQUEST' });
+  try {
+    const { data } = await Axios.get('/api/users/getcartdetails', {
+      headers: { Authorization: 'Bearer ' + user.token },
+    });
+    dispatch({ type: 'USER_CART_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_CART_FAIL',
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const cartRemoveMultiple = (productsIds) => async (
+  dispatch,
+  getState
+) => {
+  const {
+    userLogin: { user },
+  } = getState();
+  dispatch({ type: 'USER_CART_REMOVE_MULTIPLE_REQUEST' });
+  try {
+    const { data } = await Axios.post(
+      '/api/users/cartremovemultiple',
+      { productsIds },
+      {
+        headers: { Authorization: 'Bearer ' + user.token },
+      }
+    );
+    dispatch({ type: 'USER_CART_REMOVE_MULTIPLE_SUCCESS', payload: data });
+  } catch (error) {
+    dispatch({
+      type: 'USER_CART_REMOVE_MULTIPLE_FAIL',
       payload:
         error.response && error.response.data.message
           ? error.response.data.message

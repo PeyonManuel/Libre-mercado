@@ -15,18 +15,6 @@ const userSchema = mongoose.Schema(
     },
     telephone: { type: String, required: false, unique: false },
     password: { type: String, required: true },
-    addresses: [
-      {
-        postalCode: { type: String, required: true },
-        street: { type: String, required: true },
-        streetNumber: { type: String, required: false },
-        additionalInformation: { type: String, required: false },
-        betweenStreets: { type: String, required: false },
-        reference: { type: String, required: false },
-        province: { type: String, required: true },
-        city: { type: String, required: true },
-      },
-    ],
     productDrafts: [
       {
         name: { type: String, required: true, unique: false },
@@ -50,15 +38,6 @@ const userSchema = mongoose.Schema(
         date: { type: Date, default: Date.now },
       },
     ],
-    products: [
-      {
-        productId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
-          required: true,
-        },
-      },
-    ],
     userData: {
       favorites: [
         {
@@ -67,9 +46,34 @@ const userSchema = mongoose.Schema(
           required: false,
         },
       ],
-      notifications: { type: Array, required: false, unique: false },
+      notifications: [
+        {
+          text: { type: String },
+          linkTo: { type: String },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
     },
     isAdmin: { type: Boolean, required: true, default: false },
+    history: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true,
+      },
+    ],
+    cart: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true,
+        },
+        quantity: { type: Number, required: true },
+        saved: { type: Boolean, default: false },
+      },
+    ],
+    updateHistory: { type: Boolean, required: true, default: true },
   },
   { timestamps: true }
 );

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { detailsProduct } from '../Actions/productActions';
-import { detailsUser } from '../Actions/userActions';
 import LoadingCircle from '../Components/LoadingCircle';
 import MessageBox from '../Components/MessageBox';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const ProductPublishedScreen = (props) => {
   const dispatch = useDispatch();
@@ -12,39 +12,27 @@ const ProductPublishedScreen = (props) => {
   const { loading, error, product } = productDetails;
   const userLogin = useSelector((state) => state.userLogin);
   const { user, error: userError, loading: userLoading } = userLogin;
-  const userDetails = useSelector((state) => state.userDetails);
-  const {
-    user: details,
-    loading: loadingDetails,
-    error: detailsError,
-  } = userDetails;
   const [localError, setLocalError] = useState(false);
   const [correctUser, setCorrectUser] = useState(false);
-
-  useEffect(() => {
-    user && dispatch(detailsUser(user._id));
-  }, [user, dispatch]);
 
   useEffect(() => {
     dispatch(detailsProduct(productId));
   }, [dispatch, productId]);
 
   useEffect(() => {
-    (error || userError || detailsError) && setLocalError(true);
-  }, [error, detailsError, userError]);
+    (error || userError) && setLocalError(true);
+  }, [error, userError]);
 
   useEffect(() => {
-    if (details && product) {
-      details.products.find((prod) => prod._id === product._id) &&
-        setCorrectUser(true);
-    } else {
-      setLocalError(true);
+    if (user && product) {
+      product.seller._id.toString() === user._id.toString()
+        ? setCorrectUser(true)
+        : setLocalError(true);
     }
-  }, [details, product]);
-
+  }, [user, product]);
   return (
-    <>
-      {loading || loadingDetails || userLoading ? (
+    <div className='width-100 flex-center'>
+      {loading || userLoading ? (
         <LoadingCircle color='blue' />
       ) : localError ? (
         <MessageBox variant='danger'>Ha ocurrido un error</MessageBox>
@@ -54,7 +42,10 @@ const ProductPublishedScreen = (props) => {
           <>
             <div className='extra-header product-published'></div>
             <div className='column'>
-              <div className='product-published-header row'>
+              <div
+                className='product-published-header row'
+                style={{ zIndex: '102' }}
+              >
                 <div className='headers'>
                   <h3>¡Listo!</h3>
                   <h1>Ya terminaste tu publicación</h1>
@@ -71,21 +62,28 @@ const ProductPublishedScreen = (props) => {
                   </h4>
                 </div>
                 <div className='screen-mini-card-body padding margin-top'>
-                  <button className='primary'>
-                    <a
-                      href={'/product/' + product._id}
-                      className='nodecoration'
+                  <a
+                    href={'/product/' + product._id}
+                    className={
+                      'nodecoration' +
+                      (!desktopScreenCondition ? ' width-100' : '')
+                    }
+                  >
+                    <button
+                      className={
+                        'primary' + (!desktopScreenCondition ? ' block' : '')
+                      }
                     >
                       Ver publicación
-                    </a>
-                  </button>
+                    </button>
+                  </a>
                 </div>
               </div>
             </div>
           </>
         )
       )}
-    </>
+    </div>
   );
 };
 

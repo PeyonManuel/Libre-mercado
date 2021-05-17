@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateAddresses } from '../Actions/userActions';
+import { newAddress, updateAddress } from '../Actions/addressActions';
 import LoadingCircle from '../Components/LoadingCircle';
 
 const AddressScreen = (props) => {
   document.body.style.backgroundColor = '#f7f7f7';
-  const userUpdateAddresses = useSelector((state) => state.userUpdateAddresses);
-  const { loading, error } = userUpdateAddresses;
+  const addressNew = useSelector((state) => state.addressNew);
+  const { loading, error } = addressNew;
+  const addressUpdate = useSelector((state) => state.addressUpdate);
+  const { loading: loadingUpdate, error: errorUpdate } = addressUpdate;
   const currentAddress = localStorage.getItem('currentAddress')
     ? JSON.parse(localStorage.getItem('currentAddress'))
     : null;
@@ -61,12 +63,28 @@ const AddressScreen = (props) => {
   }, [noNumberCheck]);
 
   useEffect(() => {
-    if (isSubmited === true && !loading && !error) {
-      draftId
-        ? props.history.push('publicar?draft=' + draftId)
-        : props.history.push('/');
+    if (
+      isSubmited === true &&
+      ((!loading && !error) || (!loadingUpdate && !errorUpdate))
+    ) {
+      if (draftId) {
+        window.location.href = 'publicar?draft=' + draftId;
+      }
+      const checkout = localStorage.getItem('localCheckout')
+        ? JSON.parse(localStorage.getItem('localCheckout'))
+        : null;
+      if (checkout && checkout.editingAddress) {
+        localStorage.setItem(
+          'localCheckout',
+          JSON.stringify({ ...checkout, editingAddress: false })
+        );
+        window.location.href = '/checkout/shipping/addressHub';
+      }
+      if (!draftId && !checkout) {
+        window.location.href = '/mis-datos';
+      }
     }
-  }, [isSubmited, loading, error, draftId, props]);
+  }, [isSubmited, loading, error, draftId, props, loadingUpdate, errorUpdate]);
 
   useEffect(() => {
     if (
@@ -92,27 +110,29 @@ const AddressScreen = (props) => {
   ]);
 
   const handleSubmit = () => {
-    dispatch(
-      updateAddresses({
-        _id: currentAddress ? currentAddress._id : null,
-        postalCode,
-        street,
-        streetNumber: noNumberCheck ? null : streetNumber,
-        additionalInformation,
-        betweenStreets,
-        reference,
-        province,
-        city,
-      })
-    );
+    const dispatchAddress = {
+      _id: currentAddress ? currentAddress._id : null,
+      postalCode,
+      street,
+      streetNumber: noNumberCheck ? null : streetNumber,
+      additionalInformation,
+      betweenStreets,
+      reference,
+      province,
+      city,
+    };
+    if (currentAddress) {
+      dispatch(updateAddress(dispatchAddress));
+    } else {
+      dispatch(newAddress(dispatchAddress));
+    }
     setIsSubmited(true);
-    localStorage.removeItem('currentAddress');
   };
 
   return (
     <div className='big-form-block'>
       <div className='register-header row'>
-        <h2>Nuevo domicilio</h2>
+        <h2>{currentAddress ? 'Editando domicilio' : 'Nuevo domicilio'}</h2>
       </div>
       <form
         onSubmit={(e) => {
@@ -305,18 +325,17 @@ const AddressScreen = (props) => {
               <label>Ciudad *</label>
             </div>
           </div>
-        </div>
-        <div style={{ padding: '0 2rem 2rem' }}>
-          {' '}
-          <button
-            type='submit'
-            className={'primary big-form' + (isSubmited ? ' no-padding' : '')}
-            id='submitbtn'
-            disabled={true}
-          >
-            {isSubmited ? <LoadingCircle color='white' /> : 'Guardar'}
-          </button>
-        </div>
+        </div>{' '}
+        <button
+          type='submit'
+          className={
+            'margin-top primary big-form' + (isSubmited ? ' no-padding' : '')
+          }
+          id='submitbtn'
+          disabled={true}
+        >
+          {isSubmited ? <LoadingCircle color='white' /> : 'Guardar'}
+        </button>
       </form>
     </div>
   );

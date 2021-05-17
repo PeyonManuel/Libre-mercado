@@ -1,31 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const HomeScreenExhibitor = () => {
   const exhibitorRef = useRef();
   const [index, setIndex] = useState(1);
   const [disableBtns, setDisableBtns] = useState(false);
   const [disableScroll, setDisableScroll] = useState(false);
-
-  const items =
-    window.devicePixelRatio <= 2
-      ? [
-          'https://http2.mlstatic.com/D_NQ_797135-MLA45643423773_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_953329-MLA45598416456_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_895676-MLA45598052818_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_908982-MLA45599687016_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_843709-MLA45630710225_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_797135-MLA45643423773_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_953329-MLA45598416456_042021-OO.webp',
-        ]
-      : [
-          'https://http2.mlstatic.com/D_NQ_970780-MLA45598416468_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_601816-MLA45598361317_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_606224-MLA45599436546_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_736003-MLA45630645358_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_644199-MLA45643429697_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_970780-MLA45598416468_042021-OO.webp',
-          'https://http2.mlstatic.com/D_NQ_601816-MLA45598361317_042021-OO.webp',
-        ];
+  const [moveExhibitorQuantity] = useState(
+    window.screen.width > 1280 && window.devicePixelRatio > 1
+      ? 1600 * window.devicePixelRatio
+      : 1600
+  );
+  const items = desktopScreenCondition
+    ? [
+        'https://http2.mlstatic.com/D_NQ_797135-MLA45643423773_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_953329-MLA45598416456_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_895676-MLA45598052818_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_908982-MLA45599687016_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_843709-MLA45630710225_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_797135-MLA45643423773_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_953329-MLA45598416456_042021-OO.webp',
+      ]
+    : [
+        'https://http2.mlstatic.com/D_NQ_970780-MLA45598416468_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_601816-MLA45598361317_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_606224-MLA45599436546_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_736003-MLA45630645358_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_644199-MLA45643429697_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_970780-MLA45598416468_042021-OO.webp',
+        'https://http2.mlstatic.com/D_NQ_601816-MLA45598361317_042021-OO.webp',
+      ];
   useEffect(() => {
     for (let i = 1; i < items.length - 1; i++) {
       setTimeout(() => {
@@ -39,7 +43,7 @@ const HomeScreenExhibitor = () => {
   const exhibitorContainerRef = useRef();
 
   useEffect(() => {
-    if (exhibitorContainerRef.current && window.devicePixelRatio > 2) {
+    if (exhibitorContainerRef.current && !desktopScreenCondition) {
       let initialPosition = null;
       let moving = false;
       let transform = 0;
@@ -66,8 +70,16 @@ const HomeScreenExhibitor = () => {
           diff = transform + (currentPosition - initialPosition);
           exhibitorRef.current.style.transform = 'translateX(' + diff + 'px)';
           if (
-            currentPosition - initialPosition >= window.innerWidth - 10 ||
-            currentPosition - initialPosition <= -window.innerWidth + 10
+            currentPosition - initialPosition >=
+              (window.innerWidth < moveExhibitorQuantity
+                ? window.innerWidth
+                : moveExhibitorQuantity) -
+                10 ||
+            currentPosition - initialPosition <=
+              -(window.innerWidth < moveExhibitorQuantity
+                ? window.innerWidth
+                : moveExhibitorQuantity) +
+                10
           ) {
             getMouseUp();
           }
@@ -75,13 +87,33 @@ const HomeScreenExhibitor = () => {
       };
       const getMouseUp = () => {
         moving = false;
-        if (diff % window.innerWidth !== 0) {
+        if (
+          diff %
+            (window.innerWidth < moveExhibitorQuantity
+              ? window.innerWidth
+              : moveExhibitorQuantity) !==
+          0
+        ) {
           const newTransformValue =
             Math.round(
               (diff < transform
-                ? diff - 0.3 * window.innerWidth
-                : diff + 0.3 * window.innerWidth) / window.innerWidth
-            ) * window.innerWidth;
+                ? diff -
+                  0.3 *
+                    (window.innerWidth < moveExhibitorQuantity
+                      ? window.innerWidth
+                      : moveExhibitorQuantity)
+                : diff +
+                  0.3 *
+                    (window.innerWidth < moveExhibitorQuantity
+                      ? window.innerWidth
+                      : moveExhibitorQuantity)) /
+                (window.innerWidth < moveExhibitorQuantity
+                  ? window.innerWidth
+                  : moveExhibitorQuantity)
+            ) *
+            (window.innerWidth < moveExhibitorQuantity
+              ? window.innerWidth
+              : moveExhibitorQuantity);
           exhibitorRef.current.style.transition = '0.5s';
           exhibitorRef.current.style.transform =
             'translateX(' + newTransformValue + 'px)';
@@ -118,7 +150,12 @@ const HomeScreenExhibitor = () => {
     const updateExhibitorDimensions = () => {
       setDisableBtns(true);
       exhibitorRef.current.style.transform =
-        'translateX(' + index * -window.innerWidth + 'px)';
+        'translateX(' +
+        index *
+          -(window.innerWidth < moveExhibitorQuantity
+            ? window.innerWidth
+            : moveExhibitorQuantity) +
+        'px)';
       setDisableBtns(false);
     };
 
@@ -126,7 +163,7 @@ const HomeScreenExhibitor = () => {
 
     return () =>
       window.removeEventListener('resize', updateExhibitorDimensions);
-  }, [index]);
+  }, [index, moveExhibitorQuantity]);
   const renderSlickDots = () => {
     const dots = [];
     for (let i = 1; i < items.length - 1; i++) {
@@ -147,7 +184,12 @@ const HomeScreenExhibitor = () => {
                 setDisableBtns(true);
                 exhibitorRef.current.style.transition = '0.5s';
                 exhibitorRef.current.style.transform =
-                  'translateX(' + -window.innerWidth * i + 'px)';
+                  'translateX(' +
+                  -(window.innerWidth < moveExhibitorQuantity
+                    ? window.innerWidth
+                    : moveExhibitorQuantity) *
+                    i +
+                  'px)';
                 setIndex(i);
                 setDisableBtns(false);
               }
@@ -160,14 +202,19 @@ const HomeScreenExhibitor = () => {
   };
   return (
     <div className='exhibitor-container' ref={exhibitorContainerRef}>
-      {window.devicePixelRatio <= 2 && (
+      {desktopScreenCondition && (
         <button
           disabled={disableBtns}
           onClick={() => {
             setDisableBtns(true);
             exhibitorRef.current.style.transition = '0.5s';
             exhibitorRef.current.style.transform =
-              'translateX(' + (index - 1) * -window.innerWidth + 'px)';
+              'translateX(' +
+              (index - 1) *
+                -(window.innerWidth < moveExhibitorQuantity
+                  ? window.innerWidth
+                  : moveExhibitorQuantity) +
+              'px)';
             setIndex(index - 1);
           }}
           className='card-back-button exhibitor'
@@ -175,16 +222,32 @@ const HomeScreenExhibitor = () => {
       )}
       <div
         className='fit-content row home-screen-exhibitor'
-        style={{ transform: 'translateX(' + -window.innerWidth + 'px)' }}
+        style={{
+          transform:
+            'translateX(' +
+            -(window.innerWidth < moveExhibitorQuantity
+              ? window.innerWidth
+              : moveExhibitorQuantity) +
+            'px)',
+        }}
         onTransitionEnd={() => {
           exhibitorRef.current.style.transition = 'none';
           if (index === 0) {
             exhibitorRef.current.style.transform =
-              'translateX(' + (items.length - 2) * -window.innerWidth + 'px)';
+              'translateX(' +
+              (items.length - 2) *
+                -(window.innerWidth < moveExhibitorQuantity
+                  ? window.innerWidth
+                  : moveExhibitorQuantity) +
+              'px)';
             setIndex(items.length - 2);
           } else if (index === items.length - 1) {
             exhibitorRef.current.style.transform =
-              'translateX(' + -window.innerWidth + 'px)';
+              'translateX(' +
+              -(window.innerWidth < moveExhibitorQuantity
+                ? window.innerWidth
+                : moveExhibitorQuantity) +
+              'px)';
             setIndex(1);
           }
           setDisableBtns(false);
@@ -198,7 +261,7 @@ const HomeScreenExhibitor = () => {
           </div>
         ))}
       </div>
-      {window.devicePixelRatio <= 2 && (
+      {desktopScreenCondition && (
         <>
           <button
             disabled={disableBtns}
@@ -206,7 +269,12 @@ const HomeScreenExhibitor = () => {
               setDisableBtns(true);
               exhibitorRef.current.style.transition = '0.5s';
               exhibitorRef.current.style.transform =
-                'translateX(' + (index + 1) * -window.innerWidth + 'px)';
+                'translateX(' +
+                (index + 1) *
+                  -(window.innerWidth < moveExhibitorQuantity
+                    ? window.innerWidth
+                    : moveExhibitorQuantity) +
+                'px)';
               setIndex(index + 1);
             }}
             className='card-next-button exhibitor'

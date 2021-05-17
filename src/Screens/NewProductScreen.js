@@ -4,7 +4,12 @@ import { listCategories } from '../Actions/categoryActions';
 import { detailsUser, updateProductDrafts } from '../Actions/userActions';
 import { move } from 'move-position';
 import MessageBox from '../Components/MessageBox';
-import { formatNumber } from '../Utils/Utilities';
+import {
+  addErrorToImageList,
+  desktopScreenCondition,
+  formatNumber,
+} from '../Utils/Utilities';
+import LoadingCircle from '../Components/LoadingCircle';
 
 const NewProductScreen = (props) => {
   const urlParams = new URLSearchParams(props.location.search);
@@ -27,12 +32,12 @@ const NewProductScreen = (props) => {
     user: userUpdated,
   } = userUpdateProductDrafts;
   const draftId = urlParams.get('draft');
-  const [cacheValues, setCacheValues] = useState('');
+  const [cacheValues, setCacheValues] = useState(null);
   const [searchSell, setSearchSell] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isStateNew, setIsStateNew] = useState(null);
   const [images, setImages] = useState([]);
-  const [percentage, setPercentage] = useState(0);
+  const [percentage, setPercentage] = useState(-1);
   const [quantity, setQuantity] = useState(
     cacheValues ? cacheValues.stock : ''
   );
@@ -99,9 +104,12 @@ const NewProductScreen = (props) => {
     };
   }, []);
   useEffect(() => {
-    dispatch(detailsUser(user._id));
+    user && dispatch(detailsUser(user._id));
   }, [user, dispatch]);
 
+  useEffect(() => {
+    details && draftId === null && setCacheValues('');
+  }, [details, draftId]);
   useEffect(() => {
     if (
       draftId === null &&
@@ -121,7 +129,6 @@ const NewProductScreen = (props) => {
         );
     }
   }, [updateLoading, draftId, percentage, userUpdated, details, props]);
-
   useEffect(() => {
     setSearchSell(cacheValues ? cacheValues.name : '');
     setSelectedCategory(cacheValues ? cacheValues.category : null);
@@ -138,7 +145,9 @@ const NewProductScreen = (props) => {
               : 33
             : 16.5
           : 0
-        : 0
+        : cacheValues === ''
+        ? 0
+        : -1
     );
     setQuantity(cacheValues ? cacheValues.stock : '');
   }, [cacheValues]);
@@ -214,7 +223,8 @@ const NewProductScreen = (props) => {
         if (height < 500 || width < 500) {
           addErrorToImageList(
             reader.result,
-            '- El tamaño es menor a 500 x 500 px.'
+            '- El tamaño es menor a 500 x 500 px.',
+            setImageError
           );
         } else {
           setPercentage(67);
@@ -242,8 +252,7 @@ const NewProductScreen = (props) => {
 
   const firstStepSearch = () => (
     <>
-      <div className='row' style={{ marginBottom: '1rem' }}>
-        {' '}
+      <div className='row margin-bottom width-100'>
         <div className='searchbar-sell'>
           <i className='fa fa-search'></i>
           <input
@@ -283,13 +292,16 @@ const NewProductScreen = (props) => {
             'search-sell-subtext subtle-text' + (searchError ? ' error' : '')
           }
         >
-          {!searchError
-            ? 'Sumá las características principales del producto para mejorar la búsqueda.'
-            : 'Para comenzar, indicá el producto que querés publicar.'}
+          {desktopScreenCondition &&
+            (!searchError
+              ? 'Sumá las características principales del producto para mejorar la búsqueda.'
+              : 'Para comenzar, indicá el producto que querés publicar.')}
         </div>
         <button
-          className='primary margin-left'
-          style={{ width: '10rem' }}
+          className={
+            'primary' +
+            (desktopScreenCondition ? ' margin-left' : ' margin-top block')
+          }
           onClick={() => {
             if (searchSell.trim().length > 0) {
               setSelectedCategory(null);
@@ -370,7 +382,11 @@ const NewProductScreen = (props) => {
               </span>
             </span>
             {percentage <= 33 && (
-              <span>
+              <span
+                style={{
+                  fontSize: desktopScreenCondition ? 'initial' : '1.4rem',
+                }}
+              >
                 Es muy importante que la categoría sea la apropiada para que tus
                 compradores encuentren tu producto. Si no lo es, podríamos
                 pedirte que vuelvas a publicar.
@@ -496,18 +512,20 @@ const NewProductScreen = (props) => {
     >
       <div className='screen-mini-card-header-title'>
         <h2>Completá la información de tu producto</h2>
-        <button
-          className='hover-btn absolute-right'
-          onClick={() => {
-            setShowHelpSign(true);
-          }}
-        >
-          <img
-            className='smaller'
-            src='https://svgshare.com/i/UKg.svg'
-            alt='Ayuda'
-          ></img>
-        </button>
+        {desktopScreenCondition && (
+          <button
+            className='hover-btn absolute-right'
+            onClick={() => {
+              setShowHelpSign(true);
+            }}
+          >
+            <img
+              className='smaller'
+              src='https://svgshare.com/i/UKg.svg'
+              alt='Ayuda'
+            ></img>
+          </button>
+        )}
       </div>
       <div className='screen-mini-card-body padding column'>
         <div className='message-div blue row'>
@@ -536,26 +554,6 @@ const NewProductScreen = (props) => {
               />
               {imageError}
             </p>
-            {imageError.includes('no cumple los requisitos') && (
-              <button
-                className='simple absolute-right '
-                onClick={(e) => {
-                  const text = document.querySelector('#revisar-btn-text');
-                  text.innerHTML =
-                    text.innerHTML === 'Revisar ' ? 'Ocultar ' : 'Revisar ';
-
-                  document
-                    .querySelector('#revisar-btn-angle')
-                    .classList.toggle('upside-down');
-                  document
-                    .querySelector('.message-div.red')
-                    .classList.toggle('height-auto');
-                }}
-              >
-                <span id='revisar-btn-text'>Revisar </span>
-                <i id='revisar-btn-angle' className='fas fa-angle-down'></i>
-              </button>
-            )}
           </div>
           <div className='message-div-content'>
             <ul id='error-list' className='width-100'></ul>
@@ -610,13 +608,15 @@ const NewProductScreen = (props) => {
                       } else {
                         addErrorToImageList(
                           'https://svgshare.com/i/UYj.svg',
-                          '- El formato no es JPG o PNG.'
+                          '- El formato no es JPG o PNG.',
+                          setImageError
                         );
                       }
                     } else {
                       addErrorToImageList(
                         'https://svgshare.com/i/UYj.svg',
-                        '- El archivo pesa mas de 5mb'
+                        '- El archivo pesa mas de 5mb',
+                        setImageError
                       );
                     }
                   }
@@ -638,7 +638,7 @@ const NewProductScreen = (props) => {
                   images.length > 0 ? 'small-text bold' : 'subtle-text'
                 }
               >
-                Agrega o arrastra tus
+                Agrega {desktopScreenCondition ? 'o arrastra ' : ''}tus
                 <br /> fotos aquí
               </span>
               <input
@@ -660,13 +660,15 @@ const NewProductScreen = (props) => {
                         } else {
                           addErrorToImageList(
                             'https://svgshare.com/i/UYj.svg',
-                            '- El formato no es JPG o PNG.'
+                            '- El formato no es JPG o PNG.',
+                            setImageError
                           );
                         }
                       } else {
                         addErrorToImageList(
                           'https://svgshare.com/i/UYj.svg',
-                          '- El archivo pesa mas de 5mb'
+                          '- El archivo pesa mas de 5mb',
+                          setImageError
                         );
                       }
                     }
@@ -785,35 +787,50 @@ const NewProductScreen = (props) => {
       </div>
       {percentage < 100 && (
         <div className='screen-mini-card-footer flex-end'>
-          <button className='secondary' onClick={() => setImages([])}>
-            Cancelar
-          </button>
-          <button
-            className='primary'
-            onClick={() => {
-              if (images.length > 0) {
-                if (quantity !== '' && parseInt(quantity) > 0) {
-                  dispatch(
-                    updateProductDrafts({
-                      ...cacheValues,
-                      images,
-                      stock: parseInt(quantity),
-                      _id: draftId ? draftId : null,
-                    })
-                  );
-                } else {
-                  setQuantityError('La cantidad mínima es 1.');
-                }
-              } else {
-                setImageError('Agregá al menos una foto.');
-                if (quantity === '' || parseInt(quantity) === 0) {
-                  setQuantityError('La cantidad mínima es 1.');
-                }
-              }
-            }}
+          <div
+            className={
+              'width-100' +
+              (desktopScreenCondition ? ' row' : ' column reverse')
+            }
           >
-            Confirmar
-          </button>
+            <button
+              className={
+                'secondary' + (!desktopScreenCondition ? ' block' : '')
+              }
+              onClick={() => setImages([])}
+            >
+              Cancelar
+            </button>
+            <button
+              className={
+                'primary' +
+                (!desktopScreenCondition ? ' block margin-bottom' : '')
+              }
+              onClick={() => {
+                if (images.length > 0) {
+                  if (quantity !== '' && parseInt(quantity) > 0) {
+                    dispatch(
+                      updateProductDrafts({
+                        ...cacheValues,
+                        images,
+                        stock: parseInt(quantity),
+                        _id: draftId ? draftId : null,
+                      })
+                    );
+                  } else {
+                    setQuantityError('La cantidad mínima es 1.');
+                  }
+                } else {
+                  setImageError('Agregá al menos una foto.');
+                  if (quantity === '' || parseInt(quantity) === 0) {
+                    setQuantityError('La cantidad mínima es 1.');
+                  }
+                }
+              }}
+            >
+              Confirmar
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -966,26 +983,6 @@ const NewProductScreen = (props) => {
     </div>
   );
 
-  const addErrorToImageList = (errorImg, errorDetail) => {
-    const errorQuantity = document.querySelector('#error-list')
-      ? document.querySelector('#error-list').childElementCount + 1
-      : 1;
-    setImageError(
-      `${
-        errorQuantity + (errorQuantity > 1 ? ' fotos' : ' foto')
-      } no cumple los requisitos. Revisa los errores.`
-    );
-    document
-      .querySelector('#error-list')
-      .insertAdjacentHTML(
-        'beforeend',
-        `<li><div class='row flex-start list-item ${
-          document.querySelector('#error-list').childElementCount === 0
-            ? 'first-child'
-            : ''
-        }'><img class='center-cropped invalid-img'src='${errorImg}' alt='error'/><p class='bold'>${errorDetail}</p></div></li>`
-      );
-  };
   return (
     <>
       {detailsError || error ? (
@@ -994,7 +991,9 @@ const NewProductScreen = (props) => {
         </div>
       ) : (
         <>
-          <div className='extra-header new-product'></div>
+          {desktopScreenCondition && (
+            <div className='extra-header new-product'></div>
+          )}
           <div className='new-product-steps'>
             <span>
               <span className='step-number'>1</span>
@@ -1005,106 +1004,124 @@ const NewProductScreen = (props) => {
               style={{ width: percentage + '%' }}
             ></div>
           </div>
+          <div className='flex-center width-100'>
+            <div className='column flex-start'>
+              {percentage < 0 ? (
+                <LoadingCircle color='blue' />
+              ) : (
+                <>
+                  <div
+                    className='row width-100'
+                    style={{
+                      zIndex: '100',
+                      marginBottom: desktopScreenCondition && '6rem',
+                    }}
+                  >
+                    <div>
+                      <h4 className='subtle-text'>Paso 1 de 2</h4>
+                      <h1 style={{ fontSize: '2.5rem' }}>
+                        Empecemos identificando tu producto
+                      </h1>
+                    </div>
+                    {desktopScreenCondition && (
+                      <img
+                        src='https://http2.mlstatic.com/secure/sell/images/shoe-v2.svg'
+                        alt='arte de zapato'
+                      ></img>
+                    )}
+                  </div>
 
-          <div className='column flex-start'>
-            <div
-              className='row width-100'
-              style={{ zIndex: '2', marginBottom: '6rem' }}
-            >
-              <div>
-                <span className='subtle-text'>Paso 1 de 2</span>
-                <h1 style={{ fontSize: '2.5rem' }}>
-                  Empecemos identificando tu producto
-                </h1>
-              </div>
-              <img
-                src='https://http2.mlstatic.com/secure/sell/images/shoe-v2.svg'
-                alt='arte de zapato'
-              ></img>
-            </div>
-
-            <div
-              id='first-step'
-              className={
-                'screen-mini-card medium' +
-                (percentage > 16.5 && updateLoading ? ' disabled' : '')
-              }
-            >
-              {percentage >= 16.5 && firstStepHeader()}
-              <div className='screen-mini-card-body padding column'>
-                {percentage < 16.5 ? (
-                  <h1>
-                    Indicá producto, marca, modelo y características principales
-                  </h1>
-                ) : selectedCategory === null ? (
-                  <h1>¿Qué opción lo describe?</h1>
-                ) : percentage < 33 ? (
-                  <h2>Confirma la categoría</h2>
-                ) : (
-                  <h2>La categoría que elegiste</h2>
-                )}
-                {percentage < 16.5 && firstStepSearch()}
-                {loading ? (
-                  <></>
-                ) : error ? (
+                  <div
+                    id='first-step'
+                    className={
+                      'screen-mini-card medium' +
+                      (percentage > 16.5 && updateLoading ? ' disabled' : '')
+                    }
+                  >
+                    {percentage >= 16.5 && firstStepHeader()}
+                    <div className='screen-mini-card-body padding column'>
+                      {percentage < 16.5 ? (
+                        <h2>
+                          Indicá producto, marca, modelo y características
+                          principales
+                        </h2>
+                      ) : selectedCategory === null ? (
+                        <h2>¿Qué opción lo describe?</h2>
+                      ) : percentage < 33 ? (
+                        <h2>Confirma la categoría</h2>
+                      ) : (
+                        <h2>La categoría que elegiste</h2>
+                      )}
+                      {percentage < 16.5 && firstStepSearch()}
+                      {loading ? (
+                        <></>
+                      ) : error ? (
+                        <div className='screen-mini-card medium'>
+                          <MessageBox variant='danger'>{error}</MessageBox>
+                        </div>
+                      ) : (
+                        firstStepSelectCategory()
+                      )}
+                    </div>
+                    {selectedCategory !== null &&
+                      !loading &&
+                      percentage === 16.5 &&
+                      firstStepFooter()}
+                  </div>
+                </>
+              )}
+              {percentage === 33 ? (
+                updateError ? (
                   <div className='screen-mini-card medium'>
-                    <MessageBox variant='danger'>{error}</MessageBox>
+                    <MessageBox variant='danger'>{updateError}</MessageBox>
+                  </div>
+                ) : updateLoading || loadingDetails || draftId === null ? (
+                  secondStep('disabled')
+                ) : (
+                  secondStep()
+                )
+              ) : (
+                percentage > 33 &&
+                (updateLoading || loadingDetails || draftId === null
+                  ? secondStep('disabled')
+                  : secondStep())
+              )}
+              {percentage >= 67 &&
+                (updateLoading || loadingDetails || draftId === null ? (
+                  thirdStep('disabled')
+                ) : updateError ? (
+                  <div className='screen-mini-card medium'>
+                    <MessageBox variant='danger'>{updateError}</MessageBox>
                   </div>
                 ) : (
-                  firstStepSelectCategory()
-                )}
-              </div>
-              {selectedCategory !== null &&
-                !loading &&
-                percentage === 16.5 &&
-                firstStepFooter()}
+                  thirdStep()
+                ))}
+              {percentage === 100 && (
+                <div className='row flex-end width-100'>
+                  <button
+                    className={
+                      'primary' +
+                      (!desktopScreenCondition
+                        ? ' block margin-left margin-right'
+                        : '')
+                    }
+                    disabled={updateLoading || loadingDetails || updateError}
+                    onClick={() => {
+                      document.querySelector('#siguiente-link').click();
+                    }}
+                  >
+                    Siguiente
+                  </button>
+                  <a
+                    id='siguiente-link'
+                    href={'/publicar?draft=' + draftId}
+                    hidden
+                  >
+                    Siguiente
+                  </a>
+                </div>
+              )}
             </div>
-            {percentage === 33 ? (
-              updateError ? (
-                <div className='screen-mini-card medium'>
-                  <MessageBox variant='danger'>{updateError}</MessageBox>
-                </div>
-              ) : updateLoading || loadingDetails || draftId === null ? (
-                secondStep('disabled')
-              ) : (
-                secondStep()
-              )
-            ) : (
-              percentage > 33 &&
-              (updateLoading || loadingDetails || draftId === null
-                ? secondStep('disabled')
-                : secondStep())
-            )}
-            {percentage >= 67 &&
-              (updateLoading || loadingDetails || draftId === null ? (
-                thirdStep('disabled')
-              ) : updateError ? (
-                <div className='screen-mini-card medium'>
-                  <MessageBox variant='danger'>{updateError}</MessageBox>
-                </div>
-              ) : (
-                thirdStep()
-              ))}
-            {percentage === 100 && (
-              <div className='row flex-end width-100'>
-                <button
-                  className='primary'
-                  disabled={updateLoading || loadingDetails || updateError}
-                  onClick={() => {
-                    document.querySelector('#siguiente-link').click();
-                  }}
-                >
-                  Siguiente
-                </button>
-                <a
-                  id='siguiente-link'
-                  href={'/publicar?draft=' + draftId}
-                  hidden
-                >
-                  Siguiente
-                </a>
-              </div>
-            )}
           </div>
           {showHelpSign && helpSign()}
           {showChangeCategorySign && changeCategorySign()}

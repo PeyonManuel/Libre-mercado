@@ -10,6 +10,7 @@ const ChangePasswordRoute = ({ component: Component, ...rest }) => {
       {...rest}
       render={(props) => {
         const emailCodeValidated = localStorage.getItem('emailCodeValidated');
+        console.log(user, emailCodeValidated);
         return user && emailCodeValidated ? (
           <Component {...props}></Component>
         ) : (

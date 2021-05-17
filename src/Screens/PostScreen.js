@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  deleteAddresses,
   deleteProductDrafts,
-  userDeleteProduct,
   detailsUser,
   updateProductDrafts,
-  userAddProduct,
 } from '../Actions/userActions';
-import { formatNumber } from '../Utils/Utilities';
+import {
+  desktopScreenCondition,
+  formatNumber,
+  validateVideoId,
+} from '../Utils/Utilities';
 import { Redirect } from 'react-router-dom';
 import MessageBox from '../Components/MessageBox';
 import { createNewProduct } from '../Actions/productActions';
+import {
+  deleteAddress,
+  getUserAddresses,
+  updateAddress,
+} from '../Actions/addressActions';
 
 const PostScreen = (props) => {
   const userLogin = useSelector((state) => state.userLogin);
@@ -22,6 +28,17 @@ const PostScreen = (props) => {
     error: errorDetails,
     user: details,
   } = userDetails;
+  const userAddresses = useSelector((state) => state.userAddresses);
+  const {
+    loading: loadingAddresses,
+    error: errorAddresses,
+    addresses,
+  } = userAddresses;
+  const addressDelete = useSelector((state) => state.addressDelete);
+  const {
+    loading: loadingDeletingAddresses,
+    deleted: addressDeleted,
+  } = addressDelete;
   const userUpdateProductDrafts = useSelector(
     (state) => state.userUpdateProductDrafts
   );
@@ -42,16 +59,10 @@ const PostScreen = (props) => {
     product,
     loading: creatingProduct,
   } = newProduct;
-  const userAddProducts = useSelector((state) => state.userAddProducts);
-  const {
-    error: errorAddingProduct,
-    added,
-    loading: addingProduct,
-  } = userAddProducts;
-
   const dispatch = useDispatch();
   const urlParams = new URLSearchParams(props.location.search);
   const draftId = urlParams.get('draft');
+  const [localAddresses, setLocalAddresses] = useState([]);
   const [draftValues, setDraftValues] = useState(null);
   const [percentage, setPercentage] = useState(0);
   const [maxPercentage, setMaxPercentage] = useState(0);
@@ -62,6 +73,7 @@ const PostScreen = (props) => {
   const [description, setDescription] = useState('');
   const [video, setVideo] = useState('');
   const [videoError, setVideoError] = useState('');
+  const [localError, setLocalError] = useState(false);
 
   const [updatingData, setUpdatingData] = useState(false);
   const [descriptionCardOpen, setDescriptionCardOpen] = useState(false);
@@ -69,7 +81,6 @@ const PostScreen = (props) => {
   const [editingDescription, setEditingDescription] = useState(false);
   const [editingVideo, setEditingVideo] = useState(false);
   const [validVideoId, setValidVideoId] = useState('');
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY >= 175) {
@@ -84,7 +95,6 @@ const PostScreen = (props) => {
     };
     document.addEventListener('scroll', handleScroll);
   }, []);
-
   useEffect(() => {
     if (details) {
       const values = details.productDrafts.find(
@@ -96,8 +106,22 @@ const PostScreen = (props) => {
         props.history.push('/vender');
       }
     }
-  }, [details, draftId, updatingData, props]);
+  }, [details, draftId, updatingData, props, localAddresses]);
 
+  useEffect(() => {
+    if (localAddresses.length > 0) {
+      const lastUsedAddress = localAddresses.find(
+        (address) => address.lastUsed === true
+      );
+      if (lastUsedAddress) {
+        setSelectedAddress(lastUsedAddress._id);
+      }
+    }
+  }, [localAddresses]);
+
+  useEffect(() => {
+    addresses && localAddresses.length === 0 && setLocalAddresses(addresses);
+  }, [addresses, localAddresses]);
   useEffect(() => {
     if (draftValues) {
       if (draftValues.address !== null) {
@@ -119,7 +143,7 @@ const PostScreen = (props) => {
       if (draftValues.video) {
         setVideo(draftValues.video);
         setVideoCardOpen(true);
-        setValidVideoId(draftValues.video.split('v=')[1]);
+        setValidVideoId(draftValues.video.split('/embed/')[1]);
       }
     }
     setUpdatingData(false);
@@ -155,128 +179,132 @@ const PostScreen = (props) => {
   }, [percentage, updatingData]);
 
   useEffect(() => {
+    if (addressDeleted) {
+      const addressToDelete = localAddresses.find(
+        (address) => address._id.toString() === addressDeleted.toString()
+      );
+      if (addressToDelete) {
+        localAddresses.splice(localAddresses.indexOf(addressToDelete), 1);
+      }
+      dispatch({ type: 'DELETE_ADDRESS_RESET' });
+    }
+  }, [addressDeleted, dispatch, user, localAddresses]);
+
+  useEffect(() => {
     user && dispatch(detailsUser(user._id));
+    user && dispatch(getUserAddresses());
   }, [dispatch, user]);
 
   useEffect(() => {
     (updateLoading ||
+      loadingAddresses ||
+      loadingDeletingAddresses ||
       loadingDetails ||
       loading ||
-      addingProduct ||
       creatingProduct) &&
       setUpdatingData(true);
-  }, [updateLoading, loadingDetails, loading, addingProduct, creatingProduct]);
+  }, [
+    updateLoading,
+    loadingDetails,
+    loading,
+    creatingProduct,
+    loadingAddresses,
+    loadingDeletingAddresses,
+  ]);
 
   useEffect(() => {
-    if (!product && added) {
-      dispatch(createNewProduct(draftValues));
-    }
-  }, [product, dispatch, added, draftValues]);
-  useEffect(() => {
-    if (product) {
+    if (product && !draftDeleted) {
       dispatch(deleteProductDrafts(draftId));
-    } else if (newProductError) {
-      dispatch(userDeleteProduct(product._id));
     }
-  }, [added, dispatch, product, draftId, newProductError]);
+  }, [product, dispatch, draftId, newProductError, draftDeleted]);
 
   useEffect(() => {
-    draftDeleted && props.history.push('/producto-publicado');
-  }, [draftDeleted, props]);
+    draftDeleted && props.history.push('/producto-publicado/' + product._id);
+  }, [draftDeleted, props, product]);
 
-  const validateVideoId = (id) => {
-    var img = new Image();
-    img.src = 'http://img.youtube.com/vi/' + id + '/mqdefault.jpg';
-    img.onload = function () {
-      if (this.width === 120) {
-        setValidVideoId('');
-        setVideoError('Solo podés agregar links a videos de YouTube.');
-      } else {
-        setValidVideoId(id);
-        setVideoError('');
-      }
-    };
-  };
+  useEffect(() => {
+    error && errorAddresses && errorDetails && setLocalError(true);
+  }, [error, errorAddresses, errorDetails]);
+
   const displayAddresses = () => {
     const addressesForReturn = [];
-    details &&
-      details.addresses.map((address, i) =>
-        addressesForReturn.push(
-          <li
-            className={
-              'list-relative multiple-selection-btn' +
-              (selectedAddress === address._id ? ' selected' : '')
-            }
-            key={i}
-          >
-            <div className='list-item padding'>
-              <a
-                className='nodecoration'
-                href='#Select-address'
-                onClick={() => {
-                  setSelectedAddress(address._id);
+    localAddresses.map((address, i) =>
+      addressesForReturn.push(
+        <li
+          className={
+            'list-relative multiple-selection-btn' +
+            (selectedAddress === address._id ? ' selected' : '')
+          }
+          key={i}
+        >
+          <div className='list-item padding'>
+            <a
+              className='nodecoration'
+              href='#Select-address'
+              onClick={() => {
+                dispatch(
+                  updateProductDrafts({
+                    ...draftValues,
+                    address: address._id,
+                  })
+                );
+                dispatch(updateAddress({ ...address, lastUsed: true }));
+              }}
+            >
+              <h4 style={{ margin: 'auto 0' }}>
+                {address.street +
+                  ' ' +
+                  (address.streetNumber ? address.streetNumber : '')}
+              </h4>
+              <br />
+              <span className='subtle-text'>
+                {address.city + ', ' + address.province}
+              </span>
+            </a>
+            <br />
+            <a
+              className='small'
+              onClick={() => {
+                localStorage.setItem('currentAddress', JSON.stringify(address));
+              }}
+              href={'/nueva-direccion?draft=' + draftId}
+            >
+              Modificar
+            </a>
+            <button
+              className='list-delete absolute-right'
+              onClick={() => {
+                dispatch(deleteAddress(address._id));
+                if (address._id === selectedAddress) {
+                  setSelectedAddress('');
+                  setPercentage(0);
                   dispatch(
                     updateProductDrafts({
                       ...draftValues,
-                      address: address._id,
+                      address: null,
                     })
                   );
-                }}
-              >
-                <h4>
-                  {address.street +
-                    ' ' +
-                    (address.streetNumber ? address.streetNumber : '')}
-                </h4>
-                <br />
-                <span className='subtle-text'>
-                  {address.city + ', ' + address.province}
-                </span>
-              </a>
-              <br />
-              <a
+                }
+              }}
+            >
+              <img
                 className='small'
-                onClick={() => {
-                  localStorage.setItem(
-                    'currentAddress',
-                    JSON.stringify(address)
-                  );
-                }}
-                href={'/nueva-direccion?draft=' + draftId}
-              >
-                Modificar
-              </a>
-              <button
-                className='list-delete absolute-right'
-                onClick={() => {
-                  dispatch(deleteAddresses(address._id));
-                  if (address._id === selectedAddress) {
-                    setSelectedAddress('');
-                    setPercentage(0);
-                    dispatch(
-                      updateProductDrafts({
-                        ...draftValues,
-                        address: null,
-                      })
-                    );
-                  }
-                }}
-              >
-                <img
-                  className='small'
-                  src='https://svgshare.com/i/UJB.svg'
-                  alt='Boton borrar'
-                />
-              </button>
-            </div>
-          </li>
-        )
-      );
+                src='https://svgshare.com/i/UJB.svg'
+                alt='Boton borrar'
+              />
+            </button>
+          </div>
+        </li>
+      )
+    );
     return addressesForReturn;
   };
-
   const firstStep = (status) => {
-    return (
+    return errorAddresses ? (
+      <MessageBox variant='danger'>
+        Ha ocurrido un error encontrando tus direcciones
+      </MessageBox>
+    ) : (
       <div
         id='first-step'
         className={
@@ -287,7 +315,7 @@ const PostScreen = (props) => {
           <h4>Dirección de la venta</h4>
         </div>
         {details &&
-          (details.addresses.length > 0 ? (
+          (localAddresses.length > 0 ? (
             <ul>{displayAddresses()}</ul>
           ) : (
             <div className='screen-mini-card-body padding'>
@@ -364,30 +392,42 @@ const PostScreen = (props) => {
         </div>
         {percentage === 25 && maxPercentage >= 25 && (
           <div className='screen-mini-card-footer flex-end'>
-            <button
-              className='secondary'
-              disabled={price > 0 ? false : true}
-              onClick={() => {
-                setPrice(draftValues.price ? draftValues.price : 0);
-                setPercentage(maxPercentage);
-              }}
+            <div
+              className={
+                'width-100' +
+                (desktopScreenCondition ? ' row' : ' column reverse')
+              }
             >
-              Cancelar
-            </button>
-            <button
-              className='primary'
-              disabled={price > 0 ? false : true}
-              onClick={() => {
-                dispatch(
-                  updateProductDrafts({
-                    ...draftValues,
-                    price,
-                  })
-                );
-              }}
-            >
-              Confirmar
-            </button>
+              <button
+                className={
+                  'secondary' + (!desktopScreenCondition ? ' block' : '')
+                }
+                disabled={price > 0 ? false : true}
+                onClick={() => {
+                  setPrice(draftValues.price ? draftValues.price : 0);
+                  setPercentage(maxPercentage);
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                className={
+                  'primary' +
+                  (!desktopScreenCondition ? ' block margin-bottom' : '')
+                }
+                disabled={price > 0 ? false : true}
+                onClick={() => {
+                  dispatch(
+                    updateProductDrafts({
+                      ...draftValues,
+                      price,
+                    })
+                  );
+                }}
+              >
+                Confirmar
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -469,7 +509,11 @@ const PostScreen = (props) => {
       >
         <div className='screen-mini-card-header-title'>
           <h4>¿Querés agregar una descripción?</h4>
-          <span className='subtle-text no-user-select'>{' | (opcional)'}</span>
+          {desktopScreenCondition && (
+            <span className='subtle-text no-user-select'>
+              {' | (opcional)'}
+            </span>
+          )}
           {!descriptionCardOpen && (
             <img
               className='absolute-right small mouse-pointer'
@@ -506,33 +550,45 @@ const PostScreen = (props) => {
             </div>
             {editingDescription && (
               <div className='screen-mini-card-footer flex-end'>
-                <button
-                  className='secondary'
-                  disabled={price > 0 ? false : true}
-                  onClick={() => {
-                    setEditingDescription(false);
-                    setDescription(
-                      draftValues.description ? draftValues.description : ''
-                    );
-                  }}
+                <div
+                  className={
+                    'width-100' +
+                    (desktopScreenCondition ? ' row' : ' column reverse')
+                  }
                 >
-                  Cancelar
-                </button>
-                <button
-                  className='primary'
-                  disabled={price > 0 ? false : true}
-                  onClick={() => {
-                    setEditingDescription(false);
-                    dispatch(
-                      updateProductDrafts({
-                        ...draftValues,
-                        description,
-                      })
-                    );
-                  }}
-                >
-                  Confirmar
-                </button>
+                  <button
+                    className={
+                      'secondary' + (!desktopScreenCondition ? ' block' : '')
+                    }
+                    disabled={price > 0 ? false : true}
+                    onClick={() => {
+                      setEditingDescription(false);
+                      setDescription(
+                        draftValues.description ? draftValues.description : ''
+                      );
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className={
+                      'primary' +
+                      (!desktopScreenCondition ? ' block margin-bottom' : '')
+                    }
+                    disabled={price > 0 ? false : true}
+                    onClick={() => {
+                      setEditingDescription(false);
+                      dispatch(
+                        updateProductDrafts({
+                          ...draftValues,
+                          description,
+                        })
+                      );
+                    }}
+                  >
+                    Confirmar
+                  </button>
+                </div>
               </div>
             )}
           </>
@@ -553,7 +609,11 @@ const PostScreen = (props) => {
       >
         <div className='screen-mini-card-header-title'>
           <h4>¿Querés agregar un video?</h4>
-          <span className='subtle-text no-user-select'>{' | (opcional)'}</span>
+          {desktopScreenCondition && (
+            <span className='subtle-text no-user-select'>
+              {' | (opcional)'}
+            </span>
+          )}
           {!videoCardOpen && (
             <img
               className='absolute-right small mouse-pointer'
@@ -586,7 +646,11 @@ const PostScreen = (props) => {
                           videoId.length === 11)
                       ) {
                         setVideoError('');
-                        validateVideoId(videoId.substring(0, 11));
+                        validateVideoId(
+                          videoId.substring(0, 11),
+                          setValidVideoId,
+                          setVideoError
+                        );
                       } else {
                         setVideoError(
                           'Solo podés agregar links a videos de YouTube.'
@@ -613,46 +677,70 @@ const PostScreen = (props) => {
                 </div>
               </div>
               {validVideoId !== '' && (
-                <iframe
-                  className='margin-top'
-                  title='Video seleccionado'
-                  src={'https://www.youtube.com/embed/' + validVideoId}
-                  allow='autoplay; encrypted-media'
-                  frameBorder='0'
-                  height='390px'
-                  width='100%'
-                ></iframe>
+                <div
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '28rem',
+                    width: '80vw',
+                    height: '45vw',
+                    margin: '0 auto',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <iframe
+                    className='margin-top'
+                    title='Video seleccionado'
+                    src={'https://www.youtube.com/embed/' + validVideoId}
+                    allow='autoplay; encrypted-media'
+                    frameBorder='0'
+                    height='100%'
+                    width='100%'
+                  ></iframe>
+                </div>
               )}
             </div>
             {editingVideo && (
               <div className='screen-mini-card-footer flex-end'>
-                <button
-                  className='secondary'
-                  disabled={price > 0 ? false : true}
-                  onClick={() => {
-                    setVideo(draftValues.video ? draftValues.video : '');
-                    setPercentage(maxPercentage);
-                    setVideoError('');
-                    setEditingVideo(false);
-                  }}
+                <div
+                  className={
+                    'width-100' +
+                    (desktopScreenCondition ? ' row' : ' column reverse')
+                  }
                 >
-                  Cancelar
-                </button>
-                <button
-                  className='primary'
-                  disabled={validVideoId ? false : true}
-                  onClick={() => {
-                    dispatch(
-                      updateProductDrafts({
-                        ...draftValues,
-                        video: 'https://www.youtube.com/embed/' + validVideoId,
-                      })
-                    );
-                    setEditingVideo(false);
-                  }}
-                >
-                  Confirmar
-                </button>
+                  <button
+                    className={
+                      'secondary' + (!desktopScreenCondition ? ' block' : '')
+                    }
+                    disabled={price > 0 ? false : true}
+                    onClick={() => {
+                      setVideo(draftValues.video ? draftValues.video : '');
+                      setPercentage(maxPercentage);
+                      setVideoError('');
+                      setEditingVideo(false);
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className={
+                      'primary' +
+                      (!desktopScreenCondition ? ' block margin-bottom' : '')
+                    }
+                    disabled={validVideoId ? false : true}
+                    onClick={() => {
+                      dispatch(
+                        updateProductDrafts({
+                          ...draftValues,
+                          video:
+                            'https://www.youtube.com/embed/' + validVideoId,
+                        })
+                      );
+                      setEditingVideo(false);
+                    }}
+                  >
+                    Confirmar
+                  </button>
+                </div>
               </div>
             )}
           </>
@@ -662,8 +750,7 @@ const PostScreen = (props) => {
   };
 
   const postBtn = (status) => {
-    const allPostErrors =
-      !errorDeletingDraft && !errorAddingProduct && !newProductError;
+    const allPostErrors = !errorDeletingDraft && !newProductError;
     return (
       <div
         className={
@@ -674,11 +761,14 @@ const PostScreen = (props) => {
       >
         {allPostErrors ? (
           <button
-            className='primary'
+            className={
+              'primary' +
+              (!desktopScreenCondition ? ' block margin-left margin-right' : '')
+            }
             onClick={() => {
-              dispatch(userAddProduct(draftValues));
+              dispatch(createNewProduct(draftValues));
             }}
-            disabled={updatingData}
+            disabled={updatingData || creatingProduct}
           >
             Publicar
           </button>
@@ -700,10 +790,8 @@ const PostScreen = (props) => {
         draftValues &&
         (!(draftValues.images.length > 0 && draftValues.stock > 0) ? (
           <Redirect to={'vender/producto?draft=' + draftId}></Redirect>
-        ) : error ? (
-          <MessageBox>{error}</MessageBox>
-        ) : errorDetails ? (
-          <MessageBox>{errorDetails}</MessageBox>
+        ) : localError ? (
+          <MessageBox>Ha habido un error</MessageBox>
         ) : (
           <>
             <div className='new-product-steps'>
@@ -716,77 +804,91 @@ const PostScreen = (props) => {
                 style={{ width: percentage + '%' }}
               ></div>
             </div>
-            <div className='column flex-start'>
-              <a
-                className='margin-bottom'
-                href={'/vender/producto?draft=' + draftId}
-                style={{ zIndex: '2' }}
-              >
-                {'<  Anterior'}
-              </a>
-              <div
-                className='row width-100'
-                style={{ zIndex: '2', marginBottom: '6rem' }}
-              >
-                <div>
-                  <span className='subtle-text'>Paso 2 de 2</span>
-                  <h1 style={{ fontSize: '2.5rem' }}>
-                    Para terminar,
-                    <br /> definamos las condiciones de venta
-                  </h1>
+            <div className='width-100 flex-center margin-top'>
+              <div className='column flex-start'>
+                <a
+                  className={
+                    'margin-bottom' +
+                    (!desktopScreenCondition ? ' margin-left' : '')
+                  }
+                  href={'/vender/producto?draft=' + draftId}
+                  style={{ zIndex: '103' }}
+                >
+                  {'<  Anterior'}
+                </a>
+                <div
+                  className='row width-100'
+                  style={{ zIndex: '103', marginBottom: '6rem' }}
+                >
+                  <div>
+                    <span
+                      className={
+                        'subtle-text' +
+                        (!desktopScreenCondition ? ' margin-left' : '')
+                      }
+                    >
+                      Paso 2 de 2
+                    </span>
+                    <h1 style={{ fontSize: '2.5rem' }}>
+                      Para terminar,
+                      <br /> definamos las condiciones de venta
+                    </h1>
+                  </div>
+                  {desktopScreenCondition && (
+                    <img
+                      src='https://http2.mlstatic.com/secure/sell/images/notebook-v2.svg'
+                      alt='arte de zapato'
+                    ></img>
+                  )}
                 </div>
-                <img
-                  src='https://http2.mlstatic.com/secure/sell/images/notebook-v2.svg'
-                  alt='arte de zapato'
-                ></img>
+                {updatingData ? (
+                  firstStep('disabled')
+                ) : updateError ? (
+                  <MessageBox variant='danger'>{updateError}</MessageBox>
+                ) : (
+                  firstStep()
+                )}
+                {updatingData && percentage >= 25 ? (
+                  secondStep('disabled')
+                ) : percentage === 25 && updateError ? (
+                  <MessageBox variant='danger'>{updateError}</MessageBox>
+                ) : percentage >= 25 ? (
+                  secondStep()
+                ) : (
+                  maxPercentage >= 25 && secondStep('disabled')
+                )}
+                {updatingData && percentage >= 50 ? (
+                  thirdStep('disabled')
+                ) : percentage === 50 && updateError ? (
+                  <MessageBox variant='danger'>{updateError}</MessageBox>
+                ) : percentage >= 50 ? (
+                  thirdStep()
+                ) : (
+                  maxPercentage >= 50 && thirdStep('disabled')
+                )}
+                {updatingData && percentage >= 75 ? (
+                  fourthStep('disabled')
+                ) : percentage === 75 && updateError ? (
+                  <MessageBox variant='danger'>{updateError}</MessageBox>
+                ) : percentage >= 75 ? (
+                  fourthStep()
+                ) : (
+                  maxPercentage >= 75 && fourthStep('disabled')
+                )}
+                {updatingData && percentage >= 75 ? (
+                  fifthStep('disabled')
+                ) : percentage === 75 && updateError ? (
+                  <MessageBox variant='danger'>{updateError}</MessageBox>
+                ) : percentage >= 75 ? (
+                  fifthStep()
+                ) : (
+                  maxPercentage >= 75 && fifthStep('disabled')
+                )}
+                {percentage >= 75 &&
+                  (!editingDescription && !editingVideo
+                    ? postBtn()
+                    : postBtn('disabled'))}
               </div>
-              {updatingData ? (
-                firstStep('disabled')
-              ) : updateError ? (
-                <MessageBox variant='danger'>{updateError}</MessageBox>
-              ) : (
-                firstStep()
-              )}
-              {updatingData && percentage >= 25 ? (
-                secondStep('disabled')
-              ) : percentage === 25 && updateError ? (
-                <MessageBox variant='danger'>{updateError}</MessageBox>
-              ) : percentage >= 25 ? (
-                secondStep()
-              ) : (
-                maxPercentage >= 25 && secondStep('disabled')
-              )}
-              {updatingData && percentage >= 50 ? (
-                thirdStep('disabled')
-              ) : percentage === 50 && updateError ? (
-                <MessageBox variant='danger'>{updateError}</MessageBox>
-              ) : percentage >= 50 ? (
-                thirdStep()
-              ) : (
-                maxPercentage >= 50 && thirdStep('disabled')
-              )}
-              {updatingData && percentage >= 75 ? (
-                fourthStep('disabled')
-              ) : percentage === 75 && updateError ? (
-                <MessageBox variant='danger'>{updateError}</MessageBox>
-              ) : percentage >= 75 ? (
-                fourthStep()
-              ) : (
-                maxPercentage >= 75 && fourthStep('disabled')
-              )}
-              {updatingData && percentage >= 75 ? (
-                fifthStep('disabled')
-              ) : percentage === 75 && updateError ? (
-                <MessageBox variant='danger'>{updateError}</MessageBox>
-              ) : percentage >= 75 ? (
-                fifthStep()
-              ) : (
-                maxPercentage >= 75 && fifthStep('disabled')
-              )}
-              {percentage >= 75 &&
-                (!editingDescription && !editingVideo
-                  ? postBtn()
-                  : postBtn('disabled'))}
             </div>
           </>
         ))

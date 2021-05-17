@@ -12,14 +12,18 @@ const ChangePasswordScreen = (props) => {
   const userDetails = useSelector((state) => state.userDetails);
   const { loading, user, error } = userDetails;
   const userLogin = useSelector((state) => state.userLogin);
-  const { user: loggedUser, error: loginError } = userLogin;
+  const {
+    user: loggedUser,
+    error: loginError,
+    loading: loadingUser,
+  } = userLogin;
   const userUpdate = useSelector((state) => state.userUpdate);
   const { user: userUpdated, error: updateError } = userUpdate;
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const confirmPasswordError = 'Las claves deben ser iguales';
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmited, setIsSubmited] = useState(false);
   const [localError, setLocalError] = useState(false);
 
@@ -34,6 +38,7 @@ const ChangePasswordScreen = (props) => {
     if (userId) {
       dispatch(detailsUser(userId._id));
     } else {
+      console.log('hi');
       setLocalError(true);
     }
   }, [dispatch]);
@@ -44,7 +49,7 @@ const ChangePasswordScreen = (props) => {
   }, [error, loginError, updateError]);
 
   useEffect(() => {
-    userUpdated && props.history.push('/');
+    if (userUpdated) window.location.href = '/';
   }, [userUpdated, props]);
 
   useEffect(() => {
@@ -60,15 +65,11 @@ const ChangePasswordScreen = (props) => {
   }, [password]);
 
   useEffect(() => {
-    loggedUser &&
+    !loadingUser &&
       !userUpdated &&
-      dispatch(
-        updateUser(
-          { _id: loggedUser._id, password, token: loggedUser.token },
-          true
-        )
-      );
-  }, [loggedUser, dispatch, password, userUpdated]);
+      isSubmited &&
+      dispatch(updateUser({ password }, true));
+  }, [loggedUser, dispatch, password, userUpdated, isSubmited, loadingUser]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -76,12 +77,14 @@ const ChangePasswordScreen = (props) => {
       dispatch(
         loginUserWithCode(user._id, process.env.REACT_APP_CHANGE_PSW_CODE)
       );
+      setIsSubmited(true);
     } else {
+      setConfirmPassword('Las claves deben ser iguales');
       setIsSubmited(true);
     }
   };
   return (
-    <>
+    <div className='width-100 flex-center'>
       {localError ? (
         <MessageBox variant='danger'>
           Ha ocurrido un error, por favor comienza de nuevo el proceso para
@@ -90,7 +93,7 @@ const ChangePasswordScreen = (props) => {
       ) : loading ? (
         <LoadingCircle color='blue' />
       ) : (
-        <form onSubmit={submitHandler}>
+        <form onSubmit={submitHandler} style={{ marginTop: '8rem' }}>
           <div className='screen-mini-card medium'>
             <div className='screen-mini-card-header'>
               <h2>Cambia tu clave</h2>
@@ -103,7 +106,10 @@ const ChangePasswordScreen = (props) => {
                     value={password}
                     type='password'
                     maxLength='20'
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setConfirmPasswordError('');
+                    }}
                   ></input>
                   <div
                     className={
@@ -140,7 +146,10 @@ const ChangePasswordScreen = (props) => {
                     value={confirmPassword}
                     type='password'
                     maxLength='20'
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setConfirmPasswordError('');
+                    }}
                   ></input>
                   <div
                     className={
@@ -174,7 +183,7 @@ const ChangePasswordScreen = (props) => {
           </button>
         </form>
       )}
-    </>
+    </div>
   );
 };
 

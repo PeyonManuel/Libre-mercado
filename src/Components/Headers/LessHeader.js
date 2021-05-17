@@ -1,10 +1,13 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const LessHeader = (props) => {
   const userLogin = useSelector((state) => state.userLogin);
   const { user } = userLogin;
-  const dispatch = useDispatch();
+
+  useEffect(() => {
+    document.querySelector('.grid-container').classList.add('less-header');
+  }, []);
 
   useEffect(() => {
     switch (props.location.pathname) {
@@ -16,7 +19,7 @@ const LessHeader = (props) => {
         document.querySelector('#notificaciones') &&
           document.querySelector('#notificaciones').classList.add('current');
         break;
-      case '/compras':
+      case '/mis-compras':
         document.querySelector('#compras') &&
           document.querySelector('#compras').classList.add('current');
         break;
@@ -96,7 +99,7 @@ const LessHeader = (props) => {
         </a>
         <ul className='dropdown-content less-header'>
           <li>
-            <a className='nodecoration' href={'/user/' + user._id}>
+            <a className='nodecoration' href='/mis-datos'>
               <i className='fa fa-user  fa-3x'></i>
               <span>{' Hola ' + user.name}</span>
             </a>
@@ -107,31 +110,30 @@ const LessHeader = (props) => {
             </a>
           </li>
           <li>
-            <a className='nodecoration' href='#Preguntas'>
+            <a className='nodecoration' href='/Preguntas'>
               Preguntas
             </a>
           </li>
           <li className='separator'>
-            <a className='nodecoration' href='#Publicaciones'>
+            <a className='nodecoration' href='/publicaciones'>
               Publicaciones
             </a>
           </li>
           <li>
-            <a className='nodecoration' href='#Ventas'>
+            <a className='nodecoration' href='/mis-ventas'>
               Ventas
             </a>
           </li>
           <li>
-            <a className='nodecoration separator' href='#Misdatos'>
+            <a className='nodecoration separator' href='/mis-datos'>
               Mis datos
             </a>
           </li>
           <li className='separator'>
             <a
               className='nodecoration'
-              href='#salir'
+              href={props.location.search}
               onClick={() => {
-                dispatch({ type: 'USER_LOGIN_RESET' });
                 localStorage.removeItem('userInfo');
               }}
             >
@@ -150,7 +152,7 @@ const LessHeader = (props) => {
               <a
                 className='nodecoration'
                 style={{ color: 'rgba(0, 0, 0, 0.8)', margin: '1rem 0rem' }}
-                href={'/user/' + user._id}
+                href='/mis-datos'
               >
                 <i className='fa fa-user  fa-3x'></i>
                 <span>{' Hola ' + user.name}</span>
@@ -203,7 +205,7 @@ const LessHeader = (props) => {
               <a
                 id='compras'
                 className='nodecoration small-nav-bar'
-                href='/compras'
+                href='/mis-compras'
               >
                 <i className='fas fa-shopping-bag fa-lg'></i>
                 Mis compras
@@ -222,16 +224,6 @@ const LessHeader = (props) => {
               </a>
             </li>
           )}
-          <li>
-            <a
-              id='ofertas'
-              className='nodecoration small-nav-bar'
-              href='/ofertas'
-            >
-              <i className='fas fa-percentage fa-lg'></i>
-              Ofertas
-            </a>
-          </li>
           {user && (
             <li>
               <a
@@ -252,16 +244,6 @@ const LessHeader = (props) => {
             >
               <i className='fas fa-ticket-alt fa-lg'></i>
               Vender
-            </a>
-          </li>
-          <li className='separator'>
-            <a
-              id='categorias'
-              className='nodecoration small-nav-bar'
-              href='/categorias'
-            >
-              <i className='fas fa-list-ul fa-lg'></i>
-              Categorias
             </a>
           </li>
           <li className='separator'>

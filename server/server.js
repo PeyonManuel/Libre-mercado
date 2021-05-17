@@ -7,6 +7,8 @@ import categoryRouter from './Routers/categoryRouter.js';
 import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import addressRouter from './Routers/addressRouter.js';
+import orderRouter from './Routers/orderRouter.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -28,6 +30,8 @@ mongoose.connect(
 app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);
 app.use('/api/categories', categoryRouter);
+app.use('/api/addresses', addressRouter);
+app.use('/api/orders', orderRouter);
 
 app.use(express.static(path.join(__dirname, '..', 'build')));
 app.use(express.static('public'));

@@ -4,6 +4,7 @@ import { deleteProductDrafts, detailsUser } from '../Actions/userActions';
 import MessageBox from '../Components/MessageBox';
 import { Redirect } from 'react-router-dom';
 import LoadingCircle from '../Components/LoadingCircle';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const DraftsScreen = () => {
   const userLogin = useSelector((state) => state.userLogin);
@@ -35,7 +36,7 @@ const DraftsScreen = () => {
   ];
 
   useEffect(() => {
-    dispatch(detailsUser(user._id));
+    user && dispatch(detailsUser(user._id));
   }, [user, dispatch]);
 
   useEffect(() => {
@@ -68,14 +69,18 @@ const DraftsScreen = () => {
                 alt='Imagen del producto'
               />
               <div className='column'>
-                <span>{productDrafts[i].name}</span>
+                <span>
+                  {productDrafts[i].name.length < 19
+                    ? productDrafts[i].name
+                    : productDrafts[i].name.slice(0, 18) + '...'}
+                </span>
                 <span className='subtle-text margin-top'>
                   <img
                     className='very-small little-margin-right'
                     src='https://svgshare.com/i/UJR.svg'
                     alt=''
                   />
-                  {'Publicación iniciada el ' +
+                  {(desktopScreenCondition ? 'Publicación iniciada el ' : '') +
                     parseInt(productDrafts[i].date.split('-')[2]) +
                     ' de ' +
                     months[parseInt(productDrafts[i].date.split('-')[1]) - 1]}
@@ -100,7 +105,7 @@ const DraftsScreen = () => {
     return drafts;
   };
   return (
-    <>
+    <div className='width-100 flex-center'>
       <div className='extra-header post'></div>
 
       {error || detailsError ? (
@@ -113,7 +118,7 @@ const DraftsScreen = () => {
         <Redirect to='/vender/producto' />
       ) : (
         productDrafts.length > 0 && (
-          <>
+          <div>
             <div className='column flex-start'>
               <h1>
                 Hola {user && user.name},<br /> ¡qué bueno volver a verte!
@@ -135,10 +140,10 @@ const DraftsScreen = () => {
                 </div>
               )}
             </div>
-          </>
+          </div>
         )
       )}
-    </>
+    </div>
   );
 };
 

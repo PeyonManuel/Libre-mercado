@@ -3,8 +3,7 @@ import expressAsyncHandler from 'express-async-handler';
 import User from '../Models/userModel.js';
 import bcrypt from 'bcryptjs';
 import data from '../data.js';
-import ObjectID from 'mongodb';
-import { generateRandomNumber, generateToken, isAuth } from '../utils.js';
+import { generateToken, isAuth } from '../utils.js';
 
 const userRouter = express.Router();
 
@@ -56,9 +55,7 @@ userRouter.post(
 userRouter.post(
   '/login',
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body._id).populate(
-      'userData.favorites'
-    );
+    const user = await User.findById(req.body._id);
     if (user) {
       if (
         req.body.password
@@ -68,6 +65,7 @@ userRouter.post(
         res.send({
           _id: user._id,
           name: user.name,
+          userName: user.userName,
           email: user.email,
           userData: user.userData,
           isAdmin: user.isAdmin,
@@ -83,16 +81,31 @@ userRouter.post(
 );
 
 userRouter.post(
+  '/authenticate',
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.body._id);
+    if (user) {
+      if (bcrypt.compareSync(req.body.password, user.password)) {
+        res.send({ success: true });
+      } else {
+        res.status(401).send({ message: 'Clave incorrecta' });
+      }
+    } else {
+      res.status(404).send({ message: 'Usuario no encontrado' });
+    }
+  })
+);
+
+userRouter.post(
   '/loginwithcode',
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.userId).populate(
-      'userData.favorites'
-    );
+    const user = await User.findById(req.body.userId);
     if (user) {
       if (req.body.code === process.env.REACT_APP_CHANGE_PSW_CODE) {
         res.send({
           _id: user._id,
           name: user.name,
+          userName: user.userName,
           email: user.email,
           userData: user.userData,
           isAdmin: user.isAdmin,
@@ -113,27 +126,24 @@ userRouter.post(
   '/updatefavs',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.user._id).populate(
-      'userData.favorites'
-    );
+    const user = await User.findById(req.body.user._id);
     if (user) {
       const exists = user.userData.favorites.find(
-        (fav) => fav._id.toString() === req.body.updateFav._id
+        (fav) => fav.toString() === req.body.updateFav._id
       );
       if (exists && !req.body.updateFav.noDelete) {
         user.userData.favorites = user.userData.favorites.filter(
-          (fav) => fav._id.toString() !== req.body.updateFav._id
+          (fav) => fav.toString() !== req.body.updateFav._id
         );
       } else if (!exists) {
         user.userData.favorites.push(req.body.updateFav._id);
       }
       await user.save();
-      const updatedUser = await User.findById(req.body.user._id).populate(
-        'userData.favorites'
-      );
+      const updatedUser = await User.findById(req.body.user._id);
       res.send({
         _id: updatedUser._id,
         name: updatedUser.name,
+        userName: updatedUser.userName,
         email: updatedUser.email,
         userData: updatedUser.userData,
         isAdmin: updatedUser.isAdmin,
@@ -148,9 +158,7 @@ userRouter.post(
   '/updateProductDrafts',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.user._id).populate(
-      'userData.favorites'
-    );
+    const user = await User.findById(req.body.user._id);
     if (user) {
       const updatingDraft = user.productDrafts.find(
         (productDraft) => productDraft._id.toString() === req.body.draft._id
@@ -163,12 +171,11 @@ userRouter.post(
         user.productDrafts.push(req.body.draft);
       }
       await user.save();
-      const updatedUser = await User.findById(req.body.user._id).populate(
-        'userData.favorites'
-      );
+      const updatedUser = await User.findById(req.body.user._id);
       res.send({
         _id: updatedUser._id,
         name: updatedUser.name,
+        userName: updatedUser.userName,
         email: updatedUser.email,
         userData: updatedUser.userData,
         isAdmin: updatedUser.isAdmin,
@@ -185,9 +192,7 @@ userRouter.post(
   '/deleteProductDrafts',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.user._id).populate(
-      'userData.favorites'
-    );
+    const user = await User.findById(req.body.user._id);
     if (
       user &&
       user.productDrafts.find(
@@ -199,12 +204,11 @@ userRouter.post(
         1
       );
       await user.save();
-      const updatedUser = await User.findById(req.body.user._id).populate(
-        'userData.favorites'
-      );
+      const updatedUser = await User.findById(req.body.user._id);
       res.send({
         _id: updatedUser._id,
         name: updatedUser.name,
+        userName: updatedUser.userName,
         email: updatedUser.email,
         userData: updatedUser.userData,
         isAdmin: updatedUser.isAdmin,
@@ -220,23 +224,24 @@ userRouter.post(
   '/addProducts',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.user._id).populate(
-      'userData.favorites'
-    );
+    const user = await User.findById(req.body.user._id);
     if (user) {
-      user.products.push({ productId: req.body.productId });
-      await user.save();
-      const updatedUser = await User.findById(req.body.user._id).populate(
-        'userData.favorites'
-      );
-      res.send({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        userData: updatedUser.userData,
-        isAdmin: updatedUser.isAdmin,
-        token: req.body.user.token,
-      });
+      if (req.body.product.seller.toString() === user._id.toString()) {
+        user.products.push(req.body.product._id);
+        await user.save();
+        const updatedUser = await User.findById(req.body.user._id);
+        res.send({
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          userName: updatedUser.userName,
+          email: updatedUser.email,
+          userData: updatedUser.userData,
+          isAdmin: updatedUser.isAdmin,
+          token: req.body.user.token,
+        });
+      } else {
+        res.status(404).send({ message: 'El producto no es de el usuario' });
+      }
     } else {
       res.status(404).send({ message: 'Usuario no encontrado' });
     }
@@ -247,9 +252,7 @@ userRouter.post(
   '/deleteProducts',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.user._id).populate(
-      'userData.favorites'
-    );
+    const user = await User.findById(req.body.user._id);
     if (
       user &&
       user.products.find(
@@ -261,12 +264,11 @@ userRouter.post(
         1
       );
       await user.save();
-      const updatedUser = await User.findById(req.body.user._id).populate(
-        'userData.favorites'
-      );
+      const updatedUser = await User.findById(req.body.user._id);
       res.send({
         _id: updatedUser._id,
         name: updatedUser.name,
+        userName: updatedUser.userName,
         email: updatedUser.email,
         userData: updatedUser.userData,
         isAdmin: updatedUser.isAdmin,
@@ -274,76 +276,6 @@ userRouter.post(
       });
     } else {
       res.status(404).send({ message: 'Usuario o draft no encontrado' });
-    }
-  })
-);
-
-userRouter.post(
-  '/updateAddresses',
-  isAuth,
-  expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.user._id).populate(
-      'userData.favorites'
-    );
-    if (user) {
-      const updatingAddress = user.addresses.find(
-        (address) => address._id.toString() === req.body.address._id
-      );
-      if (updatingAddress) {
-        user.addresses[user.addresses.indexOf(updatingAddress)] =
-          req.body.address;
-      } else {
-        if (req.body.address._id === null) {
-          delete req.body.address._id;
-        }
-        user.addresses.push(req.body.address);
-      }
-      await user.save();
-      const updatedUser = await User.findById(req.body.user._id).populate(
-        'userData.favorites'
-      );
-      res.send({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        userData: updatedUser.userData,
-        isAdmin: updatedUser.isAdmin,
-        token: req.body.user.token,
-      });
-    } else {
-      res.status(404).send({ message: 'Usuario no encontrado' });
-    }
-  })
-);
-
-userRouter.post(
-  '/deleteAddresses',
-  isAuth,
-  expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.user._id).populate(
-      'userData.favorites'
-    );
-    if (user) {
-      user.addresses.splice(
-        user.addresses.findIndex(
-          (address) => address._id === req.body.addressId
-        ),
-        1
-      );
-      await user.save();
-      const updatedUser = await User.findById(req.body.user._id).populate(
-        'userData.favorites'
-      );
-      res.send({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        userData: updatedUser.userData,
-        isAdmin: updatedUser.isAdmin,
-        token: req.body.user.token,
-      });
-    } else {
-      res.status(404).send({ message: 'Usuario no encontrado' });
     }
   })
 );
@@ -395,6 +327,7 @@ userRouter.post(
     res.send({
       _id: newUser._id,
       name: newUser.name,
+      userName: newUser.userName,
       email: newUser.email,
       userData: newUser.userData,
       isAdmin: newUser.isAdmin,
@@ -407,9 +340,7 @@ userRouter.post(
   '/updateuser',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.body.user._id).populate(
-      'userData.favorites'
-    );
+    const user = await User.findById(req.body.user._id);
     if (user) {
       if (req.body.updatePassword) {
         await user.updateOne({
@@ -419,17 +350,261 @@ userRouter.post(
         await user.updateOne({ ...req.body.user });
       }
       await user.save();
-      const updatedUser = await User.findById(req.body.user._id).populate(
-        'userData.favorites'
-      );
+      const updatedUser = await User.findById(req.body.user._id);
       res.send({
         _id: updatedUser._id,
         name: updatedUser.name,
+        userName: updatedUser.userName,
         email: updatedUser.email,
         userData: updatedUser.userData,
         isAdmin: updatedUser.isAdmin,
-        token: req.body.user.token,
+        token: req.token,
       });
+    } else {
+      res.status(404).send({ message: 'Usuario no encontrado' });
+    }
+  })
+);
+
+userRouter.post(
+  '/updatehistory',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      switch (req.body.typeOfUpdate) {
+        case 'add':
+          user.history.unshift(req.body.productId);
+          if (user.history.length > 5000) {
+            user.history.pop();
+          }
+          break;
+        case 'remove':
+          user.history = user.history.filter(
+            (historyItem) => historyItem.toString() !== req.body.productId
+          );
+          break;
+        case 'readd':
+          user.history = user.history.filter(
+            (historyItem) =>
+              historyItem.toString() !== req.body.productId.toString()
+          );
+          user.history.unshift(req.body.productId);
+          break;
+        default:
+          res
+            .status(422)
+            .send({ message: 'No se especifico el tipo de actualización' });
+          break;
+      }
+      await user.save();
+      const updatedUser = await User.findById(req.user._id);
+      res.send({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        userName: updatedUser.userName,
+        email: updatedUser.email,
+        userData: updatedUser.userData,
+        isAdmin: updatedUser.isAdmin,
+        token: req.token,
+      });
+    } else {
+      res.status(404).send({ message: 'Usuario no encontrado' });
+    }
+  })
+);
+
+userRouter.post(
+  '/removehistory',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.history = [];
+      await user.save();
+      const updatedUser = await User.findById(req.user._id);
+      res.send({
+        history: updatedUser.history,
+      });
+    } else {
+      res.status(404).send({ message: 'Usuario no encontrado' });
+    }
+  })
+);
+
+userRouter.get(
+  '/gethistorydetails',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).populate('history');
+    if (user) res.send(user.history);
+    else res.status(404).send({ mesage: 'User not found' });
+  })
+);
+
+userRouter.post(
+  '/updatecart',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      const existent = user.cart.find(
+        (item) => item.product.toString() === req.body.item.product.toString()
+      );
+      switch (req.body.typeOfUpdate) {
+        case 'add':
+          if (req.body.item.quantity > 0) {
+            if (existent) {
+              user.cart = user.cart.map((cartItem) =>
+                cartItem.product.toString() === req.body.item.product.toString()
+                  ? {
+                      product: req.body.item.product,
+                      quantity: existent.quantity + req.body.item.quantity,
+                    }
+                  : cartItem
+              );
+            }
+          } else {
+            res
+              .status(422)
+              .send({ message: 'La cantidad debe ser mayor a cero' });
+          }
+          if (!existent) {
+            user.cart.unshift(req.body.item);
+          }
+          break;
+        case 'update':
+          if (existent) {
+            user.cart[user.cart.indexOf(existent)] = req.body.item;
+          } else {
+            res
+              .status(404)
+              .send({ message: 'Articulo del carrito no encontrado' });
+          }
+          break;
+        case 'changesave':
+          if (existent) {
+            user.cart[user.cart.indexOf(existent)] = {
+              product: existent.product,
+              quantity: existent.quantity,
+              saved: !existent.saved,
+            };
+          }
+          break;
+        case 'remove':
+          user.cart = user.cart.filter(
+            (cartItem) =>
+              cartItem.product.toString() !== req.body.item.product.toString()
+          );
+          break;
+        default:
+          res
+            .status(422)
+            .send({ message: 'No se especifico el tipo de actualización' });
+          break;
+      }
+      await user.save();
+      const updatedUser = await User.findById(req.user._id).populate(
+        'cart.product'
+      );
+      const updatedItem = updatedUser.cart.find(
+        (item) =>
+          item.product._id.toString() === req.body.item.product.toString()
+      );
+      res.send(updatedItem);
+    } else {
+      res.status(404).send({ message: 'Usuario no encontrado' });
+    }
+  })
+);
+
+userRouter.get(
+  '/getcartdetails',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).populate('cart.product');
+    if (user) res.send(user.cart);
+    else res.status(404).send({ message: 'Usuario no encontrado' });
+  })
+);
+
+userRouter.post(
+  '/cartremovemultiple',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      req.body.productsIds.forEach((id) => {
+        const itemToDelete = user.cart.find(
+          (cartItem) => cartItem.product.toString() === id.toString()
+        );
+        itemToDelete && user.cart.splice(user.cart.indexOf(itemToDelete), 1);
+      });
+      const newUser = await user.save();
+      res.send({ message: 'Carrito limpiado' });
+    } else res.status(404).send({ message: 'Usuario no encontrado' });
+  })
+);
+
+userRouter.post(
+  '/pushnotification',
+  expressAsyncHandler(async (req, res) => {
+    if (req.body.code === process.env.REACT_APP_NOTIFICATION_CODE) {
+      const user = await User.findById(req.body.userId);
+      if (user) {
+        user.notifications = user.userData.notifications.unshift(
+          req.body.notification
+        );
+        await user.save();
+        const updatedUser = await User.findById(req.body.userId);
+        res.send({
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          userName: updatedUser.userName,
+          email: updatedUser.email,
+          userData: updatedUser.userData,
+          isAdmin: updatedUser.isAdmin,
+          token: req.token,
+        });
+      } else {
+        res.status(404).send({ message: 'Usuario no encontrado' });
+      }
+    } else {
+      res.status(401).send({ message: 'No tiene autorizacion' });
+    }
+  })
+);
+
+userRouter.post(
+  '/deletenotification',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      if (
+        user.userData.notifications.find(
+          (notification) =>
+            notification._id.toString() === req.body.notificationId.toString()
+        )
+      ) {
+        user.userData.notifications = user.userData.notifications.filter(
+          (notification) =>
+            notification._id.toString() !== req.body.notificationId.toString()
+        );
+        await user.save();
+        const updatedUser = await User.findById(req.user._id);
+        res.send({
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          userName: updatedUser.userName,
+          email: updatedUser.email,
+          userData: updatedUser.userData,
+          isAdmin: updatedUser.isAdmin,
+          token: req.token,
+        });
+      } else {
+        res.status(404).send({ message: 'Notificación no encontrada' });
+      }
     } else {
       res.status(404).send({ message: 'Usuario no encontrado' });
     }

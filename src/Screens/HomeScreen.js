@@ -6,6 +6,7 @@ import HomeScreenExhibitor from '../Components/HomeScreenExhibitor';
 import LoadingCircle from '../Components/LoadingCircle';
 import MessageBox from '../Components/MessageBox';
 import Product from '../Components/Product';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const HomeScreen = (props) => {
   const dispatch = useDispatch();
@@ -15,17 +16,14 @@ const HomeScreen = (props) => {
   const { user } = userLogin;
   const [ammountToMoveProductList, setammountToMoveProductList] = useState(0);
   const [productListContainerWidth, setProductListContainerWidth] = useState(
-    window.devicePixelRatio < 2
-      ? Math.floor(window.innerWidth / 240) * 240
-      : '100%'
+    desktopScreenCondition ? Math.floor(window.innerWidth / 240) * 240 : '100%'
   );
-  console.log(window.devicePixelRatio);
   useEffect(() => {
     dispatch(listProducts());
   }, [dispatch]);
   useEffect(() => {
     const updateProductListContainerWidth = () => {
-      if (window.devicePixelRatio < 2) {
+      if (desktopScreenCondition) {
         setProductListContainerWidth(Math.floor(window.innerWidth / 240) * 240);
       } else {
         setProductListContainerWidth('100%');
@@ -51,13 +49,11 @@ const HomeScreen = (props) => {
   const moveList = (moveTo) => {
     if (moveTo === 'forward') {
       setammountToMoveProductList(
-        ammountToMoveProductList +
-          (window.screen.width / devicePixelRatio) * 0.9375
+        ammountToMoveProductList + 1200 * devicePixelRatio
       );
     } else {
       setammountToMoveProductList(
-        ammountToMoveProductList -
-          (window.screen.width / devicePixelRatio) * 0.9375
+        ammountToMoveProductList - 1200 * devicePixelRatio
       );
     }
   };
@@ -67,7 +63,7 @@ const HomeScreen = (props) => {
       className='column flex-center'
       style={{
         overflow: 'hidden',
-        width: window.devicePixelRatio < 2 ? 'calc(100vw - 1.7rem)' : '100%',
+        width: desktopScreenCondition ? 'calc(100vw - 1.7rem)' : '100%',
       }}
     >
       <HomeScreenExhibitor />
@@ -83,45 +79,48 @@ const HomeScreen = (props) => {
           {loading ? (
             <LoadingCircle color='blue' />
           ) : (
-            <div
-              className='flex-center'
-              style={{
-                position: 'relative',
-                width: devicePixelRatio < 2 ? '120rem' : '100vw',
-              }}
-            >
-              {window.devicePixelRatio < 2 && ammountToMoveProductList > 0 && (
+            <div className='relative'>
+              {desktopScreenCondition && ammountToMoveProductList > 0 && (
                 <button
                   className='card-back-button'
                   onClick={() => moveList('backwards')}
                 ></button>
               )}
-              <div className='product-list'>
-                <h1>Productos</h1>
-                <div
-                  className='row top product-cards'
-                  id='product-cards'
-                  style={{
-                    transform:
-                      'translate3d(' +
-                      -ammountToMoveProductList +
-                      'px, 0px, 0px)',
-                  }}
-                >
-                  {products.map((product) => (
-                    <>
-                      <Product
-                        key={product._id}
-                        product={product}
-                        user={user && user}
-                        history={props.history}
-                      />
-                    </>
-                  ))}
+              <div
+                className='flex-center relative'
+                style={{
+                  width: desktopScreenCondition ? '120rem' : '100vw',
+                }}
+              >
+                <div className='product-list'>
+                  <h1>Productos</h1>
+                  <div
+                    className='row top product-cards'
+                    id='product-cards'
+                    style={{
+                      transform:
+                        'translate3d(' +
+                        -ammountToMoveProductList +
+                        'px, 0px, 0px)',
+                    }}
+                  >
+                    {products
+                      .filter((product, i) => {
+                        return i < 5;
+                      })
+                      .map((product) => (
+                        <>
+                          <Product
+                            key={product._id}
+                            product={product}
+                            user={user && user}
+                          />
+                        </>
+                      ))}
+                  </div>
                 </div>
               </div>
-
-              {window.devicePixelRatio < 2 && (
+              {desktopScreenCondition && (
                 <button
                   id='card-next-button'
                   className='card-next-button'

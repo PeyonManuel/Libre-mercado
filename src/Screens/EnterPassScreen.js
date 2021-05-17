@@ -24,6 +24,12 @@ const EnterPassScreen = (props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    if (!user) {
+      window.location.href = '/login';
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (userSuccess) {
       const urlParams = new URLSearchParams(props.location.search);
       const condition = urlParams
@@ -42,10 +48,20 @@ const EnterPassScreen = (props) => {
             );
             break;
           case 'vender':
-            props.history.push('/vender');
+            window.location.href = '/vender';
             break;
           case 'new-address':
-            props.history.push('/nueva-direccion');
+            window.location.href = '/nueva-direccion';
+            break;
+          case 'product-question':
+            const productQuestion = localStorage.getItem('product-question')
+              ? JSON.parse(localStorage.getItem('product-question'))
+              : null;
+            if (productQuestion) {
+              window.location.href = '/product/' + productQuestion._id;
+            } else {
+              window.location.href = '/';
+            }
             break;
           default:
             props.history.push('/');
@@ -77,7 +93,7 @@ const EnterPassScreen = (props) => {
   };
 
   return (
-    <>
+    <div className='width-100 flex-center'>
       <div className='extra-header'></div>
       <form onSubmit={submitHandler} className='screen-card login-screen'>
         <div>
@@ -139,7 +155,7 @@ const EnterPassScreen = (props) => {
           </button>
         </div>
       </form>
-    </>
+    </div>
   );
 };
 

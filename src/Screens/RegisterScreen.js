@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { userVerifyEmailExists } from '../Actions/userActions';
-import LoadingCircle from '../Components/LoadingCircle';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const RegisterScreen = (props) => {
   document.body.style.backgroundColor = '#f7f7f7';
@@ -28,8 +28,7 @@ const RegisterScreen = (props) => {
   );
   const [emailExistsScreen, setEmailExistsScreen] = useState(false);
   const [isSubmited, setIsSubmited] = useState(false);
-  const [loginType, setLoginType] = useState('');
-  const [btnPressed, setBtnPressed] = useState(false);
+  const [disableBtn, setDisableBtn] = useState(true);
 
   const wrapperRef = useRef(null);
 
@@ -38,34 +37,11 @@ const RegisterScreen = (props) => {
   }, []);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(props.location.search);
-    const condition = urlParams
-      ? urlParams.get('loginType')
-        ? true
-        : false
-      : false;
-    if (condition) {
-      switch (urlParams.get('loginType')) {
-        case 'favorito':
-          setLoginType('favorito');
-          break;
-        case 'vender':
-          setLoginType('vender');
-          break;
-        case 'new-address':
-          setLoginType('new-address');
-          break;
-        default:
-          break;
-      }
-    }
-  }, [props]);
-
-  useEffect(() => {
     const handleClickOutside = (event) => {
       const { current: wrap } = wrapperRef;
       if (wrap && !wrap.contains(event.target) && emailExistsScreen) {
         setEmailExistsScreen(false);
+        setDisableBtn(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -76,26 +52,19 @@ const RegisterScreen = (props) => {
 
   useEffect(() => {
     if (checkedEmail && checkedEmail.exists === false && success) {
-      switch (loginType) {
-        case 'favorito':
-          props.history.push(
+      const urlParams = new URLSearchParams(props.location.search);
+      const loginType = urlParams.get('loginType');
+      if (loginType) {
+        if ('favorito') {
+          window.location.href =
             '/email-validation?authType=register&loginType=favorito&item_id=' +
-              props.location.search.split('item_id=')[1]
-          );
-          break;
-        case 'vender':
-          props.history.push(
-            '/email-validation?authType=register&loginType=vender'
-          );
-          break;
-        case 'new-address':
-          props.history.push(
-            '/email-validation?authType=register&loginType=new-address'
-          );
-          break;
-        default:
-          props.history.push('/email-validation?authType=register');
-          break;
+            props.location.search.split('item_id=')[1];
+        } else {
+          window.location.href =
+            '/email-validation?authType=register&loginType=' + loginType;
+        }
+      } else {
+        window.location.href = '/email-validation?authType=register';
       }
       dispatch({ type: 'USER_VERIFYEMAILEXISTS_RESET_SUCCESS' });
     } else if (checkedEmail && checkedEmail.exists === true && success) {
@@ -103,7 +72,7 @@ const RegisterScreen = (props) => {
       setEmailExistsScreen(true);
       dispatch({ type: 'USER_VERIFYEMAILEXISTS_RESET_SUCCESS' });
     }
-  }, [checkedEmail, props, dispatch, success, loginType]);
+  }, [checkedEmail, props, dispatch, success]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -168,12 +137,12 @@ const RegisterScreen = (props) => {
   }, [password]);
   const submitHandler = async (e) => {
     e.preventDefault();
-    setBtnPressed(true);
     const verifyEmail = async (email) => {
       try {
+        setDisableBtn(true);
         const data = await axios.get(
           'https://emailvalidation.abstractapi.com/v1/?api_key=' +
-            '991cebae87a64dd2a83faa0e62123f3b' +
+            process.env.REACT_APP_EMAIL_VALIDATION_API_KEY +
             '&email=' +
             email
         );
@@ -181,27 +150,36 @@ const RegisterScreen = (props) => {
           data &&
           data.data &&
           data.data.deliverability &&
-          data.data.deliverability === 'DELIVERABLE'
-        )
+          (data.data.deliverability === 'DELIVERABLE' ||
+            data.data.deliverability === 'UNKNOWN')
+        ) {
           return true;
-        else {
-          setBtnPressed(false);
+        } else {
+          setDisableBtn(false);
           return false;
         }
       } catch (error) {
-        setBtnPressed(false);
+        setDisableBtn(false);
+        setEmailError('Ha ocurrido un error, intenta nuevamente');
       }
     };
     setIsSubmited(true);
-    if (!(await verifyEmail(email.trim()))) {
-      setEmailError('Ingresá un E-mail valido');
+    const verifyEmailResponse = await verifyEmail(email.trim());
+    if (!verifyEmailResponse) {
+      console.log(verifyEmailResponse);
+      if (verifyEmailResponse === undefined) {
+        setEmailError('Has hecho muchos intentos');
+      }
+      if (verifyEmailResponse !== undefined) {
+        setEmailError('Ingresá un E-mail valido');
+      }
     } else {
       if (
         !(nameError || surnameError || dniError || emailError || passwordError)
       ) {
         dispatch(userVerifyEmailExists(email));
       } else {
-        setBtnPressed(false);
+        setDisableBtn(false);
       }
     }
   };
@@ -212,7 +190,10 @@ const RegisterScreen = (props) => {
           <div className='message-card screen-mini-card' ref={wrapperRef}>
             <button
               className='crossbtn'
-              onClick={() => setEmailExistsScreen(false)}
+              onClick={() => {
+                setDisableBtn(false);
+                setEmailExistsScreen(false);
+              }}
             >
               <i className='fas fa-times'></i>
             </button>
@@ -231,6 +212,7 @@ const RegisterScreen = (props) => {
               <button
                 className='secondary block'
                 onClick={() => {
+                  setDisableBtn(false);
                   setEmailExistsScreen(false);
                   if (document.getElementById('email')) {
                     document.getElementById('email').focus();
@@ -422,24 +404,20 @@ const RegisterScreen = (props) => {
                 <input
                   className={nameError ? ' error' : ''}
                   type='checkbox'
-                  onChange={() =>
-                    (document.getElementById(
-                      'submitbtn'
-                    ).disabled = !document.getElementById('submitbtn').disabled)
-                  }
+                  onChange={() => setDisableBtn(!disableBtn)}
                 />
                 <span className='checkmark'></span>
               </label>
             </div>
           </div>
-          <div style={{ padding: '2rem' }}>
+          <div className={desktopScreenCondition ? 'margin-top' : ''}>
             <button
               type='submit'
-              className={'primary big-form' + (btnPressed ? ' no-padding' : '')}
+              className='primary big-form'
               id='submitbtn'
-              disabled={true}
+              disabled={disableBtn}
             >
-              {btnPressed ? <LoadingCircle color='white' /> : 'Continuar'}
+              Continuar
             </button>
           </div>
         </form>
