@@ -115,7 +115,7 @@ const LoginScreen = (props) => {
             }}
             disabled={loading}
           >
-            {loading ? <LoadingCircle color='white' /> : 'Continuar'}
+            {loading ? <LoadingCircle color='blue' /> : 'Continuar'}
           </button>
           <button
             type='submit'

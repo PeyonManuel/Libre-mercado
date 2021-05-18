@@ -977,7 +977,7 @@ const ProductScreen = (props) => {
                     </pre>
                   </div>
                 )}
-                {user._id === product.seller._id
+                {user && user._id === product.seller._id
                   ? product.questions.length > 0
                   : true && (
                       <div className='product-questions separator width-100'>

@@ -163,7 +163,7 @@ const EnterPassScreen = (props) => {
             }}
             disabled={loading}
           >
-            {loading ? <LoadingCircle color='white' /> : 'Ingresar'}
+            {loading ? <LoadingCircle color='blue' /> : 'Ingresar'}
           </button>
           <button
             type='submit'
