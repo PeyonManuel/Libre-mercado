@@ -1,9 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 const LessHeader = (props) => {
   const userLogin = useSelector((state) => state.userLogin);
   const { user } = userLogin;
+
+  const [localNotifications, setLocalNotifications] = useState(
+    user && user.userData && user.userData.notifications
+      ? user.userData.notifications
+      : []
+  );
+
+  useEffect(() => {
+    if (user && user.userData && user.userData.notifications) {
+      setLocalNotifications(user.userData.notifications);
+    }
+  }, [user]);
 
   useEffect(() => {
     document.querySelector('.grid-container').classList.add('less-header');
@@ -105,7 +117,7 @@ const LessHeader = (props) => {
             </a>
           </li>
           <li className='separator'>
-            <a className='nodecoration ' href='#compras'>
+            <a className='nodecoration ' href='/mis-compras'>
               Compras
             </a>
           </li>
@@ -159,25 +171,31 @@ const LessHeader = (props) => {
               </a>
             ) : (
               <div className='small-navbar-notlogged-div'>
-                <i className='fa fa-user  fa-3x'></i>
-                <div className='column'>
-                  <span style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
-                    Bienvenido
-                  </span>
-                  <span>
-                    Ingresa a tu cuenta para ver tus compras, favoritos, etc.
-                  </span>
-                  <div
-                    className='row'
-                    style={{ paddingTop: '1rem', width: '100%' }}
-                  >
-                    <button className='primary' style={{ width: '49%' }}>
+                <div className='row nowrap'>
+                  <i className='fa fa-user  fa-3x'></i>
+                  <div className='column margin-left'>
+                    <span style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
+                      Bienvenido
+                    </span>
+                    <span>
+                      Ingresa a tu cuenta para ver tus compras, favoritos, etc.
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className='row'
+                  style={{ paddingTop: '1rem', width: '100%' }}
+                >
+                  <form action='/login' style={{ width: '49%' }}>
+                    <button type='submit' className='primary block'>
                       Ingresá
                     </button>
-                    <button className='secondary' style={{ width: '49%' }}>
+                  </form>
+                  <form action='/register' style={{ width: '49%' }}>
+                    <button className='secondary block margin-left'>
                       Creá tu cuenta
                     </button>
-                  </div>
+                  </form>
                 </div>
               </div>
             )}
@@ -192,14 +210,24 @@ const LessHeader = (props) => {
             <li>
               <a
                 id='notificaciones'
-                className='nodecoration small-nav-bar'
+                className='nodecoration small-nav-bar relative'
                 href='/notificaciones'
               >
-                <i className='fas fa-bell fa-lg'></i>
+                <i className='fas fa-bell fa-lg relative'>
+                  {' '}
+                  {localNotifications.length > 0 && (
+                    <div className='notification-badge'>
+                      {localNotifications.length < 10
+                        ? localNotifications.length
+                        : '+9'}
+                    </div>
+                  )}
+                </i>
                 Notificaciones
               </a>
             </li>
           )}
+
           {user && (
             <li>
               <a
@@ -215,6 +243,42 @@ const LessHeader = (props) => {
           {user && (
             <li>
               <a
+                id='ventas'
+                className='nodecoration small-nav-bar'
+                href='/mis-ventas'
+              >
+                <i className='fas fa-tags'></i>
+                Mis ventas
+              </a>
+            </li>
+          )}
+          {user && (
+            <li>
+              <a
+                id='preguntas'
+                className='nodecoration small-nav-bar'
+                href='/preguntas'
+              >
+                <i className='fas fa-question'></i>
+                Preguntas
+              </a>
+            </li>
+          )}
+          {user && (
+            <li>
+              <a
+                id='publicaciones'
+                className='nodecoration small-nav-bar'
+                href='/publicaciones'
+              >
+                <i className='fas fa-store'></i>
+                Publicaciones
+              </a>
+            </li>
+          )}
+          {user && (
+            <li>
+              <a
                 id='favoritos'
                 className='nodecoration small-nav-bar'
                 href='/favoritos'
@@ -224,18 +288,16 @@ const LessHeader = (props) => {
               </a>
             </li>
           )}
-          {user && (
-            <li>
-              <a
-                id='historial'
-                className='nodecoration small-nav-bar'
-                href='/historial'
-              >
-                <i className='fas fa-clock fa-lg'></i>
-                Historial
-              </a>
-            </li>
-          )}
+          <li>
+            <a
+              id='historial'
+              className='nodecoration small-nav-bar'
+              href='/historial'
+            >
+              <i className='fas fa-clock fa-lg'></i>
+              Historial
+            </a>
+          </li>
           <li>
             <a
               id='vender'
@@ -246,12 +308,21 @@ const LessHeader = (props) => {
               Vender
             </a>
           </li>
-          <li className='separator'>
-            <a id='ayuda' className='nodecoration small-nav-bar' href='/ayuda'>
-              <i className='fas fa-question-circle fa-lg'></i>
-              Ayuda
-            </a>
-          </li>
+          {user && (
+            <li>
+              <a
+                id='vender'
+                className='nodecoration small-nav-bar'
+                href='/'
+                onClick={() => {
+                  localStorage.removeItem('userInfo');
+                }}
+              >
+                <i className='fas fa-sign-out-alt'></i>
+                Salir
+              </a>
+            </li>
+          )}
         </ul>
       </nav>
     </header>

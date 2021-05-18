@@ -6,6 +6,7 @@ import { detailsUser } from '../Actions/userActions';
 import CheckoutSideBar from '../Components/CheckoutSideBar';
 import LoadingCircle from '../Components/LoadingCircle';
 import MessageBox from '../Components/MessageBox';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const CheckoutScreen = (props) => {
   const dispatch = useDispatch();
@@ -110,9 +111,11 @@ const CheckoutScreen = (props) => {
       <div className='checkout-shipping'>
         <h1>Opciones de envío a</h1>
         <div className='checkout-address'>
-          <div className='svg-container'>
-            <img src='https://svgshare.com/i/X3J.svg' alt='Ubicación'></img>
-          </div>
+          {desktopScreenCondition && (
+            <div className='svg-container'>
+              <img src='https://svgshare.com/i/X3J.svg' alt='Ubicación'></img>
+            </div>
+          )}
           <div className='checkout-address-details'>
             <span className='street'>
               {selectedAddress.street +
@@ -212,7 +215,10 @@ const CheckoutScreen = (props) => {
         <div className='checkout-address-hub-buttons'>
           {selectedAddress !== undefined && (
             <button
-              className='primary margin-right'
+              className={
+                'primary' +
+                (desktopScreenCondition ? ' margin-right' : ' block')
+              }
               onClick={() => {
                 dispatch(
                   updateAddress({
@@ -227,7 +233,9 @@ const CheckoutScreen = (props) => {
             </button>
           )}
           <button
-            className='secondary'
+            className={
+              'secondary' + (!desktopScreenCondition ? ' margin-top block' : '')
+            }
             onClick={() => {
               localStorage.setItem(
                 'localCheckout',
@@ -290,9 +298,7 @@ const CheckoutScreen = (props) => {
               packageArray[packageArray.length - 1].products.push({
                 _id: product._id,
                 name: productWithDetails ? productWithDetails.name : '',
-                image: productWithDetails.images
-                  ? productWithDetails.images[0]
-                  : '',
+                image: productWithDetails.cover ? productWithDetails.cover : '',
                 price: product.price,
                 quantity:
                   productQuantity > 5 - lastPackageTotalQuantity
@@ -317,8 +323,8 @@ const CheckoutScreen = (props) => {
                     name: productWithDetails.name
                       ? productWithDetails.name
                       : '',
-                    image: productWithDetails.images
-                      ? productWithDetails.images[0]
+                    image: productWithDetails.cover
+                      ? productWithDetails.cover
                       : '',
                     price: product.price,
                     quantity: productQuantity > 5 ? 5 : productQuantity,
@@ -396,8 +402,18 @@ const CheckoutScreen = (props) => {
         checkout &&
         addresses &&
         selectedAddress !== null && (
-          <div className='flex-start screen'>
-            <div className='column flex-start'>
+          <div
+            className={
+              'flex-start screen checkout-screen' +
+              (!desktopScreenCondition ? ' column' : '')
+            }
+          >
+            <div
+              className={
+                'column flex-start' +
+                (!desktopScreenCondition ? ' width-100' : '')
+              }
+            >
               {editingAddress
                 ? addressHub()
                 : selectedAddress && (

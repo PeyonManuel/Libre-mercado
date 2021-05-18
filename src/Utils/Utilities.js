@@ -88,3 +88,14 @@ export const verifyAuthenticationToken = (token) => {
     }
   );
 };
+
+export const justMinutesFromDate = (date) => {
+  return [
+    date.split('T')[1].split(':')[0],
+    date.split('T')[1].split(':')[1],
+  ].join(':');
+};
+
+export const removeMinutesFromDate = (date) => {
+  return date.split('T')[0];
+};

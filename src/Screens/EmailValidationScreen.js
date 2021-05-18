@@ -10,19 +10,18 @@ import { generateRandomNumber } from '../Utils/Utilities';
 import bcrypt from 'bcryptjs';
 import MessageBox from '../Components/MessageBox';
 import LoadingCircle from '../Components/LoadingCircle';
+// import axios from 'axios';
 
 const EmailValidationScreen = (props) => {
   const dispatch = useDispatch();
   const checkedEmail = localStorage.getItem('verifyEmail')
     ? JSON.parse(localStorage.getItem('verifyEmail'))
-    : localStorage.getItem('doesEmailExist')
-    ? localStorage.getItem('doesEmailExist')
     : null;
   const userLogin = useSelector((state) => state.userLogin);
   const { user, error, loading: loadingLogin } = userLogin;
   const userRegister = useSelector((state) => state.userRegister);
   const { error: errorRegistering, loading: loadingRegister } = userRegister;
-  const [localError, setLocalError] = useState(false);
+  const [localError, setLocalError] = useState('');
   const [input, setInput] = useState(['', '', '', '', '', '']);
   const [hashCode, setHashCode] = useState(
     localStorage.getItem('hashCode')
@@ -34,11 +33,12 @@ const EmailValidationScreen = (props) => {
   const [codeError, setCodeError] = useState(false);
 
   useEffect(() => {
-    (error || errorRegistering) && setLocalError(true);
+    (error || errorRegistering) &&
+      setLocalError('Ha ocurrido un error con el registro');
   }, [error, errorRegistering]);
 
   useEffect(() => {
-    checkedEmail === null && setLocalError(true);
+    checkedEmail === null && setLocalError('Ha ocurrido un error');
   }, [checkedEmail]);
 
   useEffect(() => {
@@ -85,7 +85,6 @@ const EmailValidationScreen = (props) => {
           loginTypeSwitch();
           break;
         case 'changepsw':
-          localStorage.removeItem('doesEmailExist');
           localStorage.setItem(
             'emailCodeValidated',
             JSON.stringify({ validated: true })
@@ -101,21 +100,49 @@ const EmailValidationScreen = (props) => {
 
   useEffect(() => {
     if (!hashCode && checkedEmail) {
+      const sendEmail = async () => {
+        //   try {
+        //     const data = await axios.get(
+        //       'https://emailvalidation.abstractapi.com/v1/?api_key=' +
+        //         process.env.REACT_APP_EMAIL_VALIDATION_API_KEY +
+        //         '&email=' +
+        //         checkedEmail.email
+        //     );
+        //     if (
+        //       data &&
+        //       data.data &&
+        //       data.data.deliverability &&
+        //       (data.data.deliverability === 'DELIVERABLE' ||
+        //         data.data.deliverability === 'UNKNOWN')
+        //     ) {
+        try {
+          await emailjs.send(
+            'gmail',
+            'template_l9xup0q',
+            {
+              email: checkedEmail.email,
+              subject: 'Te enviamos el código de seguridad',
+              title: 'Ingresá a tu cuenta con tu código de seguridad',
+              code: randomNumber,
+            },
+            'user_sr3l7H8k1UCzb3mvTFObR'
+          );
+        } catch (error) {
+          setLocalError('Parece que tu e-mail no esta disponible');
+        }
+        //   } else {
+        //     setLocalError('Parece que tu e-mail no esta disponible');
+        //   }
+        // } catch (error) {
+        //   console.log(error);
+        //   setLocalError('Ha ocurrido un error2');
+        // }
+      };
       const randomNumber = generateRandomNumber(6);
       const cacheHashCode = bcrypt.hashSync(randomNumber);
       setHashCode(cacheHashCode);
       localStorage.setItem('hashCode', JSON.stringify(cacheHashCode));
-      emailjs.send(
-        'gmail',
-        'template_l9xup0q',
-        {
-          email: checkedEmail.email,
-          subject: 'Te enviamos el código de seguridad',
-          title: 'Ingresá a tu cuenta con tu código de seguridad',
-          code: randomNumber,
-        },
-        'user_sr3l7H8k1UCzb3mvTFObR'
-      );
+      sendEmail();
     }
   }, [checkedEmail, hashCode]);
 
@@ -233,11 +260,10 @@ const EmailValidationScreen = (props) => {
       setCodeError(true);
     }
   };
-
   return (
     <div className='width-100 flex-center'>
       {localError ? (
-        <MessageBox variant='danger'>Ha ocurrido un error</MessageBox>
+        <MessageBox variant='danger'>{localError}</MessageBox>
       ) : (
         <div className='width-100 flex-center'>
           <div className='extra-header'></div>
@@ -293,6 +319,7 @@ const EmailValidationScreen = (props) => {
                   'primary block' +
                   (loadingLogin || loadingRegister ? ' loading-padding' : '')
                 }
+                disabled={loadingLogin || loadingRegister}
               >
                 {loadingLogin || loadingRegister ? (
                   <LoadingCircle color='white' />

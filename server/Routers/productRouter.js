@@ -120,7 +120,12 @@ productRouter.post(
   expressAsyncHandler(async (req, res) => {
     const product = await Product.findById(req.body.product._id);
     if (product) {
-      await product.updateOne({ ...req.body.product });
+      await product.updateOne({
+        ...req.body.product,
+        cover: req.body.product.images
+          ? req.body.product.images[0]
+          : product.cover,
+      });
       await product.save();
       const updatedProduct = await Product.findById(
         req.body.product._id
@@ -205,11 +210,20 @@ productRouter.get(
   '/getuserquestionsproducts',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const products = await Product.find({
-      questions: {
-        $elemMatch: { whoAsked: req.user._id },
+    const products = await Product.find(
+      {
+        questions: {
+          $elemMatch: { whoAsked: req.user._id },
+        },
       },
-    }).populate('seller', '_id userName');
+      {
+        _id: 1,
+        name: 1,
+        cover: 1,
+        price: 1,
+        questions: 1,
+      }
+    ).populate('seller', '_id userName');
     if (products) {
       res.send(products);
     } else {

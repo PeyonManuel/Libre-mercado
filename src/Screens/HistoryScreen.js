@@ -64,7 +64,7 @@ const HistoryScreen = () => {
       ) : !localHistory ? (
         <LoadingCircle color='blue' />
       ) : (
-        <div className='screen'>
+        <div className='screen history-screen'>
           {loadingUserUpdate ||
             (loadingHistoryUpdate && (
               <div className='absolute-loading'>

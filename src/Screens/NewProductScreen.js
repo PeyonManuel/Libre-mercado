@@ -595,7 +595,7 @@ const NewProductScreen = (props) => {
                 document
                   .querySelector('.upload-image-div')
                   .classList.remove('on-drag');
-                if (e.dataTransfer.files.length + images.length <= 10) {
+                if (e.dataTransfer.files.length + images.length <= 8) {
                   document.querySelector('#error-list').innerHTML = '';
                   for (var i = 0; i < e.dataTransfer.files.length; i++) {
                     if (e.dataTransfer.files[i].size / 1000000 <= 5) {
@@ -628,7 +628,7 @@ const NewProductScreen = (props) => {
                       .querySelector('.message-div.red')
                       .classList.remove('height-auto');
                   document.querySelector('#error-list').innerHTML = '';
-                  setImageError('Puedes subir como máximo 10 fotos.');
+                  setImageError('Puedes subir como máximo 8 fotos.');
                 }
               }}
             >
@@ -647,7 +647,7 @@ const NewProductScreen = (props) => {
                 type='file'
                 accept='image/x-png,image/jpeg,image/jpg'
                 onChange={(e) => {
-                  if (e.target.files.length + images.length <= 10) {
+                  if (e.target.files.length + images.length <= 8) {
                     document.querySelector('#error-list').innerHTML = '';
                     for (var i = 0; i < e.target.files.length; i++) {
                       if (e.target.files[i].size / 1000000 <= 5) {
@@ -680,7 +680,7 @@ const NewProductScreen = (props) => {
                         .querySelector('.message-div.red')
                         .classList.remove('height-auto');
                     document.querySelector('#error-list').innerHTML = '';
-                    setImageError('Puedes subir como máximo 10 fotos.');
+                    setImageError('Puedes subir como máximo 8 fotos.');
                   }
                   e.target.value = '';
                 }}

@@ -5,6 +5,7 @@ import { getUserPublishedProducts } from '../Actions/productActions';
 import LoadingCircle from '../Components/LoadingCircle';
 import MessageBox from '../Components/MessageBox';
 import Publishedproduct from '../Components/Publishedproduct';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const PublishedScreen = () => {
   const dispatch = useDispatch();
@@ -16,7 +17,7 @@ const PublishedScreen = () => {
   const [search, setSearch] = useState('');
   const [activeParam, setActiveParam] = useState(true);
   const [localProducts, setLocalProducts] = useState([]);
-  const [onDisplayProducts, setOnDisplayProducts] = useState([]);
+  const [onDisplayProducts, setOnDisplayProducts] = useState(null);
 
   useEffect(() => {
     dispatch(getUserSells());
@@ -51,7 +52,7 @@ const PublishedScreen = () => {
             <h1>Publicaciones</h1>
             <div className='row flex-start'>
               <div className='published-search'>
-                <i class='fas fa-search'></i>
+                <i className='fas fa-search'></i>
                 <div className='wrapper margin-left'>
                   <div className='underline-label-input'>
                     <input
@@ -75,7 +76,7 @@ const PublishedScreen = () => {
                     className={'switch' + (activeParam ? ' on' : '')}
                   ></span>
                 </div>
-                {products && (
+                {products && desktopScreenCondition && (
                   <div className='margin-left subtle-text'>
                     {'|   ' + onDisplayProducts.length + ' publicaciones'}
                   </div>
@@ -85,7 +86,7 @@ const PublishedScreen = () => {
           </div>
           <div className='width-100 flex-center'>
             <div className='published-products'>
-              {loading || loadingOrders ? (
+              {loading || loadingOrders || !onDisplayProducts ? (
                 <LoadingCircle color='blue' />
               ) : onDisplayProducts.length > 0 ? (
                 onDisplayProducts.map((product) => (
@@ -105,7 +106,7 @@ const PublishedScreen = () => {
                     alt='No encontrado'
                   />
                   <h3>Nada por acá...</h3>
-                  <p className='subtle-text'>
+                  <p className='subtle-text' style={{ textAlign: 'center' }}>
                     No encontramos publicaciones para esta búsqueda. Proba con
                     otra.
                   </p>

@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { listCategories } from '../Actions/categoryActions';
 import { desktopScreenCondition } from '../Utils/Utilities';
 import LoadingCircle from './LoadingCircle';
 import MessageBox from './MessageBox';
 
 const CategorieCards = () => {
+  const dispatch = useDispatch();
   const categoryList = useSelector((state) => state.categoryList);
   const {
     loading: categoryLoading,
@@ -18,8 +20,14 @@ const CategorieCards = () => {
   const [categoryCardWidth] = useState(window.screen.width > 340 ? 170 : 135);
 
   const categorieCardsContainerRef = useRef();
-  console.log(window.screen.width);
   const categorieCardsRef = useRef();
+
+  useEffect(() => {
+    categories &&
+      categories.length === 0 &&
+      !desktopScreenCondition &&
+      dispatch(listCategories());
+  }, [dispatch, categories]);
 
   useEffect(() => {
     const updateCategoriesContainerWidth = () => {

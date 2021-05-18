@@ -6,6 +6,7 @@ import {
 } from '../Actions/productActions';
 import LoadingCircle from '../Components/LoadingCircle';
 import MessageBox from '../Components/MessageBox';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const UserQuestionsScreen = () => {
   const dispatch = useDispatch();
@@ -30,7 +31,7 @@ const UserQuestionsScreen = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    products && setLocalProducts(products);
+    products && setLocalProducts(products.reverse());
   }, [products]);
 
   useEffect(() => {
@@ -64,7 +65,7 @@ const UserQuestionsScreen = () => {
         <LoadingCircle color='blue' />
       ) : (
         localProducts && (
-          <div className='screen margin-top'>
+          <div className='screen question-screen'>
             {localProducts.length > 0 && (
               <div className='message-div blue row'>
                 <p className='paragraph-with-icon bold'>
@@ -84,76 +85,96 @@ const UserQuestionsScreen = () => {
                 localProducts.map((product, i) => (
                   <div className='product-question-screen' key={product._id}>
                     <div className='product-question-screen-header'>
-                      <div className='list-img-div'>
-                        <img
-                          className='center-cropped'
-                          src={product.images[0]}
-                          alt='product'
-                        />
-                      </div>{' '}
-                      <div className='product-question-screen-header-name'>
-                        <a
-                          className='nodecoration'
-                          href={'/product/' + product._id}
-                        >
-                          {product.name}
-                        </a>
-                      </div>{' '}
-                      <div className='product-question-screen-header-price'>
-                        <p>{'$ ' + product.price}</p>
+                      <div
+                        className={
+                          'row flex-start' +
+                          (!desktopScreenCondition ? ' width-100' : '')
+                        }
+                      >
+                        <div className='list-img-div margin-right'>
+                          <img
+                            className='center-cropped'
+                            src={product.cover}
+                            alt='product'
+                          />
+                        </div>{' '}
+                        <div className='question-product-name-price'>
+                          <div className='product-question-screen-header-name'>
+                            <a
+                              className='nodecoration'
+                              href={'/product/' + product._id}
+                            >
+                              {product.name}
+                            </a>
+                          </div>{' '}
+                          <div className='product-question-screen-header-price'>
+                            <p>{'$ ' + product.price}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div className='product-question-screen-header-stock'>
-                        <p className={product.stock <= 10 ? 'low-stock' : ''}>
-                          {product.stock <= 10
-                            ? '¡Quedan solo ' + product.stock + 'unidades!'
-                            : 'Hay stock disponible'}
-                        </p>
-                      </div>
-                      <div className='product-question-screen-header-condition'>
-                        {!product.active ? (
-                          <p>
-                            {' '}
-                            <img
-                              src='https://svgshare.com/i/UNm.svg'
-                              alt='tip'
-                              className='absolute-left-top circle badge orange'
-                            />
-                            Inactiva
+                      <div
+                        className={
+                          desktopScreenCondition
+                            ? 'row'
+                            : 'column flex-center width-100'
+                        }
+                      >
+                        <div className='product-question-screen-header-stock'>
+                          <p className={product.stock <= 10 ? 'low-stock' : ''}>
+                            {product.stock <= 10
+                              ? '¡Quedan solo ' + product.stock + 'unidades!'
+                              : 'Hay stock disponible'}
                           </p>
-                        ) : product.finished ? (
-                          <p>
-                            {' '}
-                            <img
-                              src='https://svgshare.com/i/UNm.svg'
-                              alt='tip'
-                              className='absolute-left-top circle badge'
-                            />
-                            Publicación finalizada
-                          </p>
-                        ) : (
-                          <button
-                            className='primary'
-                            onClick={() => {
-                              window.location.href = '/checkout/shipping';
-                              localStorage.setItem(
-                                'localCheckout',
-                                JSON.stringify({
-                                  products: [
-                                    {
-                                      _id: product._id,
-                                      seller: product.seller,
-                                      price: product.price,
-                                      quantity: 1,
-                                    },
-                                  ],
-                                  editingAddress: false,
-                                })
-                              );
-                            }}
-                          >
-                            Comprar
-                          </button>
-                        )}
+                        </div>
+                        <div className='product-question-screen-header-condition'>
+                          {!product.active ? (
+                            <p>
+                              {' '}
+                              <img
+                                src='https://svgshare.com/i/UNm.svg'
+                                alt='tip'
+                                className='absolute-left-top circle badge orange'
+                              />
+                              Inactiva
+                            </p>
+                          ) : product.finished ? (
+                            <p>
+                              {' '}
+                              <img
+                                src='https://svgshare.com/i/UNm.svg'
+                                alt='tip'
+                                className='absolute-left-top circle badge'
+                              />
+                              Publicación finalizada
+                            </p>
+                          ) : (
+                            <button
+                              className={
+                                'primary' +
+                                (!desktopScreenCondition ? ' block' : '')
+                              }
+                              onClick={() => {
+                                window.location.href = '/checkout/shipping';
+                                localStorage.setItem(
+                                  'localCheckout',
+                                  JSON.stringify({
+                                    products: [
+                                      {
+                                        _id: product._id,
+                                        seller: product.seller,
+                                        price: product.price,
+                                        quantity: 1,
+                                      },
+                                    ],
+                                    editingAddress: false,
+                                  })
+                                );
+                              }}
+                            >
+                              Comprar
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <ul className='product-question-screen-questions'>
@@ -185,7 +206,7 @@ const UserQuestionsScreen = () => {
                             style={{ display: 'none' }}
                           >
                             <div className='row ask-div'>
-                              <input
+                              <textarea
                                 id={'new-question-input-' + i}
                                 type='text'
                                 maxLength='2000'
@@ -339,7 +360,9 @@ const UserQuestionsScreen = () => {
               ) : (
                 <div className='width-100 flex-center column'>
                   <h2>No tenes ninguna pregunta</h2>
-                  <p>¡Empeza a preguntar a los vendedores!</p>
+                  <p style={{ textAlign: 'center' }}>
+                    ¡Empeza a preguntar a los vendedores!
+                  </p>
                 </div>
               ))}
           </div>

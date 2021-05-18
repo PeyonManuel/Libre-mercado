@@ -4,6 +4,7 @@ import { getCartDetails } from '../Actions/userActions';
 import CartItem from '../Components/CartItem';
 import LoadingCircle from '../Components/LoadingCircle';
 import MessageBox from '../Components/MessageBox';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const CartScreen = () => {
   const dispatch = useDispatch();
@@ -147,7 +148,9 @@ const CartScreen = () => {
               ) : (
                 <div className='width-100 flex-center column margin-top'>
                   <h2 className='gray'>Tu carrito está vacío</h2>
-                  <p>¿No sabés qué comprar? ¡Miles de productos te esperan!</p>
+                  <p style={{ textAlign: 'center' }}>
+                    ¿No sabés qué comprar? ¡Miles de productos te esperan!
+                  </p>
                 </div>
               )
             ) : localSaved.length > 0 ? (
@@ -173,7 +176,7 @@ const CartScreen = () => {
           </div>
           {cartSelected === 'cart' && localCart.length > 0 && (
             <button
-              className='primary'
+              className={'primary' + (!desktopScreenCondition ? ' block' : '')}
               onClick={() => {
                 window.location.href = '/checkout/shipping';
                 localStorage.setItem(

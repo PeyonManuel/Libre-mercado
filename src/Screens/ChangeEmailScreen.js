@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUser } from '../Actions/userActions';
 import LoadingCircle from '../Components/LoadingCircle';
+import { desktopScreenCondition } from '../Utils/Utilities';
 
 const ChangeEmailScreen = () => {
   const dispatch = useDispatch();
@@ -16,6 +17,13 @@ const ChangeEmailScreen = () => {
   const [emailError, setEmailError] = useState('');
   const [confirmEmailError, setConfirmEmailError] = useState('');
   const [disableBtn, setDisableBtn] = useState(true);
+  const [verifiedEmail, setVerifiedEmail] = useState(false);
+
+  useEffect(() => {
+    if (verifiedEmail) {
+      dispatch(updateUser({ email: email }));
+    }
+  }, [verifiedEmail, dispatch, email]);
 
   useEffect(() => {
     if (email !== user.email) {
@@ -61,10 +69,9 @@ const ChangeEmailScreen = () => {
       setEmailError('');
     }
   }, [error]);
-
   const verifyEmail = async (email) => {
+    setDisableBtn(true);
     try {
-      setDisableBtn(true);
       const data = await axios.get(
         'https://emailvalidation.abstractapi.com/v1/?api_key=' +
           process.env.REACT_APP_EMAIL_VALIDATION_API_KEY +
@@ -78,17 +85,16 @@ const ChangeEmailScreen = () => {
         (data.data.deliverability === 'DELIVERABLE' ||
           data.data.deliverability === 'UNKNOWN')
       ) {
-        return true;
+        setVerifiedEmail(true);
       } else {
         setDisableBtn(false);
-        return false;
+        setEmailError('Ha ocurrido un error, intenta nuevamente');
       }
     } catch (error) {
       setDisableBtn(false);
       setEmailError('Ha ocurrido un error, intenta nuevamente');
     }
   };
-
   return (
     <div className='width-100 flex-center'>
       {user && (
@@ -105,7 +111,10 @@ const ChangeEmailScreen = () => {
                     maxLength='50'
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      if (e.target.value === user.email) {
+                      if (
+                        e.target.value.toLowerCase() ===
+                        user.emailError.toLowerCase()
+                      ) {
                         setEmailError(
                           'Ingresa un e-mail distinto al que estás usando.'
                         );
@@ -117,9 +126,7 @@ const ChangeEmailScreen = () => {
                     onKeyDown={(e) => {
                       if (e.keyCode === 13) {
                         if (email === confirmEmail) {
-                          if (verifyEmail(email)) {
-                            dispatch(updateUser({ email: email }));
-                          }
+                          verifyEmail(email);
                         }
                         if (email !== confirmEmail) {
                           setConfirmEmailError(
@@ -156,9 +163,7 @@ const ChangeEmailScreen = () => {
                     onKeyDown={(e) => {
                       if (e.keyCode === 13) {
                         if (email === confirmEmail) {
-                          if (verifyEmail(email)) {
-                            dispatch(updateUser({ email: email }));
-                          }
+                          verifyEmail(email);
                         }
                         if (email !== confirmEmail) {
                           setConfirmEmailError(
@@ -188,14 +193,13 @@ const ChangeEmailScreen = () => {
               <div className='row flex-start margin-top padding-top'>
                 <button
                   className={
-                    'primary big-form' + (loading ? ' no-padding' : '')
+                    'primary big-form margin-top' +
+                    (loading ? ' no-padding' : '')
                   }
                   disabled={disableBtn}
                   onClick={() => {
                     if (email === confirmEmail) {
-                      if (verifyEmail(email)) {
-                        dispatch(updateUser({ email: email }));
-                      }
+                      verifyEmail(email);
                     }
                     if (email !== confirmEmail) {
                       setConfirmEmailError(
@@ -207,7 +211,12 @@ const ChangeEmailScreen = () => {
                   {loading ? <LoadingCircle color='blue' /> : 'Guardar'}
                 </button>
                 <button
-                  className='secondary margin-left'
+                  className={
+                    'secondary margin-left' +
+                    (!desktopScreenCondition
+                      ? ' margin-top block margin-right'
+                      : '')
+                  }
                   onClick={() => (window.location.href = '/mis-datos')}
                 >
                   Cancelar

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateProduct } from '../Actions/productActions';
+import { desktopScreenCondition } from '../Utils/Utilities';
 import LoadingCircle from './LoadingCircle';
 import MessageBox from './MessageBox';
 
@@ -78,20 +79,18 @@ const Publishedproduct = ({
         </div>
       ) : (
         <>
-          <div className='row'>
+          <div className='row nowrap'>
             <img
               id='published-product-image'
-              className='center-cropped margin-right'
+              className='center-cropped'
               src={product.cover}
               alt='product'
             />
             <div className='published-info'>
-              <p className='subtle-text'>#{product._id}</p>
-              <h4>
-                {product.name.length > 22
-                  ? product.name.slice(0, 22) + '...'
-                  : product.name}
-              </h4>
+              {desktopScreenCondition && (
+                <p className='subtle-text'>#{product._id}</p>
+              )}
+              <h4>{product.name}</h4>
               <p className='subtle-text'>{productSales + ' ventas'}</p>
             </div>
           </div>

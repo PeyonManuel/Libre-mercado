@@ -113,6 +113,7 @@ const LoginScreen = (props) => {
             onClick={() => {
               setButtonClicked('continue');
             }}
+            disabled={loading}
           >
             {loading ? <LoadingCircle color='white' /> : 'Continuar'}
           </button>

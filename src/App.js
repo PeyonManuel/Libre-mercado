@@ -40,6 +40,7 @@ import AuthenticationScreen from './Screens/AuthenticationScreen';
 import ChangeUserInfoRoute from './Components/Routes/ChangeUserInfoRoute';
 import ChangeUserScreen from './Screens/ChangeUserScreen';
 import ChangeEmailScreen from './Screens/ChangeEmailScreen';
+import NotificationScreen from './Screens/NotificationScreen';
 
 const App = () => {
   useEffect(() => {
@@ -205,6 +206,10 @@ const App = () => {
             <PrivateRoute
               path='/authentication'
               component={AuthenticationScreen}
+            ></PrivateRoute>
+            <PrivateRoute
+              path='/notificaciones'
+              component={NotificationScreen}
             ></PrivateRoute>
             <Route path='*' component={NotFoundScreen}></Route>
           </Switch>

@@ -10,7 +10,13 @@ const GlobalRoute = () => {
   ) {
     localStorage.removeItem('RegisterCacheValues');
   }
-  if (currentRoute.includes('nueva-direccion')) {
+  if (!currentRoute.includes('cambiar-contrasena')) {
+    localStorage.removeItem('emailCodeValidated');
+  }
+  if (!currentRoute.includes('email-validation')) {
+    localStorage.removeItem('hashCode');
+  }
+  if (!currentRoute.includes('nueva-direccion')) {
     localStorage.removeItem('currentAddress');
   }
   if (

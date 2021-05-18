@@ -3,19 +3,18 @@ import { useSelector } from 'react-redux';
 import { Redirect, Route } from 'react-router-dom';
 
 const EmailValidationRoute = ({ component: Component, ...rest }) => {
-  const userVerifyEmail = useSelector((state) => state.userVerifyEmail);
   const userLogin = useSelector((state) => state.userLogin);
   const { user: loggedUser } = userLogin;
-  const { checkedEmail } = userVerifyEmail;
   return (
     <Route
       {...rest}
       render={(props) => {
+        const checkedEmail = localStorage.getItem('verifyEmail');
         const user = localStorage.getItem('RegisterCacheValues');
         const userCheckName = localStorage.getItem('userCheckNameInfo');
         const urlParams = new URLSearchParams(props.location.search);
         const authType = urlParams.get('authType');
-        if (authType === 'register' || authType === 'changepsw') {
+        if (authType === 'register') {
           return user || userCheckName || loggedUser ? (
             <Component {...props}></Component>
           ) : (
@@ -23,16 +22,12 @@ const EmailValidationRoute = ({ component: Component, ...rest }) => {
           );
         }
         if (checkedEmail) {
-          localStorage.setItem(
-            'doesEmailExist',
-            JSON.stringify({ exits: true, email: checkedEmail })
-          );
           return user || userCheckName ? (
             <Component {...props}></Component>
           ) : (
             <Redirect to='/' />
           );
-        } else if (!localStorage.getItem('doesEmailExist')) {
+        } else {
           return <Redirect to='/' />;
         }
       }}

@@ -91,7 +91,6 @@ const ProductScreen = (props) => {
       setNumReviews(numReviews);
     }
   }, [product]);
-
   useEffect(() => {
     if (productUnavaiable) {
       clearTimeout(productUnavaiableTimeout);
@@ -127,26 +126,36 @@ const ProductScreen = (props) => {
     }
   }, [product, user]);
   useEffect(() => {
+    document.querySelector('#product-info') &&
+      console.log(document.querySelector('#product-info').clientWidth);
     carouselContainerRef.current &&
       product &&
       setCarouselWidth(
-        (product.images.length * carouselContainerRef.current.scrollWidth) /
+        ((product.images.length + (product.video ? 1 : 0)) *
+          (260 < document.querySelector('#product-info').clientWidth
+            ? 260
+            : document.querySelector('#product-info').clientWidth - 40)) /
           10 +
           'rem'
       );
   }, [product, carouselContainerRef]);
-
   useEffect(() => {
-    if (carouselContainerRef.current) {
+    if (carouselContainerRef.current && product) {
       let initialPosition = null;
       let moving = false;
       let transform = 0;
       let diff = 0;
       const carouselLimit =
-        product &&
-        (product.images.length - 1) * -carouselContainerRef.current.scrollWidth;
+        (product.images.length - (product.video ? 0 : 1)) *
+        -(260 < document.querySelector('#product-info').clientWidth
+          ? 260
+          : document.querySelector('#product-info').clientWidth - 40);
       const getStartPosition = (e) => {
-        if (e.target.className === 'center-cropped big') {
+        if (
+          e.target.className === 'center-cropped big' ||
+          'carousel-card' ||
+          'track row nowrap'
+        ) {
           initialPosition = e.pageX;
           moving = true;
           const transformMatrix =
@@ -170,19 +179,21 @@ const ProductScreen = (props) => {
         }
       };
       const getMouseUp = () => {
-        moving = false;
-        if (diff < carouselLimit) {
-          document.querySelector('.track').style.transform =
-            'translateX(' + carouselLimit + 'px)';
-        } else if (diff > 0) {
-          document.querySelector('.track').style.transform =
-            'translateX(' + 0 + 'px)';
-        } else if (diff % carouselContainerRef.current.scrollWidth !== 0) {
-          document.querySelector('.track').style.transform =
-            'translateX(' +
-            Math.round(diff / carouselContainerRef.current.scrollWidth) *
-              carouselContainerRef.current.scrollWidth +
-            'px)';
+        if (moving) {
+          moving = false;
+          if (diff < carouselLimit) {
+            document.querySelector('.track').style.transform =
+              'translateX(' + carouselLimit + 'px)';
+          } else if (diff > 0) {
+            document.querySelector('.track').style.transform =
+              'translateX(' + 0 + 'px)';
+          } else if (diff % carouselContainerRef.current.scrollWidth !== 0) {
+            document.querySelector('.track').style.transform =
+              'translateX(' +
+              Math.round(diff / carouselContainerRef.current.scrollWidth) *
+                carouselContainerRef.current.scrollWidth +
+              'px)';
+          }
         }
       };
       if (window.PointerEvent) {
@@ -603,20 +614,14 @@ const ProductScreen = (props) => {
   };
 
   return (
-    <div
-      className='column flex-center'
-      style={{
-        margin: desktopScreenCondition ? '3rem 0' : '1rem 0',
-        width: '100%',
-      }}
-    >
+    <div className='width-100 flex-center'>
       {loading ? (
         <LoadingCircle color='blue' />
       ) : error ? (
         <MessageBox variant='danger'>{error}</MessageBox>
       ) : (
         product && (
-          <div className='screen'>
+          <div className='screen product-screen'>
             <div className='column'>
               {!product.active ||
                 (product.finished && (
@@ -644,7 +649,7 @@ const ProductScreen = (props) => {
               </span>
             </div>
             <div className='column screen-card'>
-              <div className='top screen-segment first'>
+              <div className='top width-100 screen-segment first'>
                 {desktopScreenCondition && (
                   <div className='row top product-col-1'>
                     <div className='miniature-images column'>
@@ -712,7 +717,10 @@ const ProductScreen = (props) => {
                     <div className='column' style={{ maxWidth: '35rem' }}></div>
                   </div>
                 )}
-                <div className='column top product-col-2 screen-mini-card'>
+                <div
+                  id='product-info'
+                  className='column top product-col-2 screen-mini-card'
+                >
                   <div className='favorite-btn product-screen'>
                     <a
                       href={'/login?loginType=FAVORITE&item_id=' + product._id}
@@ -765,7 +773,7 @@ const ProductScreen = (props) => {
                     >
                       <div className='carousel'>
                         <div
-                          className='track row'
+                          className='track row nowrap'
                           style={{
                             width: carouselWidth,
                           }}
@@ -780,6 +788,19 @@ const ProductScreen = (props) => {
                               ></img>
                             </div>
                           ))}
+                          {product.video && (
+                            <div className='carousel-card'>
+                              <iframe
+                                className='margin-top'
+                                title='Video seleccionado'
+                                src={product.video}
+                                allow='autoplay; encrypted-media'
+                                frameBorder='0'
+                                height={15.8 * 10}
+                                width='100%'
+                              ></iframe>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -966,7 +987,7 @@ const ProductScreen = (props) => {
                           <div className='column'>
                             <h4>Preguntale a {product.seller.userName}</h4>
                             <div className='row ask-div'>
-                              <input
+                              <textarea
                                 id='new-question'
                                 type='text'
                                 value={newQuestion}

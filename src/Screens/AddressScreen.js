@@ -37,6 +37,7 @@ const AddressScreen = (props) => {
 
   const [noNumberCheck, setNoNumberCheck] = useState(false);
   const [isSubmited, setIsSubmited] = useState(false);
+  const [disableBtn, setDisableBtn] = useState(true);
 
   const dispatch = useDispatch();
   const urlParams = new URLSearchParams(props.location.search);
@@ -51,6 +52,13 @@ const AddressScreen = (props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (loading || loadingUpdate) {
+      setDisableBtn(true);
+    }
+  }, [loading, loadingUpdate]);
+
   useEffect(() => {
     const numberInput = document.querySelector('#numero');
     if (noNumberCheck && numberInput) {
@@ -95,9 +103,9 @@ const AddressScreen = (props) => {
       city &&
       (noNumberCheck ? reference : streetNumber)
     ) {
-      document.querySelector('#submitbtn').removeAttribute('disabled');
+      setDisableBtn(false);
     } else {
-      document.querySelector('#submitbtn').setAttribute('disabled', true);
+      setDisableBtn(true);
     }
   }, [
     postalCode,
@@ -332,7 +340,7 @@ const AddressScreen = (props) => {
             'margin-top primary big-form' + (isSubmited ? ' no-padding' : '')
           }
           id='submitbtn'
-          disabled={true}
+          disabled={disableBtn}
         >
           {isSubmited ? <LoadingCircle color='white' /> : 'Guardar'}
         </button>

@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, updateUserFavorites } from '../Actions/userActions';
+import {
+  loginUser,
+  updateUserFavorites,
+  userVerifyEmailExists,
+} from '../Actions/userActions';
 import LoadingCircle from '../Components/LoadingCircle';
 
 const EnterPassScreen = (props) => {
   const userCheckName = useSelector((state) => state.userCheckName);
   const { user } = userCheckName;
+  const userVerifyEmail = useSelector((state) => state.userVerifyEmail);
+  const {
+    loading: loadingVerifyEmail,
+    error: errorVerifyingEmail,
+    success,
+  } = userVerifyEmail;
   const userLogin = useSelector((state) => state.userLogin);
   const { error, user: userSuccess, loading } = userLogin;
   const [loginInfo] = useState(
@@ -22,6 +32,12 @@ const EnterPassScreen = (props) => {
   const [localError, setLocalError] = useState('');
   const [buttonClicked, setButtonClicked] = useState('');
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (success) {
+      window.location.href = '/email-validation?authType=changepsw';
+    }
+  }, [success]);
 
   useEffect(() => {
     if (!user) {
@@ -77,6 +93,11 @@ const EnterPassScreen = (props) => {
       setLocalError(error);
     }
   }, [error]);
+  useEffect(() => {
+    if (errorVerifyingEmail) {
+      setLocalError('Ha ocurrido un error');
+    }
+  }, [errorVerifyingEmail]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -87,8 +108,7 @@ const EnterPassScreen = (props) => {
         setLocalError('Ingresá la clave');
       }
     } else if (buttonClicked === 'dontknowpass') {
-      dispatch({ type: 'USER_VERIFYEMAILEXISTS_SUCCESS', payload: user.email });
-      props.history.push('/email-validation?authType=changepsw');
+      dispatch(userVerifyEmailExists(user.email));
     }
   };
 
@@ -141,17 +161,25 @@ const EnterPassScreen = (props) => {
             onClick={() => {
               setButtonClicked('login');
             }}
+            disabled={loading}
           >
             {loading ? <LoadingCircle color='white' /> : 'Ingresar'}
           </button>
           <button
             type='submit'
-            className='secondary block'
+            className={
+              'secondary block' + (loadingVerifyEmail ? ' no-padding' : '')
+            }
             onClick={() => {
               setButtonClicked('dontknowpass');
             }}
+            disabled={loadingVerifyEmail}
           >
-            No sé mi clave
+            {loadingVerifyEmail ? (
+              <LoadingCircle color='blue' />
+            ) : (
+              'No sé mi clave'
+            )}
           </button>
         </div>
       </form>

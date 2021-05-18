@@ -42,10 +42,7 @@ const ProductPublishedScreen = (props) => {
           <>
             <div className='extra-header product-published'></div>
             <div className='column'>
-              <div
-                className='product-published-header row'
-                style={{ zIndex: '102' }}
-              >
+              <div className='product-published-header row'>
                 <div className='headers'>
                   <h3>¡Listo!</h3>
                   <h1>Ya terminaste tu publicación</h1>

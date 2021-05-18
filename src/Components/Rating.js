@@ -63,7 +63,7 @@ const Rating = ({ rating, numReviews, small }) => {
         </>
       )}
       <span key={0} className={small ? 'subtle-text' : ''}>
-        {numReviews + (!small && ' opiniones')}
+        {numReviews + (!small && (numReviews > 1 ? ' opiniones' : ' opinion'))}
       </span>
     </div>
   );

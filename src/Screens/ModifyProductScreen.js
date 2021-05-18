@@ -195,7 +195,9 @@ const ModifyProductScreen = (props) => {
         product && (
           <div className='screen flex-start column'>
             <a
-              className={!desktopScreenCondition ? 'margin-left' : ''}
+              className={
+                'margin-top' + (!desktopScreenCondition ? ' margin-left' : '')
+              }
               href='/publicaciones'
             >
               <strong>{'<'}</strong>

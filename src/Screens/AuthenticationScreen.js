@@ -4,6 +4,7 @@ import {
   authenticateUser,
   checkUserName,
   loginUser,
+  userVerifyEmailExists,
 } from '../Actions/userActions';
 import LoadingCircle from '../Components/LoadingCircle';
 import { generateAuthenticateToken } from '../Utils/Utilities';
@@ -13,7 +14,12 @@ const AuthenticationScreen = (props) => {
   const { user } = userLogin;
   const userAuthenticate = useSelector((state) => state.userAuthenticate);
   const { loading, error, success } = userAuthenticate;
-
+  const userVerifyEmail = useSelector((state) => state.userVerifyEmail);
+  const {
+    loading: loadingVerifyEmail,
+    error: errorVerifyingEmail,
+    success: successVerifyingEmail,
+  } = userVerifyEmail;
   const urlParams = new URLSearchParams(props.location.search);
   const [type] = useState(urlParams.get('Type'));
 
@@ -43,7 +49,11 @@ const AuthenticationScreen = (props) => {
       setLocalError(error);
     }
   }, [error]);
-
+  useEffect(() => {
+    if (successVerifyingEmail) {
+      window.location.href = '/email-validation?authType=changepsw';
+    }
+  }, [successVerifyingEmail]);
   useEffect(() => {
     if (success) {
       localStorage.setItem(
@@ -58,7 +68,13 @@ const AuthenticationScreen = (props) => {
         window.location.href = '/mis-datos/cambiar-email';
       }
     }
-  }, [success, dispatch, user, type]);
+  }, [success, dispatch, user, type, successVerifyingEmail]);
+
+  useEffect(() => {
+    if (errorVerifyingEmail) {
+      setLocalError('Ha ocurrido un error');
+    }
+  }, [errorVerifyingEmail]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -70,9 +86,8 @@ const AuthenticationScreen = (props) => {
         setLocalError('Ingresá la clave');
       }
     } else if (buttonClicked === 'dontknowpass') {
-      dispatch({ type: 'USER_VERIFYEMAILEXISTS_SUCCESS', payload: user.email });
       dispatch(checkUserName(loginInfo));
-      props.history.push('/email-validation?authType=changepsw');
+      dispatch(userVerifyEmailExists(user.email));
     }
   };
 
@@ -128,12 +143,19 @@ const AuthenticationScreen = (props) => {
           </button>
           <button
             type='submit'
-            className='secondary block'
+            className={
+              'secondary block' + (loadingVerifyEmail ? ' no-padding' : '')
+            }
             onClick={() => {
               setButtonClicked('dontknowpass');
             }}
+            disabled={loadingVerifyEmail}
           >
-            No sé mi clave
+            {loadingVerifyEmail ? (
+              <LoadingCircle color='blue' />
+            ) : (
+              'No sé mi clave'
+            )}
           </button>
         </div>
       </form>

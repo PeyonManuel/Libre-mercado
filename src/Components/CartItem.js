@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateCart } from '../Actions/userActions';
-import { formatNumber } from '../Utils/Utilities';
+import { desktopScreenCondition, formatNumber } from '../Utils/Utilities';
 
 const CartItem = ({
   i,
@@ -65,7 +65,16 @@ const CartItem = ({
           <img src={cartItem.product.images[0]} alt='Producto' />
         </div>
         <div className='column'>
-          <p className='cart-item-name'>{cartItem.product.name}</p>
+          <p
+            className='cart-item-name'
+            onClick={() => {
+              if (!desktopScreenCondition) {
+                window.location.href = '/product/' + cartItem.product._id;
+              }
+            }}
+          >
+            {cartItem.product.name}
+          </p>
           <div className='cart-item-buttons'>
             <button
               className='anchor-lookalike'
@@ -87,36 +96,38 @@ const CartItem = ({
             >
               Eliminar
             </button>
-            <button
-              disabled={!hasStock}
-              className='anchor-lookalike'
-              onClick={() => {
-                if (!disableOtherBtn) {
-                  if (cartItem.product.active && !cartItem.product.Finished) {
-                    window.location.href = '/checkout/shipping';
-                    localStorage.setItem(
-                      'localCheckout',
-                      JSON.stringify({
-                        products: [
-                          {
-                            _id: cartItem.product._id,
-                            seller: cartItem.product.seller,
-                            price: cartItem.product.price,
-                            quantity: cartItem.quantity,
-                          },
-                        ],
-                        editingAddress: false,
-                      })
-                    );
+            {desktopScreenCondition && (
+              <button
+                disabled={!hasStock}
+                className='anchor-lookalike'
+                onClick={() => {
+                  if (!disableOtherBtn) {
+                    if (cartItem.product.active && !cartItem.product.Finished) {
+                      window.location.href = '/checkout/shipping';
+                      localStorage.setItem(
+                        'localCheckout',
+                        JSON.stringify({
+                          products: [
+                            {
+                              _id: cartItem.product._id,
+                              seller: cartItem.product.seller,
+                              price: cartItem.product.price,
+                              quantity: cartItem.quantity,
+                            },
+                          ],
+                          editingAddress: false,
+                        })
+                      );
+                    }
+                    if (!cartItem.product.active || cartItem.product.Finished) {
+                      window.location.href = '/product' + cartItem.product._id;
+                    }
                   }
-                  if (!cartItem.product.active || cartItem.product.Finished) {
-                    window.location.href = '/product' + cartItem.product._id;
-                  }
-                }
-              }}
-            >
-              Comprar ahora
-            </button>
+                }}
+              >
+                Comprar ahora
+              </button>
+            )}
             <button
               className='anchor-lookalike'
               onClick={() => {
@@ -138,13 +149,31 @@ const CartItem = ({
                 }
               }}
             >
-              {cartItem.saved ? 'Agregar al carrito' : 'Guardar para después'}
+              {desktopScreenCondition
+                ? cartItem.saved
+                  ? 'Agregar al carrito'
+                  : 'Guardar para después'
+                : cartItem.saved
+                ? 'Al carrito'
+                : 'Guardar'}
             </button>
           </div>
         </div>
       </div>
-      <div className='column flex-center'>
-        <div className='cart-quantity-changer'>
+      <div
+        className={
+          'flex-center' +
+          (desktopScreenCondition
+            ? ' column'
+            : ' row' + (window.screen.width < 768 ? ' margin-top' : ''))
+        }
+      >
+        <div
+          className={
+            'cart-quantity-changer' +
+            (!desktopScreenCondition ? ' margin-right' : '')
+          }
+        >
           <button
             disabled={quantity === 1}
             onClick={() => {

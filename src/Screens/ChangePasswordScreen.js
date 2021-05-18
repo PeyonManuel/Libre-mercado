@@ -18,16 +18,17 @@ const ChangePasswordScreen = (props) => {
     loading: loadingUser,
   } = userLogin;
   const userUpdate = useSelector((state) => state.userUpdate);
-  const { user: userUpdated, error: updateError } = userUpdate;
+  const {
+    user: userUpdated,
+    error: updateError,
+    loading: loadingUserUpdate,
+  } = userUpdate;
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmited, setIsSubmited] = useState(false);
   const [localError, setLocalError] = useState(false);
-
-  const [btnClicked, setBtnClicked] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -38,7 +39,6 @@ const ChangePasswordScreen = (props) => {
     if (userId) {
       dispatch(detailsUser(userId._id));
     } else {
-      console.log('hi');
       setLocalError(true);
     }
   }, [dispatch]);
@@ -51,18 +51,6 @@ const ChangePasswordScreen = (props) => {
   useEffect(() => {
     if (userUpdated) window.location.href = '/';
   }, [userUpdated, props]);
-
-  useEffect(() => {
-    if (password.length < 6) {
-      setPasswordError(
-        'Te faltan ' + (6 - password.length) + ' caracteres más'
-      );
-    } else if (/(.)\1{3,}/.test(password)) {
-      setPasswordError('Evitá ingresar caracteres repetidos.');
-    } else {
-      setPasswordError('');
-    }
-  }, [password]);
 
   useEffect(() => {
     !loadingUser &&
@@ -79,8 +67,7 @@ const ChangePasswordScreen = (props) => {
       );
       setIsSubmited(true);
     } else {
-      setConfirmPassword('Las claves deben ser iguales');
-      setIsSubmited(true);
+      setConfirmPasswordError('Las claves deben ser iguales');
     }
   };
   return (
@@ -102,7 +89,6 @@ const ChangePasswordScreen = (props) => {
               <div className='wrapper'>
                 <div className='underline-label-input big-form'>
                   <input
-                    className={isSubmited && passwordError ? ' error' : ''}
                     value={password}
                     type='password'
                     maxLength='20'
@@ -111,12 +97,7 @@ const ChangePasswordScreen = (props) => {
                       setConfirmPasswordError('');
                     }}
                   ></input>
-                  <div
-                    className={
-                      'underline' +
-                      (isSubmited && passwordError ? ' error' : '')
-                    }
-                  ></div>
+                  <div></div>
                   <label>Clave</label>
                   <i
                     className='fas fa-check fa-xs'
@@ -129,20 +110,11 @@ const ChangePasswordScreen = (props) => {
                     nombre, apellido o e-mail, ni caracteres idénticos
                     consecutivos.
                   </div>
-                  <span
-                    className={
-                      'reg-info-after' +
-                      (isSubmited && passwordError ? ' error' : '')
-                    }
-                  >
-                    {passwordError}
-                  </span>
                 </div>
               </div>
               <div className='wrapper'>
                 <div className='underline-label-input big-form'>
                   <input
-                    className={isSubmited && passwordError ? ' error' : ''}
                     value={confirmPassword}
                     type='password'
                     maxLength='20'
@@ -153,15 +125,13 @@ const ChangePasswordScreen = (props) => {
                   ></input>
                   <div
                     className={
-                      'underline' +
-                      (isSubmited && confirmPasswordError ? ' error' : '')
+                      'underline' + (confirmPasswordError ? ' error' : '')
                     }
                   ></div>
                   <label>Confirmar clave</label>
                   <span
                     className={
-                      'reg-info-after' +
-                      (isSubmited && confirmPasswordError ? ' error' : '')
+                      'reg-info-after' + (confirmPasswordError ? ' error' : '')
                     }
                   >
                     {confirmPasswordError}
@@ -172,14 +142,20 @@ const ChangePasswordScreen = (props) => {
           </div>
           <button
             type='submit'
-            className={'primary big-form' + (btnClicked ? ' no-padding' : '')}
+            className={
+              'primary big-form' +
+              (loadingUserUpdate || loading || loadingUser ? ' no-padding' : '')
+            }
             id='submitbtn'
-            disabled={password.length < 6}
-            onClick={() => {
-              setBtnClicked(true);
-            }}
+            disabled={
+              password.length < 6 || loadingUserUpdate || loading || loadingUser
+            }
           >
-            {btnClicked ? <LoadingCircle color='white' /> : 'Confirmar'}
+            {loadingUserUpdate || loading || loadingUser ? (
+              <LoadingCircle color='white' />
+            ) : (
+              'Confirmar'
+            )}
           </button>
         </form>
       )}

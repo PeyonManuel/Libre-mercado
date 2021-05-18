@@ -10,6 +10,8 @@ import {
   desktopScreenCondition,
   formatDate,
   formatNumber,
+  justMinutesFromDate,
+  removeMinutesFromDate,
 } from '../../Utils/Utilities';
 import CategoriesDropdownList from '../CategoriesDropdownList';
 import LoadingCircle from '../LoadingCircle';
@@ -70,11 +72,6 @@ const Header = (props) => {
   useEffect(() => {
     if (userFavsUpdated) {
       setUserChanged(false);
-      if (userFavsUpdated.userData.favorites.length > 0) {
-        // dispatch(
-        //   listByIdsProducts(userFavsUpdated.userData.favorites.slice(0, 3))
-        // );
-      }
       if (userFavsUpdated.userData.favorites.length === 0) {
         dispatch({ type: 'PRODUCT_ID_LIST_RESET' });
       }
@@ -129,13 +126,10 @@ const Header = (props) => {
     }
   }, [props]);
   useEffect(() => {
-    if (
-      (user && user.userData && user.userData.notifications) ||
-      (user && user.userData && user.userData.notifications && error)
-    ) {
+    if (user && user.userData && user.userData.notifications) {
       setLocalNotifications(user.userData.notifications);
     }
-  }, [user, error]);
+  }, [user]);
 
   useEffect(() => {
     if (addToCartSuccess && clickedAddToCart) {
@@ -147,16 +141,6 @@ const Header = (props) => {
 
   var currentTime = new Date();
 
-  const justMinutesFromDate = (date) => {
-    return [
-      date.split('T')[1].split(':')[0],
-      date.split('T')[1].split(':')[1],
-    ].join(':');
-  };
-
-  const removeMinutesFromDate = (date) => {
-    return date.split('T')[0];
-  };
   return (
     <header className='row flex-center'>
       <div
@@ -247,7 +231,7 @@ const Header = (props) => {
             style={{ paddingTop: '1.5rem' }}
           >
             <div style={{ width: '14rem' }}></div>
-            <CategoriesDropdownList />
+            {desktopScreenCondition && <CategoriesDropdownList />}
           </div>
         </div>
         <ul className='row user-options half'>
@@ -256,7 +240,11 @@ const Header = (props) => {
               <div className='dropdown'>
                 <a className='nodecoration' href='#user'>
                   <i className='fa fa-user  fa-lg margin-right'></i>{' '}
-                  <p>{user.name}</p> <i className='fa fa-caret-down'></i>
+                  <p>{user.name}</p>{' '}
+                  <i
+                    className='fa fa-caret-down'
+                    style={{ marginLeft: '0.5rem' }}
+                  ></i>
                 </a>
                 <ul className='dropdown-content'>
                   <li>
@@ -321,7 +309,7 @@ const Header = (props) => {
               Mis compras{' '}
             </a>
           </li>
-          {user && window.location.href.split('/')[3] !== 'favoritos' && (
+          {user && !window.location.href.split('/')[3].includes('favoritos') && (
             <li>
               <div
                 className='dropdown'
@@ -339,7 +327,11 @@ const Header = (props) => {
               >
                 <a className='nodecoration' href='#favorites'>
                   {'Favoritos '}
-                  <i className='fa fa-caret-down'></i>
+
+                  <i
+                    className='fa fa-caret-down'
+                    style={{ marginLeft: '0.5rem' }}
+                  ></i>
                 </a>
                 <ul className='dropdown-content favorites'>
                   <li>
@@ -469,86 +461,88 @@ const Header = (props) => {
               <i className='fa fa-shopping-cart fa-lg'></i>{' '}
             </a>
           </li>
-          {user && (
-            <li>
-              <div className='dropdown'>
-                <a className='nodecoration' href='#notificaciones'>
-                  <i className='fa fa-bell fa-lg'></i>
-                  {localNotifications > 0 && (
-                    <div className='notification-badge'>
-                      {localNotifications.length < 10
-                        ? localNotifications.length
-                        : '+9'}
-                    </div>
-                  )}
-                </a>
-                <ul className='dropdown-content notifications'>
-                  <li>
-                    <h2 style={{ margin: '0' }}>Notificaciones</h2>
-                  </li>
-                  {loadingDeleteNotification ? (
-                    <div className='absolute-loading'>
-                      <LoadingCircle color='blue' padding={true} />
-                    </div>
-                  ) : errorDeletingNotification ? (
-                    <MessageBox variant='danger'>
-                      Ha ocurrido un error con las notificaciones
-                    </MessageBox>
-                  ) : localNotifications.length >= 1 ? (
-                    localNotifications.map(
-                      (noti, i) =>
-                        i < 3 && (
-                          <li
-                            className='separator'
-                            key={noti._id}
-                            style={{ position: 'relative' }}
-                          >
-                            <div className='delbtn-div'>
-                              <button
-                                onClick={() => {
-                                  dispatch(deleteNotificationUser(noti._id));
-                                  setLocalNotifications(
-                                    localNotifications.filter(
-                                      (localNoti) => localNoti._id !== noti._id
-                                    )
-                                  );
-                                }}
-                              >
-                                Eliminar
-                              </button>
-                            </div>
-                            <a
-                              className='row top nodecoration'
-                              href={noti.linkTo}
-                              onClick={() =>
-                                dispatch(deleteNotificationUser(noti._id))
-                              }
-                            >
-                              <h4>
-                                {noti.text.split(':')[0]}
-                                <br />
-                                {noti.text.split(':')[1]}
-                              </h4>
-                            </a>
-                            <p className='notification-date'>
-                              <i className='fas fa-clock'></i>
-                              {formatDate(currentTime) ===
-                              removeMinutesFromDate(noti.createdAt)
-                                ? justMinutesFromDate(noti.createdAt)
-                                : removeMinutesFromDate(noti.createdAt)}
-                            </p>
-                          </li>
-                        )
-                    )
-                  ) : (
+          {user &&
+            !window.location.href.split('/')[3].includes('notificaciones') && (
+              <li>
+                <div className='dropdown'>
+                  <a className='nodecoration' href='#notificaciones'>
+                    <i className='fa fa-bell fa-lg'></i>
+                    {localNotifications.length > 0 && (
+                      <div className='notification-badge'>
+                        {localNotifications.length < 10
+                          ? localNotifications.length
+                          : '+9'}
+                      </div>
+                    )}
+                  </a>
+                  <ul className='dropdown-content notifications'>
                     <li>
-                      <span className='nofavs'>No hay nada por aquí</span>
+                      <h2 style={{ margin: '0' }}>Notificaciones</h2>
                     </li>
-                  )}
-                </ul>
-              </div>
-            </li>
-          )}
+                    {loadingDeleteNotification ? (
+                      <div className='absolute-loading'>
+                        <LoadingCircle color='blue' padding={true} />
+                      </div>
+                    ) : errorDeletingNotification ? (
+                      <MessageBox variant='danger'>
+                        Ha ocurrido un error con las notificaciones
+                      </MessageBox>
+                    ) : localNotifications.length >= 1 ? (
+                      localNotifications.map(
+                        (noti, i) =>
+                          i < 3 && (
+                            <li
+                              className='separator'
+                              key={noti._id}
+                              style={{ position: 'relative' }}
+                            >
+                              <div className='delbtn-div'>
+                                <button
+                                  onClick={() => {
+                                    dispatch(deleteNotificationUser(noti._id));
+                                    setLocalNotifications(
+                                      localNotifications.filter(
+                                        (localNoti) =>
+                                          localNoti._id !== noti._id
+                                      )
+                                    );
+                                  }}
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                              <a
+                                className='row top nodecoration'
+                                href={noti.linkTo}
+                                onClick={() =>
+                                  dispatch(deleteNotificationUser(noti._id))
+                                }
+                              >
+                                <h4>
+                                  {noti.text.split(':')[0]}
+                                  <br />
+                                  {noti.text.split(':')[1]}
+                                </h4>
+                              </a>
+                              <p className='notification-date'>
+                                <i className='fas fa-clock'></i>
+                                {formatDate(currentTime) ===
+                                removeMinutesFromDate(noti.createdAt)
+                                  ? justMinutesFromDate(noti.createdAt)
+                                  : removeMinutesFromDate(noti.createdAt)}
+                              </p>
+                            </li>
+                          )
+                      )
+                    ) : (
+                      <li>
+                        <span className='nofavs'>No hay nada por aquí</span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </li>
+            )}
         </ul>
       </div>
       <nav className='small-screen-nav-bar' id='small-screen-nav-bar'>
@@ -607,11 +601,21 @@ const Header = (props) => {
                 className='nodecoration small-nav-bar relative'
                 href='/notificaciones'
               >
-                <i className='fas fa-bell fa-lg'></i>
+                <i className='fas fa-bell fa-lg relative'>
+                  {' '}
+                  {localNotifications.length > 0 && (
+                    <div className='notification-badge'>
+                      {localNotifications.length < 10
+                        ? localNotifications.length
+                        : '+9'}
+                    </div>
+                  )}
+                </i>
                 Notificaciones
               </a>
             </li>
           )}
+         
           {user && (
             <li>
               <a
