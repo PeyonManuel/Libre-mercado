@@ -1301,6 +1301,9 @@ div:hover > .card-next-button,
     height: auto;
     min-height: 60rem;
   }
+  .product-list.search {
+    min-height: initial;
+  }
   .product-list > h1 {
     padding: 2rem 1rem;
     margin: 0;

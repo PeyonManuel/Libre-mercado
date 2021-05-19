@@ -354,7 +354,7 @@ const SearchScreen = (props) => {
             <div
               className={
                 'results width-100 flex-start' +
-                (!desktopScreenCondition ? ' product-list' : '')
+                (!desktopScreenCondition ? ' product-list search' : '')
               }
             >
               {products
