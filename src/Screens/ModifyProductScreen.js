@@ -300,7 +300,7 @@ const ModifyProductScreen = (props) => {
                   >
                     <ul
                       className={
-                        'image-slider row flex-start gap-1' +
+                        'image-slider row flex-start' +
                         (images.length > 0 ? ' fit-content' : '')
                       }
                     >

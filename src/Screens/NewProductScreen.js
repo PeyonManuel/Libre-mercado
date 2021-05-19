@@ -361,7 +361,11 @@ const NewProductScreen = (props) => {
                   ).name + 'logo'
                 }
               ></img>
-              <span className='column' id='selected-category-name' hidden>
+              <span
+                className='column margin-left'
+                id='selected-category-name'
+                hidden
+              >
                 <span>
                   {
                     categories.find(
@@ -568,7 +572,7 @@ const NewProductScreen = (props) => {
         >
           <ul
             className={
-              'image-slider row flex-start gap-1' +
+              'image-slider row flex-start' +
               (images.length > 0 ? ' fit-content' : '')
             }
           >
@@ -926,12 +930,12 @@ const NewProductScreen = (props) => {
             }}
           ></i>
         </div>
-        <div className='screen-mini-card-body padding column gap-2'>
-          <span className='subtle-text'>
+        <div className='screen-mini-card-body padding column'>
+          <span className='subtle-text margin-bottom'>
             Como estás modificando informacion que elegiste, tendrás que volver
             a seleccionarla.
           </span>
-          <div className='row flex-start gap-1'>
+          <div className='row flex-start'>
             <button
               className='primary'
               onClick={() => {
@@ -957,7 +961,7 @@ const NewProductScreen = (props) => {
             </button>
             <button
               id='change-category-cancelbtn'
-              className='secondary'
+              className='secondary margin-left'
               onClick={() => {
                 setSelectedCategory(cacheValues.category);
                 dispatch(

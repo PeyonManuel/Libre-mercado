@@ -317,85 +317,82 @@ const RegisterScreen = (props) => {
                 </span>
               </div>
             </div>
-            <div className='registration-user-fields row'>
-              <div className='wrapper'>
-                <div className='underline-label-input big-form'>
-                  <input
-                    className={
-                      isSubmited && emailError && !emailExistsScreen
-                        ? ' error'
-                        : ''
-                    }
-                    value={email}
-                    id='email'
-                    type='text'
-                    maxLength='40'
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                    }}
-                  ></input>
-                  <div
-                    className={
-                      'underline' +
-                      (isSubmited && emailError && !emailExistsScreen
-                        ? ' error'
-                        : '')
-                    }
-                  ></div>
-                  <label>E-mail</label>
-                  <span
-                    className={
-                      'reg-info-after' +
-                      (isSubmited && emailError && !emailExistsScreen
-                        ? ' error'
-                        : '')
-                    }
-                  >
-                    {isSubmited && emailError
-                      ? emailError
-                      : 'Asegurate de tener acceso a este e-mail.'}
-                  </span>
-                </div>
-              </div>
-              <div className='wrapper'>
-                <div className='underline-label-input big-form'>
-                  <input
-                    className={isSubmited && passwordError ? ' error' : ''}
-                    value={password}
-                    type='password'
-                    maxLength='20'
-                    onChange={(e) => setPassword(e.target.value)}
-                  ></input>
-                  <div
-                    className={
-                      'underline' +
-                      (isSubmited && passwordError ? ' error' : '')
-                    }
-                  ></div>
-                  <label>Clave</label>
-                  <i
-                    className='fas fa-check fa-xs'
-                    id='check'
-                    style={{ opacity: '0' }}
-                  ></i>
-                  <i className='far fa-question-circle'></i>
-                  <div className='reg-help subtle-text'>
-                    Tu clave debe tener entre 6 y 20 caracteres. No incluyas tu
-                    nombre, apellido o e-mail, ni caracteres idénticos
-                    consecutivos.
-                  </div>
-                  <span
-                    className={
-                      'reg-info-after' +
-                      (isSubmited && passwordError ? ' error' : '')
-                    }
-                  >
-                    {passwordError}
-                  </span>
-                </div>
+            <div className='wrapper'>
+              <div className='underline-label-input big-form'>
+                <input
+                  className={
+                    isSubmited && emailError && !emailExistsScreen
+                      ? ' error'
+                      : ''
+                  }
+                  value={email}
+                  id='email'
+                  type='text'
+                  maxLength='40'
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                ></input>
+                <div
+                  className={
+                    'underline' +
+                    (isSubmited && emailError && !emailExistsScreen
+                      ? ' error'
+                      : '')
+                  }
+                ></div>
+                <label>E-mail</label>
+                <span
+                  className={
+                    'reg-info-after' +
+                    (isSubmited && emailError && !emailExistsScreen
+                      ? ' error'
+                      : '')
+                  }
+                >
+                  {isSubmited && emailError
+                    ? emailError
+                    : 'Asegurate de tener acceso a este e-mail.'}
+                </span>
               </div>
             </div>
-            <div>
+            <div className='wrapper'>
+              <div className='underline-label-input big-form'>
+                <input
+                  className={isSubmited && passwordError ? ' error' : ''}
+                  value={password}
+                  type='password'
+                  maxLength='20'
+                  onChange={(e) => setPassword(e.target.value)}
+                ></input>
+                <div
+                  className={
+                    'underline' + (isSubmited && passwordError ? ' error' : '')
+                  }
+                ></div>
+                <label>Clave</label>
+                <i
+                  className='fas fa-check fa-xs'
+                  id='check'
+                  style={{ opacity: '0' }}
+                ></i>
+                <i className='far fa-question-circle'></i>
+                <div className='reg-help subtle-text'>
+                  Tu clave debe tener entre 6 y 20 caracteres. No incluyas tu
+                  nombre, apellido o e-mail, ni caracteres idénticos
+                  consecutivos.
+                </div>
+                <span
+                  className={
+                    'reg-info-after' +
+                    (isSubmited && passwordError ? ' error' : '')
+                  }
+                >
+                  {passwordError}
+                </span>
+              </div>
+            </div>
+            <div className='margin-top'>
               <label className='container'>
                 {' '}
                 Acepto los <a href='#Terminos'>Términos y Condiciones</a> y
