@@ -46,7 +46,7 @@ const ProductScreen = (props) => {
     error: errorAddingToCart,
   } = cartUpdate;
   const userUpdateFavs = useSelector((state) => state.userUpdateFavs);
-  const { error: favError } = userUpdateFavs;
+  const { error: favError, loadingUpdateFavs } = userUpdateFavs;
   const [selectedImg, setSelectedImg] = useState(0);
   const [videoSelected, setVideoSelected] = useState(false);
   const [selectedQty, setSelectedQty] = useState(1);
@@ -60,7 +60,9 @@ const ProductScreen = (props) => {
       user.userData.favorites &&
       product &&
       product._id &&
-      user.userData.favorites.find((fav) => fav._id === product._id)
+      user.userData.favorites.find(
+        (fav) => fav.toString() === product._id.toString()
+      )
       ? true
       : false
   );
@@ -252,8 +254,7 @@ const ProductScreen = (props) => {
       user &&
       product &&
       product._id &&
-      user.userData.favorites.filter((fav) => fav._id === product._id)
-        .length === 1
+      user.userData.favorites.filter((fav) => fav === product._id).length === 1
     ) {
       setChangeHeart(true);
     } else {
@@ -725,15 +726,17 @@ const ProductScreen = (props) => {
                     <a
                       href={'/login?loginType=FAVORITE&item_id=' + product._id}
                       onClick={(e) => {
-                        if (user) {
-                          e.preventDefault();
-                          dispatch(
-                            updateUserFavorites({
-                              _id: product._id,
-                              noDelete: false,
-                            })
-                          );
-                          setChangeHeart(!changeHeart);
+                        if (!loadingUpdateFavs) {
+                          if (user) {
+                            e.preventDefault();
+                            dispatch(
+                              updateUserFavorites({
+                                _id: product._id,
+                                noDelete: false,
+                              })
+                            );
+                            setChangeHeart(!changeHeart);
+                          }
                         }
                       }}
                     >
@@ -977,74 +980,73 @@ const ProductScreen = (props) => {
                     </pre>
                   </div>
                 )}
-                {user && user._id === product.seller._id
+                {(user && user._id === product.seller._id
                   ? product.questions.length > 0
-                  : true && (
-                      <div className='product-questions separator width-100'>
-                        <h1>Preguntas y respuestas</h1>
-                        {((user && product.seller._id !== user._id) ||
-                          !user) && (
-                          <div className='column'>
-                            <h4>Preguntale a {product.seller.userName}</h4>
-                            <div className='row ask-div'>
-                              <textarea
-                                id='new-question'
-                                type='text'
-                                value={newQuestion}
-                                maxLength='2000'
-                                onChange={(e) => setNewQuestion(e.target.value)}
-                                placeholder='Escribí tu pregunta...'
-                              />
-                              <button
-                                disabled={disableQuestionBtn}
-                                className={
-                                  'primary big-form' +
-                                  (loadingAddQuestion ? ' no-padding' : '')
-                                }
-                                onClick={() => {
-                                  if (user) {
-                                    dispatch(
-                                      addQuestionProduct(product, {
-                                        whoAsked: user._id,
-                                        question: newQuestion,
-                                      })
-                                    );
-                                    setDisableQuestionBtn(true);
-                                  } else {
-                                    localStorage.setItem(
-                                      'product-question',
-                                      JSON.stringify({
-                                        _id: product._id,
-                                        question: newQuestion,
-                                      })
-                                    );
-                                    window.location.href =
-                                      '/login?loginType=product-question';
-                                  }
-                                }}
-                              >
-                                {loadingAddQuestion ? (
-                                  <LoadingCircle color='blue' />
-                                ) : (
-                                  'Preguntar'
-                                )}
-                              </button>
-                            </div>
-                            {errorAddingQuestion && (
-                              <MessageBox variant='danger'>
-                                Ha ocurrido un error con tu pregunta
-                              </MessageBox>
+                  : true) && (
+                  <div className='product-questions separator width-100'>
+                    <h1>Preguntas y respuestas</h1>
+                    {((user && product.seller._id !== user._id) || !user) && (
+                      <div className='column'>
+                        <h4>Preguntale a {product.seller.userName}</h4>
+                        <div className='row ask-div'>
+                          <textarea
+                            id='new-question'
+                            type='text'
+                            value={newQuestion}
+                            maxLength='2000'
+                            onChange={(e) => setNewQuestion(e.target.value)}
+                            placeholder='Escribí tu pregunta...'
+                          />
+                          <button
+                            disabled={disableQuestionBtn}
+                            className={
+                              'primary big-form' +
+                              (loadingAddQuestion ? ' no-padding' : '')
+                            }
+                            onClick={() => {
+                              if (user) {
+                                dispatch(
+                                  addQuestionProduct(product, {
+                                    whoAsked: user._id,
+                                    question: newQuestion,
+                                  })
+                                );
+                                setDisableQuestionBtn(true);
+                              } else {
+                                localStorage.setItem(
+                                  'product-question',
+                                  JSON.stringify({
+                                    _id: product._id,
+                                    question: newQuestion,
+                                  })
+                                );
+                                window.location.href =
+                                  '/login?loginType=product-question';
+                              }
+                            }}
+                          >
+                            {loadingAddQuestion ? (
+                              <LoadingCircle color='blue' />
+                            ) : (
+                              'Preguntar'
                             )}
-                          </div>
-                        )}
-                        <div className='column margin-top'>
-                          {userQuestions.length > 0 &&
-                            renderQuestions('user', userQuestions)}
-                          {otherQuestions.length > 0 &&
-                            renderQuestions('other', otherQuestions)}
+                          </button>
                         </div>
+                        {errorAddingQuestion && (
+                          <MessageBox variant='danger'>
+                            Ha ocurrido un error con tu pregunta
+                          </MessageBox>
+                        )}
                       </div>
                     )}
+                    <div className='column margin-top'>
+                      {userQuestions.length > 0 &&
+                        renderQuestions('user', userQuestions)}
+                      {otherQuestions.length > 0 &&
+                        renderQuestions('other', otherQuestions)}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
