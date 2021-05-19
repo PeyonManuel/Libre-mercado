@@ -1655,7 +1655,7 @@ div:hover > .card-next-button,
 }
 .screen-mini-card.disabled {
   pointer-events: none;
-  opacity: 50%;
+  opacity: 0.5;
 }
 .screen-mini-card.dashed {
   border: 1px #bfbfbf dashed;
