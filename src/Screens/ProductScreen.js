@@ -46,7 +46,7 @@ const ProductScreen = (props) => {
     error: errorAddingToCart,
   } = cartUpdate;
   const userUpdateFavs = useSelector((state) => state.userUpdateFavs);
-  const { error: favError, loadingUpdateFavs } = userUpdateFavs;
+  const { error: favError, loading: loadingUpdateFavs } = userUpdateFavs;
   const [selectedImg, setSelectedImg] = useState(0);
   const [videoSelected, setVideoSelected] = useState(false);
   const [selectedQty, setSelectedQty] = useState(1);
@@ -726,9 +726,9 @@ const ProductScreen = (props) => {
                     <a
                       href={'/login?loginType=FAVORITE&item_id=' + product._id}
                       onClick={(e) => {
-                        if (!loadingUpdateFavs) {
-                          if (user) {
-                            e.preventDefault();
+                        if (user) {
+                          e.preventDefault();
+                          if (!loadingUpdateFavs) {
                             dispatch(
                               updateUserFavorites({
                                 _id: product._id,

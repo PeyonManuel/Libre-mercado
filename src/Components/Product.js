@@ -22,7 +22,7 @@ const Product = ({
   });
   const rating = productTotalRating / numReviews;
   const userUpdateFavs = useSelector((state) => state.userUpdateFavs);
-  const { error } = userUpdateFavs;
+  const { error, loading: loadingUpdateFavs } = userUpdateFavs;
   const dispatch = useDispatch();
   const [changeHeart, setChangeHeart] = useState(
     user &&
@@ -55,8 +55,10 @@ const Product = ({
           onClick={(e) => {
             if (user) {
               e.preventDefault();
-              dispatch(updateUserFavorites({ _id: _id, noDelete: false }));
-              setChangeHeart(!changeHeart);
+              if (!loadingUpdateFavs) {
+                dispatch(updateUserFavorites({ _id: _id, noDelete: false }));
+                setChangeHeart(!changeHeart);
+              }
             }
           }}
         >
