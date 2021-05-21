@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUser } from '../Actions/userActions';
 import LoadingCircle from '../Components/LoadingCircle';
@@ -71,28 +71,39 @@ const ChangeEmailScreen = () => {
   }, [error]);
   const verifyEmail = async (email) => {
     setDisableBtn(true);
-    try {
-      const data = await axios.get(
-        'https://emailvalidation.abstractapi.com/v1/?api_key=' +
-          process.env.REACT_APP_EMAIL_VALIDATION_API_KEY +
-          '&email=' +
-          email
-      );
-      if (
-        data &&
-        data.data &&
-        data.data.deliverability &&
-        (data.data.deliverability === 'DELIVERABLE' ||
-          data.data.deliverability === 'UNKNOWN')
-      ) {
-        setVerifiedEmail(true);
-      } else {
-        setDisableBtn(false);
-        setEmailError('Ha ocurrido un error, intenta nuevamente');
-      }
-    } catch (error) {
+    if (
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+        email
+      )
+    ) {
+      // try {
+      //   const data = await axios.get(
+      //     'https://emailvalidation.abstractapi.com/v1/?api_key=' +
+      //       process.env.REACT_APP_EMAIL_VALIDATION_API_KEY +
+      //       '&email=' +
+      //       email
+      //   );
+      //   if (
+      //     data &&
+      //     data.data &&
+      //     data.data.deliverability &&
+      //     (data.data.deliverability === 'DELIVERABLE' ||
+      //       data.data.deliverability === 'UNKNOWN')
+      //   ) {
+      //     setVerifiedEmail(true);
+      //   } else {
+      //     setDisableBtn(false);
+      //     setEmailError('Ha ocurrido un error, intenta nuevamente');
+      //   }
+      // } catch (error) {
+      //   setDisableBtn(false);
+      //   setEmailError('Ha ocurrido un error, intenta nuevamente');
+      // }
+      // REACHED API QUOTA LIMIT FOR THE MONTH
+      setVerifiedEmail(true);
+    } else {
       setDisableBtn(false);
-      setEmailError('Ha ocurrido un error, intenta nuevamente');
+      setEmailError('Usá el formato nombre@ejemplo.com');
     }
   };
   return (
@@ -111,10 +122,7 @@ const ChangeEmailScreen = () => {
                     maxLength='50'
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      if (
-                        e.target.value.toLowerCase() ===
-                        user.emailError.toLowerCase()
-                      ) {
+                      if (e.target.value === user.emailError) {
                         setEmailError(
                           'Ingresa un e-mail distinto al que estás usando.'
                         );

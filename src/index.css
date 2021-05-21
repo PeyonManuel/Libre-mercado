@@ -1915,8 +1915,7 @@ div:hover > .card-next-button,
   right: 0;
   bottom: 1rem;
 }
-.underline-label-input.big-form > .fa-question-circle:hover ~ .reg-help,
-.underline-label-input.big-form > .reg-help:hover {
+.underline-label-input.big-form > .fa-question-circle:hover ~ .reg-help {
   opacity: 1;
   left: -7rem;
   z-index: 99;

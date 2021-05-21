@@ -1,4 +1,4 @@
-import axios from 'axios';
+// import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { userVerifyEmailExists } from '../Actions/userActions';
@@ -138,30 +138,32 @@ const RegisterScreen = (props) => {
   const submitHandler = async (e) => {
     e.preventDefault();
     const verifyEmail = async (email) => {
-      try {
-        setDisableBtn(true);
-        const data = await axios.get(
-          'https://emailvalidation.abstractapi.com/v1/?api_key=' +
-            process.env.REACT_APP_EMAIL_VALIDATION_API_KEY +
-            '&email=' +
-            email
-        );
-        if (
-          data &&
-          data.data &&
-          data.data.deliverability &&
-          (data.data.deliverability === 'DELIVERABLE' ||
-            data.data.deliverability === 'UNKNOWN')
-        ) {
-          return true;
-        } else {
-          setDisableBtn(false);
-          return false;
-        }
-      } catch (error) {
-        setDisableBtn(false);
-        setEmailError('Ha ocurrido un error, intenta nuevamente');
-      }
+      // try {
+      //   setDisableBtn(true);
+      //   const data = await axios.get(
+      //     'https://emailvalidation.abstractapi.com/v1/?api_key=' +
+      //       process.env.REACT_APP_EMAIL_VALIDATION_API_KEY +
+      //       '&email=' +
+      //       email
+      //   );
+      //   if (
+      //     data &&
+      //     data.data &&
+      //     data.data.deliverability &&
+      //     (data.data.deliverability === 'DELIVERABLE' ||
+      //       data.data.deliverability === 'UNKNOWN')
+      //   ) {
+      //     return true;
+      //   } else {
+      //     setDisableBtn(false);
+      //     return false;
+      //   }
+      // } catch (error) {
+      //   setDisableBtn(false);
+      //   setEmailError('Ha ocurrido un error, intenta nuevamente');
+      // }
+      // REACHED API QUOTA LIMIT FOR THE MONTH
+      return true;
     };
     setIsSubmited(true);
     const verifyEmailResponse = await verifyEmail(email.trim());
