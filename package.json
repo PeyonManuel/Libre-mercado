@@ -37,7 +37,8 @@
     "node": "14.x.x"
   },
   "scripts": {
-    "start": "concurrently \"react-scripts start\" \"nodemon --watch server --exec node server/server.js\"",
+   "start": "cd server && npm start",
+    "postinstall": "npm run build",
     "build": "react-dotenv && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
