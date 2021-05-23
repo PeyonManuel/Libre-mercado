@@ -4119,13 +4119,6 @@ div:hover > .card-next-button,
   width: 100%;
 }
 
-.user-order-screen {
-  margin-top: 4rem;
-  padding: 2rem;
-  background-color: white;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
-  max-width: 80rem;
-}
 .order-item {
   padding: 2rem;
   display: flex;
@@ -4151,6 +4144,13 @@ div:hover > .card-next-button,
     .user-order-screen {
       margin-top: 0;
     }
+  }
+  .user-order-screen {
+    margin-top: 4rem;
+    padding: 2rem;
+    background-color: white;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+    max-width: 80rem;
   }
 
   .order-item {
