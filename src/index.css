@@ -2070,16 +2070,14 @@ div:hover > .card-next-button,
 .email-badge {
   border: 0.0625rem solid #e7e7e7;
   border-radius: 1rem;
-  display: -webkit-inline-flex;
   display: inline-flex;
   -webkit-flex-direction: row;
   flex-direction: row;
   height: 2rem;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
+  justify-content: space-around;
   margin: 1rem auto -1rem;
   max-width: 20rem;
-  width: 8rem;
+  width: 12rem;
 }
 .email-badge__user-name {
   display: inline;
@@ -2094,6 +2092,7 @@ div:hover > .card-next-button,
   margin: 0;
   text-align: left;
   text-overflow: ellipsis;
+  width: 7rem;
 }
 /* product */
 .product-col-1 {
