@@ -37,7 +37,7 @@
     "node": "14.x.x"
   },
   "scripts": {
-   "start": "cd server && npm start",
+    "start": "cd server && npm start",
     "postinstall": "npm run build",
     "build": "react-dotenv && react-scripts build",
     "test": "react-scripts test",
