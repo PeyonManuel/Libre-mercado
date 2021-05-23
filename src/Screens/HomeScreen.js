@@ -106,7 +106,7 @@ const HomeScreen = (props) => {
                   >
                     {products
                       .filter((product, i) => {
-                        return i < 5;
+                        return i < 15;
                       })
                       .map((product) => (
                         <>
