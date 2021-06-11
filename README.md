@@ -1,4 +1,4 @@
-The idea of this project was to make an eCommerce site while copying the style of a recognized web page, and what better option than Mercado libre.\
+The idea of this project was to make an eCommerce site while copying the style of a recognized web page, and what better option than Mercado libre.
 
 Main features\
 Register and login\
