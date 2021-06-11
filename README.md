@@ -12,4 +12,4 @@ Possibility of asking questions to the seller of a product\
 Possibility of valuing the purchase\
 Favorites, history, purchases, questions, publications, notifications, sales and personal data section\
 Categories for products\
-Search with filters\
+Search with filters
